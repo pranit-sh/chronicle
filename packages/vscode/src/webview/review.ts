@@ -5,14 +5,12 @@ import { escapeHtml, humanize, proposalTitle, relativeTime } from "../present.js
 import type { ChronicleSession } from "../session.js";
 import {
   blankSlate,
-  callout,
+  disclosure,
   glyph,
   pageHtml,
-  pill,
   section,
   spec,
   type SpecField,
-  type Tone,
 } from "./chrome.js";
 
 /**
@@ -93,14 +91,6 @@ export class ReviewPanel {
 
 // --- Semantics ------------------------------------------------------------
 
-/** What the operation does to the knowledge base, in colour. */
-const OP_TONE: Record<Proposal["op"], Tone> = {
-  create: "good",
-  update: "accent",
-  archive: "bad",
-  restore: "accent",
-};
-
 const MARKER_CLASS: Record<DiffLine["marker"], string> = {
   "+": "added",
   "-": "removed",
@@ -145,8 +135,8 @@ function diff(lines: readonly DiffLine[], proposal: Proposal): string {
 
 function reviewBody(proposal: Proposal, lines: readonly DiffLine[], targetTitle?: string): string {
   const fields: SpecField[] = [
-    { label: "Proposed by", value: `${proposal.proposedBy.id} (${proposal.proposedBy.kind})` },
-    { label: "Raised", value: relativeTime(proposal.createdAt) },
+    { label: "Proposed by", value: `${proposal.proposedBy.id} (${humanize(proposal.proposedBy.kind)})` },
+    { label: "Raised", value: humanize(relativeTime(proposal.createdAt)) },
   ];
   if (targetTitle) fields.push({ label: "Existing record", value: targetTitle });
   if (proposal.targetId) fields.push({ label: "Target id", value: proposal.targetId, mono: true, wide: true });
@@ -160,15 +150,12 @@ function reviewBody(proposal: Proposal, lines: readonly DiffLine[], targetTitle?
 <span class="eyebrow-id" title="${escapeHtml(proposal.id)}">${escapeHtml(proposal.id)}</span>
 </div>
 <h1 class="title">${escapeHtml(proposalTitle(proposal, targetTitle))}</h1>
-<div class="chips">${pill(humanize(proposal.op), OP_TONE[proposal.op])}${
-    proposal.proposedBy.kind === "agent" ? pill("From an agent", "warn") : ""
-  }</div>
 </header>
 
 <main class="content">
-${callout("accent", "Why this was raised", proposal.reason)}
-${section("Proposal", spec(fields))}
-${section("What accepting this would do", diff(lines, proposal))}
+${section("Reason", `<p class="reason">${escapeHtml(proposal.reason)}</p>`)}
+${section("Changes", diff(lines, proposal))}
+${disclosure("Details", spec(fields))}
 </main>
 
 <footer class="actionbar">

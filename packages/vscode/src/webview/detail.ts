@@ -1,21 +1,19 @@
-import type { Evidence, KnowledgeItem, KnowledgeStatusName } from "@chronicle/core";
+import type { Evidence, KnowledgeItem } from "@chronicle/core";
 import MarkdownIt from "markdown-it";
 import * as vscode from "vscode";
 
-import { describeEvidence, escapeHtml, humanize, relativeTime, statusLabel, typeNoun } from "../present.js";
+import { describeEvidence, escapeHtml, humanize, relativeTime, typeNoun } from "../present.js";
 import type { ChronicleSession } from "../session.js";
 import {
   blankSlate,
   callout,
+  disclosure,
   empty,
   glyph,
   pageHtml,
-  pill,
   section,
   spec,
-  tag,
   type SpecField,
-  type Tone,
 } from "./chrome.js";
 
 /**
@@ -97,23 +95,6 @@ export class DetailPanel {
 
 // --- Semantics ------------------------------------------------------------
 
-const STATUS_TONE: Record<KnowledgeStatusName, Tone> = {
-  active: "good",
-  confirmed: "accent",
-  proposed: "warn",
-  stale: "bad",
-  archived: "neutral",
-};
-
-const ENFORCEMENT_TONE: Record<string, Tone> = { must: "accent", should: "neutral", never: "bad" };
-/** Accepted stays neutral: colour is reserved for the states that need a human. */
-const DECISION_TONE: Record<string, Tone> = {
-  accepted: "neutral",
-  proposed: "warn",
-  superseded: "neutral",
-  rejected: "bad",
-};
-const SEVERITY_TONE: Record<string, Tone> = { low: "neutral", medium: "warn", high: "bad", critical: "bad" };
 const VERDICT_TONE: Record<string, "pass" | "fail" | "unknown"> = {
   pass: "pass",
   fail: "fail",
@@ -141,28 +122,6 @@ function renderBody(body: string): string {
   return markdown.render(body.trim());
 }
 
-/** State the reader needs before reading a word of the item itself. */
-function chips(item: KnowledgeItem): string {
-  const qualifier =
-    item.type === "rule"
-      ? pill(humanize(item.enforcement), ENFORCEMENT_TONE[item.enforcement] ?? "neutral")
-      : item.type === "decision"
-        ? pill(humanize(item.decisionStatus), DECISION_TONE[item.decisionStatus] ?? "neutral")
-        : item.type === "issue"
-          ? pill(`${humanize(item.severity)} severity`, SEVERITY_TONE[item.severity] ?? "neutral")
-          : "";
-
-  return [
-    pill(statusLabel(item.status), STATUS_TONE[item.status]),
-    qualifier,
-    expired(item) ? pill("Expired", "bad") : "",
-    item.source === "ai" ? pill("From an agent", "warn") : "",
-    item.pinned ? tag("Pinned") : "",
-  ]
-    .filter(Boolean)
-    .join("");
-}
-
 /**
  * The one thing worth interrupting the reader for.
  *
@@ -174,7 +133,7 @@ function alert(item: KnowledgeItem): string {
     return callout(
       "bad",
       "Needs attention",
-      "The evidence behind this no longer matches the code. Update it, or archive it, so your agents stop being told something untrue.",
+      "Evidence no longer matches the code. Update or archive this item.",
     );
   }
   if (expired(item)) {
@@ -187,14 +146,24 @@ function alert(item: KnowledgeItem): string {
 }
 
 function record(item: KnowledgeItem): SpecField[] {
-  const fields: SpecField[] = [
-    { label: "Scope", value: item.scopes.join(", "), mono: true },
-    { label: "Added by", value: `${item.actor.id} (${item.actor.kind})` },
+  const fields: SpecField[] = [];
+
+  if (item.status === "proposed") fields.push({ label: "Status", value: "Proposed" });
+  if (item.type === "rule") fields.push({ label: "Enforcement", value: humanize(item.enforcement) });
+  if (item.type === "decision" && item.decisionStatus !== "accepted") {
+    fields.push({ label: "Decision status", value: humanize(item.decisionStatus) });
+  }
+  if (item.type === "issue") fields.push({ label: "Severity", value: humanize(item.severity) });
+  if (item.pinned) fields.push({ label: "Pinned", value: "Yes" });
+
+  fields.push(
+    { label: "Scope", value: item.scopes.map((scope) => (scope === "project" ? "Project" : scope)).join(", ") },
+    { label: "Added by", value: `${item.actor.id} (${humanize(item.actor.kind)})` },
     {
       label: "Origin",
       value: item.provenance.ref ? `${humanize(item.provenance.origin)} — ${item.provenance.ref}` : humanize(item.provenance.origin),
     },
-    { label: "Confidence", value: `${Math.round(item.confidence * 100)}%`, meter: item.confidence },
+    { label: "Confidence", value: `${Math.round(item.confidence * 100)}%` },
     { label: "Priority", value: `${item.priority} of 100` },
     {
       label: "Lifetime",
@@ -202,9 +171,9 @@ function record(item: KnowledgeItem): SpecField[] {
         ? `${humanize(item.lifetime)}, expires ${item.expiresAt.slice(0, 10)}`
         : humanize(item.lifetime),
     },
-    { label: "Last verified", value: relativeTime(item.lastVerifiedAt) },
-    { label: "Last updated", value: relativeTime(item.updatedAt) },
-  ];
+    { label: "Last verified", value: humanize(relativeTime(item.lastVerifiedAt)) },
+    { label: "Last updated", value: humanize(relativeTime(item.updatedAt)) },
+  );
 
   if (item.paths.length) fields.push({ label: "Applies to", value: item.paths.join("  ·  "), mono: true, wide: true });
   if (item.tags.length) fields.push({ label: "Tags", value: item.tags.join(", "), wide: true });
@@ -225,7 +194,7 @@ function evidenceRow(entry: Evidence): string {
     .join(" · ");
 
   return `<li class="record">
-<span class="verdict verdict--${verdict}">${escapeHtml(result)}</span>
+<span class="verdict verdict--${verdict}">${escapeHtml(humanize(result))}</span>
 <span class="record-main">
 <span class="record-title">${escapeHtml(describeEvidence(entry))}</span>
 ${notes ? `<span class="record-note">${escapeHtml(notes)}</span>` : ""}
@@ -237,7 +206,7 @@ function evidenceSection(item: KnowledgeItem): string {
   if (!item.evidence.length) {
     return section(
       "Evidence",
-      empty("Nothing here can be checked against the code automatically, so this will never be marked stale on its own."),
+      empty("No automated evidence configured."),
     );
   }
   return section("Evidence", `<ul class="records">${item.evidence.map(evidenceRow).join("")}</ul>`, {
@@ -248,6 +217,7 @@ function evidenceSection(item: KnowledgeItem): string {
 function detailBody(item: KnowledgeItem): string {
   const body = item.body.trim();
   const workaround = item.type === "issue" && item.workaround ? item.workaround.trim() : "";
+  const hasAutomatedEvidence = item.evidence.some((entry) => entry.kind !== "ref");
 
   return `<div class="shell">
 <header class="masthead">
@@ -258,26 +228,29 @@ function detailBody(item: KnowledgeItem): string {
 <span class="eyebrow-id" title="${escapeHtml(item.id)}">${escapeHtml(item.id)}</span>
 </div>
 <h1 class="title">${escapeHtml(item.title)}</h1>
-<div class="chips">${chips(item)}</div>
 </header>
 
 <main class="content">
 ${alert(item)}
-${section("Record", spec(record(item)))}
-${body ? section("What this says", `<div class="prose">${renderBody(body)}</div>`) : ""}
+${body ? section("Content", `<div class="prose">${renderBody(body)}</div>`) : ""}
 ${workaround ? section("Workaround", `<div class="prose">${renderBody(workaround)}</div>`) : ""}
 ${evidenceSection(item)}
+${disclosure("Details", spec(record(item)))}
 </main>
 
 <footer class="actionbar">
-<button class="btn btn--primary" data-command="verify">Verify against the code</button>
-<button class="btn" data-command="open">Open the Markdown</button>
+${
+  hasAutomatedEvidence
+    ? `<button class="btn btn--primary" data-command="verify">Verify against the code</button>
+<button class="btn" data-command="open">Open the Markdown</button>`
+    : `<button class="btn btn--primary" data-command="open">Open the Markdown</button>
+<button hidden data-command="verify">Verify against the code</button>`
+}
 ${
   item.status === "archived"
     ? `<button class="btn btn--quiet" data-command="restore">Restore</button>`
     : `<button class="btn btn--quiet" data-command="archive">Archive</button>`
 }
-<span class="actionbar-note">Every change lands in the Markdown, versioned with your code.</span>
 </footer>
 </div>`;
 }

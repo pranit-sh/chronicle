@@ -22,8 +22,6 @@ export interface SpecField {
   value: string;
   /** Renders the value in the editor font — for ids, paths and globs. */
   mono?: boolean;
-  /** A 0–1 fraction, drawn as a bar under the value. */
-  meter?: number;
   /** Long values take the full width of the grid instead of one cell. */
   wide?: boolean;
 }
@@ -57,44 +55,12 @@ ${body}
       value: target.dataset.value,
     });
   });
-
-  // The masthead and action bar float over the content, so their edges only
-  // appear once there is something scrolled underneath them to separate from.
-  let queued = false;
-  const trackEdges = () => {
-    queued = false;
-    const doc = document.documentElement;
-    doc.dataset.scrolled = String(window.scrollY > 2);
-    doc.dataset.scrollEnd = String(window.scrollY + window.innerHeight >= doc.scrollHeight - 2);
-  };
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(trackEdges);
-    },
-    { passive: true },
-  );
-  window.addEventListener("resize", trackEdges, { passive: true });
-  trackEdges();
 </script>
 </body>
 </html>`;
 }
 
 // --- Components -----------------------------------------------------------
-
-/** A status chip: a tinted dot and a label, sized to sit inline with text. */
-export function pill(label: string, tone: Tone = "neutral", options: { dot?: boolean } = {}): string {
-  const dot = options.dot === false ? "" : `<span class="pill-dot"></span>`;
-  return `<span class="pill pill--${tone}">${dot}${escapeHtml(label)}</span>`;
-}
-
-/** A quieter chip for facets that classify rather than warn: types, scopes. */
-export function tag(label: string, options: { mono?: boolean } = {}): string {
-  return `<span class="tag${options.mono ? " tag--mono" : ""}">${escapeHtml(label)}</span>`;
-}
 
 /**
  * The metadata grid.
@@ -105,18 +71,12 @@ export function tag(label: string, options: { mono?: boolean } = {}): string {
  */
 export function spec(fields: readonly SpecField[]): string {
   const cells = fields
-    .map((field) => {
-      const meter =
-        typeof field.meter === "number"
-          ? `<span class="meter"><span class="meter-fill" style="width:${Math.round(
-              Math.min(Math.max(field.meter, 0), 1) * 100,
-            )}%"></span></span>`
-          : "";
-      return `<div class="spec-cell${field.wide ? " spec-cell--wide" : ""}">
+    .map(
+      (field) => `<div class="spec-cell${field.wide ? " spec-cell--wide" : ""}">
 <dt class="spec-label">${escapeHtml(field.label)}</dt>
-<dd class="spec-value${field.mono ? " spec-value--mono" : ""}">${escapeHtml(field.value)}${meter}</dd>
-</div>`;
-    })
+<dd class="spec-value${field.mono ? " spec-value--mono" : ""}">${escapeHtml(field.value)}</dd>
+</div>`,
+    )
     .join("");
   return `<dl class="spec">${cells}</dl>`;
 }
@@ -124,9 +84,16 @@ export function spec(fields: readonly SpecField[]): string {
 export function section(title: string, content: string, options: { count?: number } = {}): string {
   const count = typeof options.count === "number" ? `<span class="section-count">${options.count}</span>` : "";
   return `<section class="section">
-<div class="section-head"><h2 class="section-title">${escapeHtml(title)}</h2>${count}<span class="section-rule"></span></div>
+<div class="section-head"><h2 class="section-title">${escapeHtml(title)}</h2>${count}</div>
 ${content}
 </section>`;
+}
+
+export function disclosure(title: string, content: string): string {
+  return `<details class="disclosure">
+<summary class="disclosure-summary">${escapeHtml(title)}</summary>
+<div class="disclosure-content">${content}</div>
+</details>`;
 }
 
 /** A boxed aside for the one thing the reader has to act on. */
@@ -204,7 +171,6 @@ function tokens(): string {
     --chr-hairline: color-mix(in srgb, var(--chr-fg) 9%, transparent);
     --chr-surface: color-mix(in srgb, var(--chr-fg) 3%, var(--chr-bg));
     --chr-raised: color-mix(in srgb, var(--chr-fg) 7%, var(--chr-bg));
-    --chr-veil: color-mix(in srgb, var(--chr-bg) 82%, transparent);
 
     --chr-1: 4px;
     --chr-2: 8px;
@@ -216,15 +182,13 @@ function tokens(): string {
 
     --chr-r-sm: 4px;
     --chr-r-md: 6px;
-    --chr-r-lg: 10px;
+    --chr-r-lg: 4px;
     --chr-r-pill: 999px;
 
-    --chr-gutter: clamp(20px, 5vw, 44px);
-    --chr-measure: 64rem;
+    --chr-gutter: 24px;
+    --chr-measure: 58rem;
 
     --chr-mono: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, monospace);
-    --chr-fast: 110ms;
-    --chr-ease: cubic-bezier(0.32, 0.72, 0, 1);
   }`;
 }
 
@@ -263,10 +227,9 @@ function base(): string {
 /**
  * The shell.
  *
- * One centred measure so a panel opened beside a narrow editor and a panel
- * maximised across a 4K display both read at a comfortable line length. The
- * masthead and action bar are translucent layers the content passes under,
- * which keeps the title and the decision buttons reachable in a long record.
+ * One centred measure keeps a panel opened beside an editor and a maximised
+ * panel equally readable. Both the header and action row stay in normal
+ * document flow, so they never cover the record being read.
  */
 function layout(): string {
   return `
@@ -280,47 +243,21 @@ function layout(): string {
   }
 
   .masthead {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    margin: 0 calc(-1 * var(--chr-gutter));
-    padding: var(--chr-6) var(--chr-gutter) var(--chr-4);
-    background: var(--chr-veil);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    padding: var(--chr-5) 0 var(--chr-4);
   }
-  .masthead::after,
-  .actionbar::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--chr-line);
-    opacity: 0;
-    transition: opacity 180ms var(--chr-ease);
-  }
-  .masthead::after { bottom: 0; }
-  html[data-scrolled="true"] .masthead::after { opacity: 1; }
 
-  .content { flex: 1 1 auto; padding: var(--chr-2) 0 var(--chr-6); }
+  .content { flex: 1 1 auto; padding: 0 0 var(--chr-5); }
 
   .actionbar {
-    position: sticky;
-    bottom: 0;
-    z-index: 2;
     margin: 0 calc(-1 * var(--chr-gutter));
     padding: var(--chr-3) var(--chr-gutter);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--chr-2);
-    background: var(--chr-veil);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border-top: 1px solid var(--chr-line);
+    background: var(--chr-bg);
   }
-  .actionbar::before { top: 0; }
-  html:not([data-scroll-end="true"]) .actionbar::before { opacity: 1; }
   .actionbar-note { margin-left: auto; color: var(--chr-muted); font-size: 11.5px; }
 
   .blank {
@@ -347,9 +284,8 @@ function layout(): string {
 /**
  * The type scale.
  *
- * Tracking is set per size rather than once: the title tightens as it grows,
- * and the small uppercase labels open up, which is the only way both read
- * correctly out of the same font.
+ * A compact type scale that follows the host editor rather than presenting a
+ * separate editorial hierarchy.
  */
 function typographyScale(): string {
   return `
@@ -357,26 +293,18 @@ function typographyScale(): string {
     display: flex;
     align-items: center;
     gap: var(--chr-2);
-    margin: 0 0 var(--chr-3);
+    margin: 0 0 var(--chr-2);
     color: var(--chr-muted);
-    font-size: 11.5px;
+    font-size: 12px;
     line-height: 1.4;
     min-width: 0;
   }
   .eyebrow-mark {
-    display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: var(--chr-r-md);
-    border: 1px solid var(--chr-hairline);
-    background: var(--chr-surface);
+    display: block;
     color: var(--chr-accent);
   }
   .eyebrow-kind {
     font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
     color: var(--chr-fg);
   }
   .eyebrow-sep { opacity: 0.4; }
@@ -390,119 +318,69 @@ function typographyScale(): string {
 
   .title {
     margin: 0;
-    font-size: clamp(19px, 2.4vw, 25px);
+    font-size: 20px;
     font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.017em;
-    text-wrap: balance;
+    line-height: 1.3;
   }
 
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    margin: var(--chr-3) 0 0;
-  }
-
-  .section { margin: var(--chr-6) 0 0; }
+  .section { margin: var(--chr-5) 0 0; }
   .section:first-child { margin-top: var(--chr-5); }
   .section-head {
     display: flex;
     align-items: center;
     gap: var(--chr-2);
-    margin: 0 0 var(--chr-3);
+    margin: 0 0 var(--chr-2);
   }
   .section-title {
     margin: 0;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--chr-muted);
+    color: var(--chr-fg);
   }
   .section-count {
     font-size: 10.5px;
     font-variant-numeric: tabular-nums;
     color: var(--chr-muted);
-    background: var(--chr-raised);
-    border-radius: var(--chr-r-pill);
-    padding: 0 6px;
-    line-height: 1.6;
+    padding: 0;
+    line-height: inherit;
   }
-  .section-rule { flex: 1 1 auto; height: 1px; background: var(--chr-hairline); }
+  .empty, .reason { margin: 0; color: var(--chr-muted); font-size: 12.5px; }
 
-  .empty { margin: 0; color: var(--chr-muted); font-size: 12.5px; }`;
+  .disclosure { margin: var(--chr-5) 0 0; }
+  .disclosure-summary {
+    width: max-content;
+    color: var(--chr-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .disclosure-summary:hover { color: var(--chr-fg); }
+  .disclosure-content { margin-top: var(--chr-2); }`;
 }
 
 function components(): string {
   return `
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 2px 9px 2px 7px;
-    border-radius: var(--chr-r-pill);
-    border: 1px solid color-mix(in srgb, currentColor 32%, transparent);
-    background: color-mix(in srgb, currentColor 12%, transparent);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-  }
-  .pill-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: var(--chr-r-pill);
-    background: currentColor;
-  }
-  .pill--neutral { color: var(--chr-muted); }
-  .pill--accent { color: var(--chr-accent); }
-  .pill--good { color: var(--chr-good); }
-  .pill--warn { color: var(--chr-warn); }
-  .pill--bad { color: var(--chr-bad); }
-
-  .tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: var(--chr-r-sm);
-    border: 1px solid var(--chr-hairline);
-    background: var(--chr-surface);
-    color: var(--chr-muted);
-    font-size: 11px;
-    white-space: nowrap;
-  }
-  .tag--mono { font-family: var(--chr-mono); font-size: 10.5px; }
-
   /*
-   * Flex rather than grid: a partial last row stretches to fill the box, so the
-   * panel never shows an empty tile because a record happened to have seven
-   * fields instead of eight.
+   * Metadata is a flat definition grid. Dividers provide enough structure
+   * without making every value look like a separate card.
    */
   .spec {
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1px;
-    background: var(--chr-hairline);
-    border: 1px solid var(--chr-hairline);
-    border-radius: var(--chr-r-lg);
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--chr-5);
+    border-top: 1px solid var(--chr-hairline);
   }
   .spec-cell {
-    flex: 1 1 13rem;
     min-width: 0;
-    background: var(--chr-surface);
-    padding: 10px 14px 11px;
+    padding: 8px 0 9px;
+    border-bottom: 1px solid var(--chr-hairline);
   }
-  .spec-cell--wide { flex-basis: 100%; }
+  .spec-cell--wide { grid-column: 1 / -1; }
   .spec-label {
     margin: 0 0 3px;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
     color: var(--chr-muted);
   }
   .spec-value {
@@ -514,26 +392,14 @@ function components(): string {
   }
   .spec-value--mono { font-family: var(--chr-mono); font-size: 11.5px; }
 
-  .meter {
-    display: block;
-    height: 3px;
-    max-width: 92px;
-    margin-top: 6px;
-    border-radius: var(--chr-r-pill);
-    background: color-mix(in srgb, var(--chr-fg) 12%, transparent);
-    overflow: hidden;
-  }
-  .meter-fill { display: block; height: 100%; border-radius: inherit; background: var(--chr-accent); }
-
   .callout {
     display: flex;
     gap: 10px;
     align-items: flex-start;
     margin: var(--chr-4) 0 0;
     padding: 11px 14px;
-    border: 1px solid color-mix(in srgb, var(--chr-tone) 34%, transparent);
-    border-left-width: 3px;
-    border-radius: var(--chr-r-md);
+    border-left: 3px solid var(--chr-tone);
+    border-radius: var(--chr-r-sm);
     background: color-mix(in srgb, var(--chr-tone) 9%, var(--chr-bg));
     font-size: 12.5px;
   }
@@ -566,8 +432,6 @@ function components(): string {
   .verdict {
     font-size: 10.5px;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     line-height: 1.9;
   }
   .verdict--pass { color: var(--chr-good); }
@@ -589,10 +453,8 @@ function components(): string {
     border-bottom: 1px solid var(--chr-hairline);
   }
   .diff-scope {
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--chr-muted);
   }
   .diff-stat {
@@ -626,15 +488,15 @@ function components(): string {
     font-size: 12.5px;
     font-weight: 500;
     padding: 6px 14px;
-    border-radius: var(--chr-r-md);
+    border-radius: 2px;
     border: 1px solid var(--chr-line);
     background: var(--vscode-button-secondaryBackground, var(--chr-raised));
     color: var(--vscode-button-secondaryForeground, var(--chr-fg));
     cursor: pointer;
-    transition: background var(--chr-fast) ease, transform 90ms ease, border-color var(--chr-fast) ease;
   }
   .btn:hover { background: var(--vscode-button-secondaryHoverBackground, var(--chr-line)); }
-  .btn:active { transform: scale(0.985); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn:disabled:hover { background: var(--vscode-button-secondaryBackground, var(--chr-raised)); }
   .btn--primary {
     border-color: transparent;
     background: var(--vscode-button-background);
@@ -656,7 +518,6 @@ function prose(): string {
     margin: var(--chr-5) 0 var(--chr-2);
     font-weight: 600;
     line-height: 1.3;
-    letter-spacing: -0.008em;
   }
   .prose h1 { font-size: 16px; }
   .prose h2 { font-size: 14.5px; }
@@ -698,8 +559,6 @@ function prose(): string {
   .prose th {
     font-size: 10.5px;
     font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
     color: var(--chr-muted);
   }
   .prose hr { margin: var(--chr-5) 0; border: none; border-top: 1px solid var(--chr-hairline); }`;
@@ -708,17 +567,11 @@ function prose(): string {
 /** Honour the reader's system preferences rather than insisting on the effect. */
 function preferences(): string {
   return `
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
-    .btn:active { transform: none; }
-  }
-
-  @media (prefers-reduced-transparency: reduce) {
-    .masthead, .actionbar {
-      background: var(--chr-bg);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-    }
+  @media (max-width: 520px) {
+    :root { --chr-gutter: 16px; }
+    .spec { grid-template-columns: minmax(0, 1fr); }
+    .spec-cell--wide { grid-column: auto; }
+    .actionbar-note { flex-basis: 100%; margin-left: 0; }
   }
 
   @media (prefers-contrast: more) {
@@ -727,12 +580,10 @@ function preferences(): string {
       --chr-hairline: color-mix(in srgb, var(--chr-fg) 30%, transparent);
       --chr-muted: var(--chr-fg);
     }
-    .masthead, .actionbar { background: var(--chr-bg); backdrop-filter: none; }
-    .masthead::after, .actionbar::before { opacity: 1; }
   }
 
   @media print {
-    .masthead, .actionbar { position: static; background: none; backdrop-filter: none; }
+    .actionbar { background: none; }
     .btn { display: none; }
   }`;
 }
