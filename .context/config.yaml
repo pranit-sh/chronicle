@@ -1,0 +1,39 @@
+# Chronicle configuration. This file is committed, so knowledge settings
+# travel with the branch just like the knowledge itself.
+version: 1
+
+# Map a scope id to the code paths that activate it. Scopes are dotted paths,
+# and an item scoped "core" applies to anything resolving under "core.*".
+scopes:
+  core: ["packages/core/**"]
+  core.schema: ["packages/core/src/schema.ts"]
+  core.store: ["packages/core/src/store.ts", "packages/core/src/frontmatter.ts"]
+  core.resolver: ["packages/core/src/resolver.ts", "packages/core/src/scope.ts"]
+  core.verifier: ["packages/core/src/verifier.ts", "packages/core/src/evidence.ts"]
+  mcp: ["packages/mcp/**"]
+  cli: ["packages/cli/**"]
+  tests: ["packages/*/test/**"]
+  build: ["**/tsup.config.ts", "**/tsconfig*.json", "pnpm-workspace.yaml", "**/package.json"]
+
+budget:
+  maxItems: 25
+  maxChars: 8000
+
+authority:
+  autoLearn: true
+  autoModifyRules: false
+  autoArchiveStale: false
+  detectContradictions: true
+
+resolver:
+  includeStale: true
+  includeProposed: false
+  freshnessHorizonDays: 90
+
+exclude:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/.git/**"
+  - "**/.env*"
+  - "**/*.pem"
+  - "**/*.key"

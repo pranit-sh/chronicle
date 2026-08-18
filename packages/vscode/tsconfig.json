@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "types": ["node", "vscode"],
+    "lib": ["ES2023", "DOM"]
+  },
+  "include": ["src/**/*.ts"]
+}

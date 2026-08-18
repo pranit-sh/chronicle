@@ -1,0 +1,30 @@
+{
+  "name": "@chronicle/core",
+  "version": "0.1.0",
+  "description": "Schema, store, scope model, resolver, verifier and history for Chronicle",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "picomatch": "^4.0.5",
+    "ulid": "^3.0.2",
+    "yaml": "^2.9.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/picomatch": "^4.0.3"
+  }
+}

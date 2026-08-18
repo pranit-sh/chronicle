@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+coverage/
+*.log
+
+# Chronicle derives this from the committed Markdown in .context/knowledge/
+.context/.cache/

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "chronicle": {
+      "command": "node",
+      "args": ["packages/mcp/dist/bin.js"],
+      "env": {
+        "CHRONICLE_ROOT": "."
+      }
+    }
+  }
+}

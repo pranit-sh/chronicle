@@ -1,0 +1,10 @@
+packages:
+  - "packages/*"
+
+allowBuilds:
+  # tsup bundles with esbuild, whose install script links the prebuilt binary.
+  esbuild: true
+  # Both come from vsce and are only needed to publish to the Marketplace.
+  # `vsce package` does not sign or authenticate, so neither needs to build.
+  "@vscode/vsce-sign": false
+  keytar: false

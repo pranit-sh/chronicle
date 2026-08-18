@@ -1,0 +1,21 @@
+{
+  "name": "chronicle",
+  "version": "0.1.0",
+  "description": "Command line for Chronicle, a versioned knowledge layer for AI coding agents",
+  "type": "module",
+  "bin": {
+    "chronicle": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@chronicle/core": "workspace:*",
+    "@chronicle/mcp": "workspace:*",
+    "commander": "^15.0.0"
+  }
+}

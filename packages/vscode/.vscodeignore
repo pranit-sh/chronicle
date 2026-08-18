@@ -1,0 +1,9 @@
+# The extension ships as a single bundled file, so nothing else is needed.
+src/**
+test/**
+tsconfig.json
+tsup.config.ts
+node_modules/**
+**/*.map
+**/*.ts
+!media/**
