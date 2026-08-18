@@ -26,7 +26,7 @@ import type { ChronicleStore } from "./store.js";
 /**
  * The staging area that makes "AI proposes, developer disposes" structural
  * rather than a convention. Agents can write here and nowhere else; accepting a
- * proposal is the only path from this directory into `.context/knowledge`.
+ * proposal is the only path from this directory into `.chronicle/knowledge`.
  */
 
 function proposalFile(paths: ChroniclePaths, id: string): string {

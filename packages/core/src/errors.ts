@@ -3,6 +3,8 @@ import type { ZodError } from "zod";
 export type ChronicleErrorCode =
   | "not_initialized"
   | "already_initialized"
+  /** A pre-0.1.0 `.context/` directory that needs renaming. */
+  | "legacy_directory"
   | "not_found"
   | "ambiguous_reference"
   | "invalid_document"

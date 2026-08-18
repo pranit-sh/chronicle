@@ -25,7 +25,7 @@ export function makeItem(overrides: Record<string, unknown> = {}): KnowledgeItem
     ...frontmatter,
     body: text,
     sections: extractSections(text),
-    filePath: `/repo/.context/knowledge/${frontmatter.type}/${frontmatter.id}.md`,
+    filePath: `/repo/.chronicle/knowledge/${frontmatter.type}/${frontmatter.id}.md`,
   };
 }
 

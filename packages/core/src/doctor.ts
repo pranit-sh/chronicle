@@ -6,11 +6,17 @@ import { ChronicleError, formatZodError } from "./errors.js";
 import { pathExists } from "./fs-utils.js";
 import { parseMarkdownDocument } from "./frontmatter.js";
 import { listProposals } from "./proposals.js";
-import { type ChroniclePaths, chroniclePaths, toRepoRelative } from "./paths.js";
+import {
+  CHRONICLE_DIR,
+  type ChroniclePaths,
+  LEGACY_CHRONICLE_DIR,
+  chroniclePaths,
+  toRepoRelative,
+} from "./paths.js";
 import { KnowledgeFrontmatterSchema, TYPE_DIRECTORIES } from "./schema.js";
 
 /**
- * Health checks over `.context/` itself.
+ * Health checks over `.chronicle/` itself.
  *
  * Everything here reads the directory directly rather than going through the
  * store, because the whole point is to explain why the store will not open.
@@ -52,8 +58,8 @@ function findConflictMarkers(contents: string): number[] {
   return lines;
 }
 
-/** Every file under `.context/`, including dotfiles, excluding the derived cache. */
-async function contextFiles(paths: ChroniclePaths): Promise<string[]> {
+/** Every file under `.chronicle/`, including dotfiles, excluding the derived cache. */
+async function chronicleFiles(paths: ChroniclePaths): Promise<string[]> {
   const found: string[] = [];
   async function walk(current: string): Promise<void> {
     let entries;
@@ -69,7 +75,7 @@ async function contextFiles(paths: ChroniclePaths): Promise<string[]> {
       else if (entry.isFile()) found.push(full);
     }
   }
-  await walk(paths.contextDir);
+  await walk(paths.chronicleDir);
   return found.sort();
 }
 
@@ -80,26 +86,34 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
 
   const add = (diagnosis: Diagnosis) => diagnoses.push(diagnosis);
 
-  if (!(await pathExists(paths.contextDir))) {
+  if (!(await pathExists(paths.chronicleDir))) {
+    const legacy = await pathExists(path.join(root, LEGACY_CHRONICLE_DIR));
     return {
       root,
       initialized: false,
       diagnoses: [
-        {
-          level: "error",
-          code: "not_initialized",
-          message: `No .context directory in ${root}.`,
-          fix: "Run chronicle init",
-        },
+        legacy
+          ? {
+              level: "error",
+              code: "legacy_directory",
+              message: `This project still uses ${LEGACY_CHRONICLE_DIR}/, which Chronicle used before 0.1.0.`,
+              fix: `Run git mv ${LEGACY_CHRONICLE_DIR} ${CHRONICLE_DIR}`,
+            }
+          : {
+              level: "error",
+              code: "not_initialized",
+              message: `No ${CHRONICLE_DIR} directory in ${root}.`,
+              fix: "Run chronicle init",
+            },
       ],
       counts: { error: 1, warning: 0, info: 0 },
       itemsChecked: 0,
     };
   }
 
-  const files = await contextFiles(paths);
+  const files = await chronicleFiles(paths);
 
-  // 1. Conflict markers anywhere under .context/, including config and history.
+  // 1. Conflict markers anywhere under .chronicle/, including config and history.
   for (const file of files) {
     const raw = await readFile(file, "utf8").catch(() => undefined);
     if (raw === undefined) continue;
@@ -125,7 +139,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         level: "warning",
         code: "missing_config",
         message: "No config.yaml, so the built-in defaults are in force.",
-        fix: "Run chronicle init, or write .context/config.yaml by hand",
+        fix: `Run chronicle init, or write ${CHRONICLE_DIR}/config.yaml by hand`,
       });
     }
   } catch (error) {
@@ -221,7 +235,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
             code: "unmapped_scope",
             message: `Scope "${scope}" is not mapped to any code path, so no file will ever activate it.`,
             file: relative(file),
-            fix: `Add ${scope} to scopes in .context/config.yaml`,
+            fix: `Add ${scope} to scopes in ${CHRONICLE_DIR}/config.yaml`,
           });
         }
       }
@@ -287,7 +301,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
   }
 
   // 6. The derived cache must never be committed.
-  const gitignore = path.join(paths.contextDir, ".gitignore");
+  const gitignore = path.join(paths.chronicleDir, ".gitignore");
   const ignored = await readFile(gitignore, "utf8").catch(() => "");
   if (!ignored.split("\n").some((line) => line.trim().replace(/^\//, "").startsWith(".cache"))) {
     const rootIgnore = await readFile(path.join(root, ".gitignore"), "utf8").catch(() => "");
@@ -296,7 +310,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         level: "warning",
         code: "cache_not_ignored",
         message: "The derived index cache is not gitignored, so it will churn in every diff.",
-        fix: "Add .cache/ to .context/.gitignore",
+        fix: `Add .cache/ to ${CHRONICLE_DIR}/.gitignore`,
       });
     }
   }
@@ -354,10 +368,10 @@ export function isHealthy(report: DoctorReport): boolean {
 }
 
 /** Rough directory size, used to reassure the developer the layer stays small. */
-export async function contextSizeBytes(root: string): Promise<number> {
+export async function chronicleSizeBytes(root: string): Promise<number> {
   const paths = chroniclePaths(root);
   let total = 0;
-  for (const file of await contextFiles(paths)) {
+  for (const file of await chronicleFiles(paths)) {
     total += (await stat(file).catch(() => ({ size: 0 }))).size;
   }
   return total;

@@ -314,13 +314,13 @@ describe("proposal storage", () => {
       proposedBy: agent,
       reason: "Detected in conversation",
     });
-    const raw = await readFile(path.join(root, ".context/proposals", `${proposal.id}.yaml`), "utf8");
+    const raw = await readFile(path.join(root, ".chronicle/proposals", `${proposal.id}.yaml`), "utf8");
     expect(raw).toContain("op: create");
     expect(raw).toContain("reason: Detected in conversation");
   });
 
   it("reports a corrupt proposal instead of ignoring it", async () => {
-    await writeFile(path.join(root, ".context/proposals/broken.yaml"), "op: nonsense\n", "utf8");
+    await writeFile(path.join(root, ".chronicle/proposals/broken.yaml"), "op: nonsense\n", "utf8");
     await expect(listProposals(store.paths)).rejects.toThrow(/not a valid proposal/);
   });
 });

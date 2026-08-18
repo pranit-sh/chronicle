@@ -16,7 +16,7 @@
   ],
   "main": "./dist/extension.cjs",
   "activationEvents": [
-    "workspaceContains:.context/config.yaml"
+    "workspaceContains:.chronicle/config.yaml"
   ],
   "scripts": {
     "build": "tsup",
@@ -65,7 +65,7 @@
     "viewsWelcome": [
       {
         "view": "chronicle.knowledge",
-        "contents": "No knowledge layer in this workspace yet.\n\nChronicle keeps what your agents should know as Markdown in `.context/`, committed alongside your code.\n\n[Set up Chronicle](command:chronicle.init)"
+        "contents": "No knowledge layer in this workspace yet.\n\nChronicle keeps what your agents should know as Markdown in `.chronicle/`, committed alongside your code.\n\n[Set up Chronicle](command:chronicle.init)"
       },
       {
         "view": "chronicle.proposals",

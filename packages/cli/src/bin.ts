@@ -26,7 +26,7 @@ export function buildProgram(): Command {
       [
         "A developer-controlled, versioned knowledge layer for AI coding agents.",
         "",
-        "Knowledge lives as Markdown in .context/ and is committed alongside your code,",
+        "Knowledge lives as Markdown in .chronicle/ and is committed alongside your code,",
         "so it follows branches, reviews and merges exactly like the code does.",
       ].join("\n"),
     )

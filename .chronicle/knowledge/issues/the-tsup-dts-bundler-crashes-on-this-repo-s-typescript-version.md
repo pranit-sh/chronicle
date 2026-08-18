@@ -11,8 +11,8 @@ source: human
 confidence: 0.9
 priority: 50
 createdAt: 2026-08-18T10:06:58.423Z
-updatedAt: 2026-08-18T10:41:39.522Z
-lastVerifiedAt: 2026-08-18T10:41:39.492Z
+updatedAt: 2026-08-18T12:20:58.864Z
+lastVerifiedAt: 2026-08-18T12:20:58.832Z
 actor:
   kind: human
   id: Pranit Deshmukh
@@ -21,7 +21,7 @@ provenance:
   ref: chronicle remember
 evidence:
   - expect: present
-    lastCheckedAt: 2026-08-18T10:41:39.492Z
+    lastCheckedAt: 2026-08-18T12:20:58.832Z
     lastResult: pass
     lastDetail: "/dts: false/ in packages/*/tsup.config.ts: 4 matches"
     kind: grep

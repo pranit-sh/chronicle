@@ -1,5 +1,6 @@
 import {
   type Actor,
+  CHRONICLE_DIR,
   ChronicleError,
   ChronicleStore,
   type Proposal,
@@ -11,7 +12,7 @@ import * as vscode from "vscode";
  * Owns the single open store for the workspace and keeps it in step with the
  * files on disk.
  *
- * The Markdown under `.context/` is authoritative and a developer is expected
+ * The Markdown under `.chronicle/` is authoritative and a developer is expected
  * to edit it by hand, switch branches, and pull. So the extension watches the
  * directory and reloads rather than assuming it is the only writer.
  */
@@ -79,7 +80,7 @@ export class ChronicleSession implements vscode.Disposable {
     const root = folder.uri.fsPath;
     try {
       const configured = await vscode.workspace.fs
-        .stat(vscode.Uri.joinPath(folder.uri, ".context", "config.yaml"))
+        .stat(vscode.Uri.joinPath(folder.uri, CHRONICLE_DIR, "config.yaml"))
         .then(
           () => true,
           () => false,
@@ -141,7 +142,7 @@ export class ChronicleSession implements vscode.Disposable {
     if (this.#watcher) return;
     // The derived cache changes on every read, so watching it would loop.
     const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(folder, ".context/{knowledge,archive,proposals}/**"),
+      new vscode.RelativePattern(folder, `${CHRONICLE_DIR}/{knowledge,archive,proposals}/**`),
     );
     const onEvent = () => this.scheduleReload();
     watcher.onDidCreate(onEvent);
@@ -149,7 +150,7 @@ export class ChronicleSession implements vscode.Disposable {
     watcher.onDidDelete(onEvent);
 
     const config = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(folder, ".context/config.yaml"),
+      new vscode.RelativePattern(folder, `${CHRONICLE_DIR}/config.yaml`),
     );
     config.onDidCreate(onEvent);
     config.onDidChange(onEvent);

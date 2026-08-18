@@ -7,7 +7,15 @@ import { atomicWrite, ensureDir, listFilesRecursive, moveFile, pathExists } from
 import { appendHistory } from "./history.js";
 import { matchesReference, newKnowledgeId, slugify, uniqueSlug } from "./ids.js";
 import { parseMarkdownDocument, serializeMarkdownDocument } from "./frontmatter.js";
-import { type ChroniclePaths, chroniclePaths, findWorkspaceRoot, toRepoRelative } from "./paths.js";
+import {
+  CHRONICLE_DIR,
+  type ChroniclePaths,
+  LEGACY_CHRONICLE_DIR,
+  chroniclePaths,
+  findLegacyRoot,
+  findWorkspaceRoot,
+  toRepoRelative,
+} from "./paths.js";
 import { extractSections } from "./sections.js";
 import {
   type Actor,
@@ -107,7 +115,7 @@ function matchesFilter(item: KnowledgeItem, filter: KnowledgeFilter): boolean {
 }
 
 /**
- * Reads and writes the Markdown knowledge files under `.context/`. The
+ * Reads and writes the Markdown knowledge files under `.chronicle/`. The
  * Markdown is always authoritative; the in-memory map and the JSON cache are
  * derived and can be deleted at any time.
  */
@@ -129,13 +137,20 @@ export class ChronicleStore {
     return this.paths.root;
   }
 
-  /** Finds the nearest `.context/` walking up from `cwd`. */
+  /** Finds the nearest `.chronicle/` walking up from `cwd`. */
   static async open(cwd: string = process.cwd()): Promise<ChronicleStore> {
     const root = await findWorkspaceRoot(cwd);
     if (!root) {
+      const legacy = await findLegacyRoot(cwd);
+      if (legacy) {
+        throw new ChronicleError(
+          "legacy_directory",
+          `Found a ${LEGACY_CHRONICLE_DIR}/ directory in ${legacy}, which is what Chronicle used before 0.1.0. Rename it with \`git mv ${LEGACY_CHRONICLE_DIR} ${CHRONICLE_DIR}\`.`,
+        );
+      }
       throw new ChronicleError(
         "not_initialized",
-        `No .context directory found in ${cwd} or any parent. Run \`chronicle init\` first.`,
+        `No ${CHRONICLE_DIR} directory found in ${cwd} or any parent. Run \`chronicle init\` first.`,
       );
     }
     return ChronicleStore.openAt(root);
@@ -152,7 +167,7 @@ export class ChronicleStore {
   static async init(root: string, actor: Actor): Promise<ChronicleStore> {
     const paths = chroniclePaths(root);
     if (await pathExists(paths.configFile)) {
-      throw new ChronicleError("already_initialized", `${paths.contextDir} already exists.`);
+      throw new ChronicleError("already_initialized", `${paths.chronicleDir} already exists.`);
     }
     for (const dir of Object.values(TYPE_DIRECTORIES)) {
       await ensureDir(path.join(paths.knowledgeDir, dir));
@@ -161,8 +176,8 @@ export class ChronicleStore {
     await ensureDir(paths.proposalsDir);
     await ensureDir(paths.historyDir);
     await writeDefaultConfig(paths);
-    await atomicWrite(path.join(paths.contextDir, ".gitignore"), `${".cache/"}\n`);
-    await atomicWrite(path.join(paths.contextDir, "README.md"), contextReadme());
+    await atomicWrite(path.join(paths.chronicleDir, ".gitignore"), `${".cache/"}\n`);
+    await atomicWrite(path.join(paths.chronicleDir, "README.md"), chronicleReadme());
     await appendHistory(paths, {
       op: "init",
       actor,
@@ -525,7 +540,7 @@ function summarize(item: KnowledgeItem): Record<string, unknown> {
   };
 }
 
-function contextReadme(): string {
+function chronicleReadme(): string {
   return `# Chronicle knowledge layer
 
 This directory is the project's knowledge layer: what the project believes, why,

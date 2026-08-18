@@ -18,7 +18,7 @@ export const KNOWLEDGE_TYPES = [
 export type KnowledgeTypeName = (typeof KNOWLEDGE_TYPES)[number];
 export const KnowledgeTypeSchema = z.enum(KNOWLEDGE_TYPES);
 
-/** Directory under `.context/knowledge/` that holds each type. */
+/** Directory under `.chronicle/knowledge/` that holds each type. */
 export const TYPE_DIRECTORIES: Record<KnowledgeTypeName, string> = {
   rule: "rules",
   decision: "decisions",

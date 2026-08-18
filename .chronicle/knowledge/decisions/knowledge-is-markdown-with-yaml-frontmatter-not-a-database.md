@@ -21,7 +21,7 @@ provenance:
 ---
 
 ## Decision
-One Markdown file per knowledge item under .context/knowledge, with YAML frontmatter, committed to Git.
+One Markdown file per knowledge item under .chronicle/knowledge, with YAML frontmatter, committed to Git.
 
 ## Rationale
 The product thesis is Knowledge Git: knowledge has to diff, branch, review and merge like code, and a developer has to be able to open it in an editor. A single binary database is opaque in Git and produces no meaningful conflicts.
@@ -30,4 +30,4 @@ The product thesis is Knowledge Git: knowledge has to diff, branch, review and m
 SQLite as the source of truth, rejected because it defeats the versioning thesis. One JSON file per item, rejected as unpleasant to hand edit. An append-only JSONL event log, deferred as heavier than the MVP needs.
 
 ## Consequences
-Queries need an index, so the store keeps an in-memory map rebuilt from disk and cached, keyed by mtime, in the gitignored .context/.cache.
+Queries need an index, so the store keeps an in-memory map rebuilt from disk and cached, keyed by mtime, in the gitignored .chronicle/.cache.

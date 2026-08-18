@@ -10,8 +10,8 @@ source: human
 confidence: 0.9
 priority: 50
 createdAt: 2026-08-18T10:06:58.133Z
-updatedAt: 2026-08-18T10:41:39.518Z
-lastVerifiedAt: 2026-08-18T10:41:39.492Z
+updatedAt: 2026-08-18T12:20:58.861Z
+lastVerifiedAt: 2026-08-18T12:20:58.832Z
 actor:
   kind: human
   id: Pranit Deshmukh
@@ -21,11 +21,11 @@ provenance:
 evidence:
   - expect: present
     minMatches: 1
-    lastCheckedAt: 2026-08-18T10:41:39.492Z
+    lastCheckedAt: 2026-08-18T12:20:58.832Z
     lastResult: pass
     lastDetail: "glob packages/*/test/**/*.test.ts: 9 matches"
     kind: glob
     glob: packages/*/test/**/*.test.ts
 ---
 
-The root vitest.config.ts aliases @chronicle/core to its source, so tests run against the current source without building first. Store and MCP tests work against a real temporary .context directory rather than mocking the filesystem.
+The root vitest.config.ts aliases @chronicle/core to its source, so tests run against the current source without building first. Store and MCP tests work against a real temporary .chronicle directory rather than mocking the filesystem.

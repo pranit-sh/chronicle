@@ -10,8 +10,8 @@ source: human
 confidence: 0.9
 priority: 50
 createdAt: 2026-08-18T10:06:57.731Z
-updatedAt: 2026-08-18T10:41:39.516Z
-lastVerifiedAt: 2026-08-18T10:41:39.492Z
+updatedAt: 2026-08-18T12:20:58.859Z
+lastVerifiedAt: 2026-08-18T12:20:58.832Z
 actor:
   kind: human
   id: Pranit Deshmukh
@@ -20,7 +20,7 @@ provenance:
   ref: chronicle remember
 evidence:
   - expect: present
-    lastCheckedAt: 2026-08-18T10:41:39.492Z
+    lastCheckedAt: 2026-08-18T12:20:58.832Z
     lastResult: pass
     lastDetail: "file packages/core/src/scope.ts: 1 match"
     kind: file

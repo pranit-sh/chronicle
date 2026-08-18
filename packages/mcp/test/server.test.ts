@@ -37,7 +37,7 @@ async function callTool(name: string, args: Record<string, unknown> = {}): Promi
 beforeEach(async () => {
   root = await mkdtemp(path.join(tmpdir(), "chronicle-mcp-"));
   const store = await ChronicleStore.init(root, actor);
-  await writeFile(path.join(root, ".context/config.yaml"), CONFIG, "utf8");
+  await writeFile(path.join(root, ".chronicle/config.yaml"), CONFIG, "utf8");
 
   await store.create(
     { type: "rule", title: "Use TypeScript everywhere", scopes: ["project"], enforcement: "must" },

@@ -47,7 +47,7 @@ function compile(globs: readonly string[]): Matcher {
 
 /**
  * Turns a file path into the scope chain that is active for it, using the
- * `scopes` map from `.context/config.yaml`.
+ * `scopes` map from `.chronicle/config.yaml`.
  */
 export class ScopeResolver {
   #scopeMatchers: Array<{ scope: string; matches: Matcher }>;

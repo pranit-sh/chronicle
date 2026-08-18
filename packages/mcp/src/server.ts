@@ -21,7 +21,7 @@ import * as z from "zod/v4";
 import { errorResult, formatItem, formatSearchHit, textResult } from "./format.js";
 
 export interface ChronicleServerOptions {
-  /** Directory to search upwards from for `.context/`. Defaults to `process.cwd()`. */
+  /** Directory to search upwards from for `.chronicle/`. Defaults to `process.cwd()`. */
   cwd?: string;
   /** Recorded as the author of anything this agent stages. */
   agentId?: string;

@@ -26,12 +26,12 @@ async function initStore(): Promise<ChronicleStore> {
 }
 
 describe("ChronicleStore.init", () => {
-  it("lays out .context and records an init event", async () => {
+  it("lays out .chronicle and records an init event", async () => {
     const store = await initStore();
     const paths = chroniclePaths(root);
 
     expect(await readFile(paths.configFile, "utf8")).toContain("version: 1");
-    expect(await readFile(path.join(paths.contextDir, ".gitignore"), "utf8")).toContain(".cache/");
+    expect(await readFile(path.join(paths.chronicleDir, ".gitignore"), "utf8")).toContain(".cache/");
     expect(store.config.budget.maxItems).toBe(25);
 
     const history = await readHistory(paths);
@@ -60,7 +60,7 @@ describe("ChronicleStore.create", () => {
     );
 
     expect(item.filePath).toBe(
-      path.join(root, ".context/knowledge/rules/never-call-the-db-directly-from-api-handlers.md"),
+      path.join(root, ".chronicle/knowledge/rules/never-call-the-db-directly-from-api-handlers.md"),
     );
     const raw = await readFile(item.filePath, "utf8");
     expect(raw.startsWith("---\n")).toBe(true);
@@ -156,7 +156,7 @@ describe("ChronicleStore reload and cache", () => {
     const store = await initStore();
     const created = await store.create({ type: "rule", title: "Original" }, actor);
     const raw = await readFile(created.filePath, "utf8");
-    await writeFile(path.join(root, ".context/knowledge/rules/copy.md"), raw, "utf8");
+    await writeFile(path.join(root, ".chronicle/knowledge/rules/copy.md"), raw, "utf8");
 
     await expect(ChronicleStore.openAt(root)).rejects.toThrow(/Duplicate knowledge id/);
   });
@@ -200,11 +200,11 @@ describe("ChronicleStore archive and restore", () => {
 
     const archived = await store.archive(created.id, actor);
     expect(archived.status).toBe("archived");
-    expect(archived.filePath).toBe(path.join(root, ".context/archive/rules/retired-rule.md"));
+    expect(archived.filePath).toBe(path.join(root, ".chronicle/archive/rules/retired-rule.md"));
 
     const restored = await store.restore(created.id, actor);
     expect(restored.status).toBe("active");
-    expect(restored.filePath).toBe(path.join(root, ".context/knowledge/rules/retired-rule.md"));
+    expect(restored.filePath).toBe(path.join(root, ".chronicle/knowledge/rules/retired-rule.md"));
   });
 
   it("hides archived items from listings unless asked for", async () => {

@@ -3,7 +3,7 @@
 See, review and control what your AI coding agents are told about your project.
 
 Chronicle keeps project knowledge — rules, decisions, architecture, conventions
-— as Markdown in `.context/`, committed alongside your code. This extension is
+— as Markdown in `.chronicle/`, committed alongside your code. This extension is
 the window onto it.
 
 ## What it gives you
@@ -25,7 +25,7 @@ budget and why. This is the transparency view: no hidden prompt.
 1. Run **Chronicle: Set up the knowledge layer** from the command palette.
 2. Say something worth remembering with **Chronicle: Remember this**. Chronicle
    guesses the type and scope from the sentence and shows you its guess.
-3. Commit `.context/`. Knowledge now follows branches, reviews and merges the
+3. Commit `.chronicle/`. Knowledge now follows branches, reviews and merges the
    same way your code does.
 
 To let agents read it, point them at the MCP server:

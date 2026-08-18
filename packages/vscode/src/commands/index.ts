@@ -1,4 +1,5 @@
 import {
+  CHRONICLE_DIR,
   ChronicleStore,
   acceptProposal,
   isHealthy,
@@ -78,14 +79,16 @@ function refOf(arg: unknown): string {
 
 async function init(session: ChronicleSession): Promise<void> {
   const folder = vscode.workspace.workspaceFolders?.[0];
-  if (!folder) throw new Error("Open a folder first, so Chronicle knows where to put .context/.");
+  if (!folder) {
+    throw new Error(`Open a folder first, so Chronicle knows where to put ${CHRONICLE_DIR}/.`);
+  }
 
   await ChronicleStore.init(folder.uri.fsPath, await session.actor());
   await session.reload();
 
   const remember = "Remember something";
   const choice = await vscode.window.showInformationMessage(
-    "Chronicle is set up. Knowledge lives in .context/ and is meant to be committed.",
+    `Chronicle is set up. Knowledge lives in ${CHRONICLE_DIR}/ and is meant to be committed.`,
     remember,
   );
   if (choice === remember) await vscode.commands.executeCommand("chronicle.remember");
@@ -110,7 +113,10 @@ async function archive(session: ChronicleSession, reference: string): Promise<vo
 
   const confirm = await vscode.window.showWarningMessage(
     `Archive "${item.title}"?`,
-    { modal: true, detail: "Agents stop being told this. The file moves to .context/archive/ and stays in Git." },
+    {
+      modal: true,
+      detail: `Agents stop being told this. The file moves to ${CHRONICLE_DIR}/archive/ and stays in Git.`,
+    },
     "Archive",
   );
   if (confirm !== "Archive") return;

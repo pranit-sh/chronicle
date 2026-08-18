@@ -100,7 +100,7 @@ The AI must distinguish temporary statements, preferences, experiments, suggesti
 Some knowledge should expire (e.g., "migrating auth — expires after migration completes"). Categories: Permanent, Long-term, Feature-level, Task-level, Temporary — so short-lived info doesn't pollute long-term knowledge.
 
 ## 25. Local-First Architecture
-MVP should be local-first, stored in-project (e.g., `.context/knowledge/`, `.context/history/`, `.context/indexes/`, `.context/config`; exact format TBD). Core principle: **the developer owns the knowledge** — no cloud dependency required for basic use.
+MVP should be local-first, stored in-project (e.g., `.chronicle/knowledge/`, `.chronicle/history/`, `.chronicle/.cache/`, `.chronicle/config.yaml`; exact format TBD). Core principle: **the developer owns the knowledge** — no cloud dependency required for basic use.
 
 ## 26. Git Integration
 Knowledge should live alongside code in Git (commit, branch, merge), so different branches can hold different knowledge states — i.e., **knowledge follows the codebase's Git state**.

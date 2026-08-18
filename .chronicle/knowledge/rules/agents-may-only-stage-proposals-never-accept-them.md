@@ -12,8 +12,8 @@ confidence: 0.9
 priority: 50
 pinned: true
 createdAt: 2026-08-18T10:06:56.416Z
-updatedAt: 2026-08-18T10:41:39.507Z
-lastVerifiedAt: 2026-08-18T10:41:39.492Z
+updatedAt: 2026-08-18T12:20:58.848Z
+lastVerifiedAt: 2026-08-18T12:20:58.832Z
 actor:
   kind: human
   id: Pranit Deshmukh
@@ -22,7 +22,7 @@ provenance:
   ref: chronicle remember
 evidence:
   - expect: absent
-    lastCheckedAt: 2026-08-18T10:41:39.492Z
+    lastCheckedAt: 2026-08-18T12:20:58.832Z
     lastResult: pass
     lastDetail: "/registerTool\\(\\s*[\"'](knowledge_accept|knowledge_delete)/ in packages/mcp/src/**/*.ts: still absent"
     kind: grep
@@ -30,4 +30,4 @@ evidence:
     pattern: registerTool\(\s*["'](knowledge_accept|knowledge_delete)
 ---
 
-The MCP server deliberately exposes no accept, edit or delete tool. An agent can write to .context/proposals and nowhere else, so a human always decides what the project believes. Adding a tool that mutates .context/knowledge directly would break the core product promise.
+The MCP server deliberately exposes no accept, edit or delete tool. An agent can write to .chronicle/proposals and nowhere else, so a human always decides what the project believes. Adding a tool that mutates .chronicle/knowledge directly would break the core product promise.

@@ -2,7 +2,7 @@ import {
   ChronicleStore,
   type Diagnosis,
   type DiagnosisLevel,
-  contextSizeBytes,
+  chronicleSizeBytes,
   isHealthy,
   runDoctor,
 } from "@chronicle/core";
@@ -49,7 +49,7 @@ export function registerDoctor(program: Command): void {
       const report = await runDoctor(cwd);
 
       if (options.json) {
-        printJson({ ...report, sizeBytes: report.initialized ? await contextSizeBytes(cwd) : 0 });
+        printJson({ ...report, sizeBytes: report.initialized ? await chronicleSizeBytes(cwd) : 0 });
         process.exitCode = isHealthy(report) ? 0 : 1;
         return;
       }
@@ -83,7 +83,7 @@ export function registerDoctor(program: Command): void {
       print();
       const facts: string[][] = [
         [color.gray("items"), `${report.itemsChecked} checked`],
-        [color.gray("size"), humanBytes(await contextSizeBytes(cwd))],
+        [color.gray("size"), humanBytes(await chronicleSizeBytes(cwd))],
         [
           color.gray("store"),
           storeOpens

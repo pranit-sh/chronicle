@@ -5,5 +5,5 @@ dist/
 coverage/
 *.log
 
-# Chronicle derives this from the committed Markdown in .context/knowledge/
-.context/.cache/
+# Chronicle derives this from the committed Markdown in .chronicle/knowledge/
+.chronicle/.cache/

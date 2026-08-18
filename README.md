@@ -12,7 +12,7 @@ Chronicle makes that knowledge a real artifact: structured, versioned, checkable
 against the code, and yours to control.
 
 ```
-.context/
+.chronicle/
   config.yaml                            scope map, budget, what agents may do
   knowledge/
     rules/no-direct-db-in-handlers.md
@@ -84,7 +84,7 @@ Point an agent at it by adding the MCP server to your client, for example
 ## The command line
 
 ```
-init                              create .context/ in this project
+init                              create .chronicle/ in this project
 remember "<text>"                 capture knowledge, classified automatically
 list / show <ref>                 browse what the project knows
 context --file <path> --task …    exactly what an agent would receive
@@ -139,7 +139,7 @@ pnpm test         # unit tests, then the VS Code smoke test against the bundle
 pnpm test:unit    # just the fast ones
 ```
 
-Chronicle dogfoods itself: this repository has its own `.context/`, and the
+Chronicle dogfoods itself: this repository has its own `.chronicle/`, and the
 rules in it are verified by `chronicle verify` against this codebase.
 
 ## License
