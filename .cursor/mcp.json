@@ -2,9 +2,9 @@
   "mcpServers": {
     "chronicle": {
       "command": "node",
-      "args": ["packages/mcp/dist/bin.js"],
+      "args": ["${workspaceFolder}/packages/mcp/dist/bin.js"],
       "env": {
-        "CHRONICLE_ROOT": "."
+        "CHRONICLE_ROOT": "${workspaceFolder}"
       }
     }
   }

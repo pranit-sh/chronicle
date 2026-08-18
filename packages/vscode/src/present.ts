@@ -28,6 +28,17 @@ const TYPE_LABEL: Record<KnowledgeTypeName, string> = {
   issue: "Known issues",
 };
 
+/** The singular noun for a single item, for detail views and headings. */
+const TYPE_NOUN: Record<KnowledgeTypeName, string> = {
+  rule: "Rule",
+  decision: "Decision",
+  architecture: "Architecture",
+  domain: "Domain knowledge",
+  convention: "Convention",
+  context: "Current context",
+  issue: "Known issue",
+};
+
 const STATUS_LABEL: Record<KnowledgeStatusName, string> = {
   proposed: "Proposed",
   confirmed: "Confirmed",
@@ -40,8 +51,18 @@ export function typeLabel(type: KnowledgeTypeName): string {
   return TYPE_LABEL[type];
 }
 
+export function typeNoun(type: KnowledgeTypeName): string {
+  return TYPE_NOUN[type];
+}
+
 export function statusLabel(status: KnowledgeStatusName): string {
   return STATUS_LABEL[status];
+}
+
+/** Turns a schema enum value into something a reader would recognise. */
+export function humanize(value: string): string {
+  const spaced = value.replace(/_/g, " ");
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
 export function itemIcon(item: KnowledgeItem): vscode.ThemeIcon {

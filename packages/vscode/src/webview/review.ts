@@ -1,9 +1,19 @@
 import { type DiffLine, type Proposal, proposalDiff } from "@chronicle/core";
 import * as vscode from "vscode";
 
-import { escapeHtml, proposalTitle, relativeTime } from "../present.js";
+import { escapeHtml, humanize, proposalTitle, relativeTime } from "../present.js";
 import type { ChronicleSession } from "../session.js";
-import { pageHtml } from "./chrome.js";
+import {
+  blankSlate,
+  callout,
+  glyph,
+  pageHtml,
+  pill,
+  section,
+  spec,
+  type SpecField,
+  type Tone,
+} from "./chrome.js";
 
 /**
  * The proposal review surface.
@@ -66,7 +76,7 @@ export class ReviewPanel {
       this.#panel.webview.html = pageHtml(
         this.#panel.webview,
         "Review proposal",
-        `<p class="empty">This proposal has already been decided.</p>`,
+        blankSlate("This proposal has already been decided."),
       );
       return;
     }
@@ -81,31 +91,90 @@ export class ReviewPanel {
   }
 }
 
-function diffHtml(lines: readonly DiffLine[]): string {
-  return lines
-    .map((line) => {
-      const klass = line.marker === "+" ? "added" : line.marker === "-" ? "removed" : "";
-      return `<div class="line ${klass}">${escapeHtml(`${line.marker} ${line.text}`)}</div>`;
-    })
+// --- Semantics ------------------------------------------------------------
+
+/** What the operation does to the knowledge base, in colour. */
+const OP_TONE: Record<Proposal["op"], Tone> = {
+  create: "good",
+  update: "accent",
+  archive: "bad",
+  restore: "accent",
+};
+
+const MARKER_CLASS: Record<DiffLine["marker"], string> = {
+  "+": "added",
+  "-": "removed",
+  "~": "changed",
+  " ": "context",
+};
+
+// --- Markup ---------------------------------------------------------------
+
+/** What the diff covers, so the header says something the chips do not repeat. */
+function scope(proposal: Proposal): string {
+  if (proposal.op === "create") {
+    const payload = proposal.payload as { type?: string } | undefined;
+    return `A new ${payload?.type ?? "item"} record`;
+  }
+  if (proposal.op !== "update") return "The whole record";
+  const fields = Object.keys(proposal.changes ?? {});
+  return fields.length === 1 ? "1 field" : `${fields.length} fields`;
+}
+
+function diff(lines: readonly DiffLine[], proposal: Proposal): string {
+  const added = lines.filter((line) => line.marker === "+").length;
+  const removed = lines.filter((line) => line.marker === "-").length;
+
+  const body = lines
+    .map(
+      (line) =>
+        `<div class="dline dline--${MARKER_CLASS[line.marker]}"><span class="dline-mark">${escapeHtml(
+          line.marker.trim(),
+        )}</span><span class="dline-text">${escapeHtml(line.text)}</span></div>`,
+    )
     .join("");
+
+  return `<div class="diff">
+<div class="diff-head">
+<span class="diff-scope">${escapeHtml(scope(proposal))}</span>
+<span class="diff-stat"><span class="added">+${added}</span><span class="removed">-${removed}</span></span>
+</div>
+<div class="diff-body">${body}</div>
+</div>`;
 }
 
 function reviewBody(proposal: Proposal, lines: readonly DiffLine[], targetTitle?: string): string {
-  const who = `${proposal.proposedBy.id} (${proposal.proposedBy.kind})`;
-  return `
-<h1>${escapeHtml(proposalTitle(proposal, targetTitle))}</h1>
-<p class="subtitle">Proposed by ${escapeHtml(who)} ${escapeHtml(relativeTime(proposal.createdAt))} · ${escapeHtml(proposal.id)}</p>
+  const fields: SpecField[] = [
+    { label: "Proposed by", value: `${proposal.proposedBy.id} (${proposal.proposedBy.kind})` },
+    { label: "Raised", value: relativeTime(proposal.createdAt) },
+  ];
+  if (targetTitle) fields.push({ label: "Existing record", value: targetTitle });
+  if (proposal.targetId) fields.push({ label: "Target id", value: proposal.targetId, mono: true, wide: true });
 
-<div class="callout">${escapeHtml(proposal.reason)}</div>
-
-<h2>What accepting this would do</h2>
-<div class="diff"><div class="field">${escapeHtml(proposal.op)}</div>${diffHtml(lines)}</div>
-
-<p class="empty">Nothing has been written to your knowledge base yet.</p>
-
-<div class="actions">
-  <button class="primary" data-command="accept">Accept</button>
-  <button data-command="reject">Reject</button>
+  return `<div class="shell">
+<header class="masthead">
+<div class="eyebrow">
+<span class="eyebrow-mark">${glyph("proposal")}</span>
+<span class="eyebrow-kind">Proposal</span>
+<span class="eyebrow-sep">/</span>
+<span class="eyebrow-id" title="${escapeHtml(proposal.id)}">${escapeHtml(proposal.id)}</span>
 </div>
-`;
+<h1 class="title">${escapeHtml(proposalTitle(proposal, targetTitle))}</h1>
+<div class="chips">${pill(humanize(proposal.op), OP_TONE[proposal.op])}${
+    proposal.proposedBy.kind === "agent" ? pill("From an agent", "warn") : ""
+  }</div>
+</header>
+
+<main class="content">
+${callout("accent", "Why this was raised", proposal.reason)}
+${section("Proposal", spec(fields))}
+${section("What accepting this would do", diff(lines, proposal))}
+</main>
+
+<footer class="actionbar">
+<button class="btn btn--primary" data-command="accept">Accept</button>
+<button class="btn" data-command="reject">Reject</button>
+<span class="actionbar-note">Nothing has been written to your knowledge base yet.</span>
+</footer>
+</div>`;
 }
