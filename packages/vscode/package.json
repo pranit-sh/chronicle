@@ -21,13 +21,15 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "node test/smoke.mjs",
-    "package": "vsce package --no-dependencies"
+    "test": "node test/smoke.mjs && node test/packaged.mjs",
+    "package": "vsce package --no-dependencies --allow-missing-repository"
   },
   "dependencies": {
-    "@chronicle/core": "workspace:*"
+    "@chronicle/core": "workspace:*",
+    "markdown-it": "^15.0.0"
   },
   "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
     "@types/vscode": "~1.95.0",
     "@vscode/vsce": "^3.9.2"
   },

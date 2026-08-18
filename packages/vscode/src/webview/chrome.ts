@@ -92,6 +92,30 @@ function styles(): string {
   .facts dd { margin: 0; font-size: 0.85rem; }
 
   .body { border-top: 1px solid var(--vscode-widget-border, rgba(128,128,128,0.25)); padding-top: 14px; margin-top: 18px; }
+  .body > :first-child { margin-top: 0; }
+  .body ul, .body ol { margin: 0 0 12px; padding-left: 22px; }
+  .body li { margin: 2px 0; }
+  .body li > ul, .body li > ol { margin-bottom: 0; }
+  .body code {
+    background: var(--vscode-textCodeBlock-background);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .body pre code { background: none; padding: 0; }
+  .body blockquote {
+    margin: 0 0 12px;
+    padding: 2px 0 2px 14px;
+    border-left: 3px solid var(--vscode-textBlockQuote-border, var(--vscode-focusBorder));
+    color: var(--vscode-descriptionForeground);
+  }
+  .body table { border-collapse: collapse; margin: 0 0 12px; font-size: 0.9em; }
+  .body th, .body td {
+    border: 1px solid var(--vscode-widget-border, rgba(128,128,128,0.3));
+    padding: 4px 10px;
+    text-align: left;
+  }
+  .body th { background: var(--vscode-editorWidget-background); font-weight: 600; }
+  .body hr { border: none; border-top: 1px solid var(--vscode-widget-border, rgba(128,128,128,0.25)); margin: 18px 0; }
 
   .evidence { list-style: none; padding: 0; margin: 0; }
   .evidence li {

@@ -1,4 +1,5 @@
 import type { KnowledgeItem } from "@chronicle/core";
+import MarkdownIt from "markdown-it";
 import * as vscode from "vscode";
 
 import { describeEvidence, escapeHtml, relativeTime, statusLabel } from "../present.js";
@@ -93,31 +94,18 @@ function expired(item: KnowledgeItem): boolean {
   return Boolean(item.expiresAt && Date.parse(item.expiresAt) < Date.now());
 }
 
-/** Renders the body's Markdown well enough for headings, lists and code. */
-function renderBody(markdown: string): string {
-  const blocks = markdown.trim().split(/\n{2,}/);
-  return blocks
-    .map((block) => {
-      const trimmed = block.trim();
-      if (!trimmed) return "";
-      if (trimmed.startsWith("```")) {
-        return `<pre>${escapeHtml(trimmed.replace(/^```[a-z]*\n?/, "").replace(/```$/, ""))}</pre>`;
-      }
-      const heading = /^(#{1,4})\s+(.*)$/.exec(trimmed);
-      if (heading) {
-        const level = Math.min(6, (heading[1]?.length ?? 1) + 1);
-        return `<h${level}>${escapeHtml(heading[2] ?? "")}</h${level}>`;
-      }
-      if (/^[-*]\s+/m.test(trimmed) && trimmed.split("\n").every((line) => /^[-*]\s+/.test(line.trim()))) {
-        const items = trimmed
-          .split("\n")
-          .map((line) => `<li>${escapeHtml(line.replace(/^\s*[-*]\s+/, ""))}</li>`)
-          .join("");
-        return `<ul>${items}</ul>`;
-      }
-      return `<p>${escapeHtml(trimmed).replace(/\n/g, "<br />")}</p>`;
-    })
-    .join("\n");
+/**
+ * Bodies are written by hand, so they get a real CommonMark renderer.
+ *
+ * Raw HTML stays off: a knowledge file can arrive over a merge or from an
+ * accepted agent proposal, and none of that should be able to inject markup
+ * into the panel. markdown-it also rejects `javascript:` and `vbscript:` link
+ * targets on its own.
+ */
+const markdown = new MarkdownIt({ html: false, linkify: true, typographer: false });
+
+function renderBody(body: string): string {
+  return markdown.render(body.trim());
 }
 
 function detailBody(item: KnowledgeItem): string {

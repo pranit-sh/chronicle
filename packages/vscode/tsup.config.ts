@@ -6,9 +6,12 @@ export default defineConfig({
   outExtension: () => ({ js: ".cjs" }),
   target: "node20",
   platform: "node",
-  // VS Code loads extensions as CommonJS, and @chronicle/core is ESM only, so
-  // it has to be bundled in rather than required at runtime.
-  noExternal: ["@chronicle/core"],
+  // The vsix ships without node_modules, so everything except the `vscode`
+  // host module has to be bundled in. tsup would otherwise leave anything
+  // listed under dependencies as a bare require that fails once installed.
+  // noExternal wins over external, so `vscode` is excluded in the pattern
+  // itself rather than listed below.
+  noExternal: [/^(?!vscode$)/],
   external: ["vscode"],
   dts: false,
   // Bundling all of @chronicle/core and its dependencies makes this large

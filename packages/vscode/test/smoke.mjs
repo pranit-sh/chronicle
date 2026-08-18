@@ -21,6 +21,7 @@ const require = createRequire(import.meta.url);
 const events = new Map();
 const registered = new Map();
 const shown = [];
+const panels = [];
 
 class EventEmitter {
   #listeners = [];
@@ -99,13 +100,18 @@ const vscode = {
       return { dispose: () => {} };
     },
     createStatusBarItem: () => ({ show() {}, hide() {}, dispose() {} }),
-    createWebviewPanel: () => ({
-      webview: { html: "", onDidReceiveMessage: noopEvent },
-      onDidDispose: noopEvent,
-      reveal() {},
-      dispose() {},
-      title: "",
-    }),
+    createWebviewPanel: (viewType) => {
+      const panel = {
+        viewType,
+        webview: { html: "", onDidReceiveMessage: noopEvent },
+        onDidDispose: noopEvent,
+        reveal() {},
+        dispose() {},
+        title: "",
+      };
+      panels.push(panel);
+      return panel;
+    },
     onDidChangeActiveTextEditor: noopEvent,
     showInformationMessage: async (message) => void shown.push(["info", message]),
     showWarningMessage: async (message) => void shown.push(["warn", message]),
@@ -161,7 +167,26 @@ await store.create(
   { type: "rule", title: "Never call the database directly from an API handler", scopes: ["project"] },
   actor,
 );
-await store.create({ type: "decision", title: "Postgres over MongoDB", status: "stale" }, actor);
+const decision = await store.create(
+  {
+    type: "decision",
+    title: "Postgres over MongoDB",
+    status: "stale",
+    body: [
+      "## Decision",
+      "",
+      "We use **Postgres**, reached through `src/lib/repository.ts`.",
+      "",
+      "## Alternatives",
+      "",
+      "1. MongoDB, rejected for weak transactions",
+      "2. SQLite, rejected because we need concurrent writers",
+      "",
+      "See [the ADR](https://example.com/adr-7).",
+    ].join("\n"),
+  },
+  actor,
+);
 await store.create({ type: "convention", title: "Files are kebab-case" }, actor);
 await core.proposeCreate(store, {
   draft: { type: "architecture", title: "Auth lives in src/auth" },
@@ -171,7 +196,12 @@ await core.proposeCreate(store, {
 
 // --- run ------------------------------------------------------------------
 
-const extension = require("../dist/extension.cjs");
+// Defaults to the freshly built bundle. Point it at an extracted .vsix to
+// prove the shipped artifact runs without any node_modules beside it.
+const bundle = process.env.CHRONICLE_EXTENSION_BUNDLE
+  ? path.resolve(process.env.CHRONICLE_EXTENSION_BUNDLE)
+  : "../dist/extension.cjs";
+const extension = require(bundle);
 const subscriptions = [];
 await extension.activate({ subscriptions });
 
@@ -232,6 +262,34 @@ assert.ok(
     .some((group) => group.items?.some((item) => item.title === "Auth lives in src/auth")),
   "the accepted proposal should now be knowledge",
 );
+
+// The detail panel is structured HTML over the frontmatter, with the body
+// rendered as real Markdown.
+await registered.get("chronicle.showItem")(decision.id);
+const detail = panels.find((panel) => panel.viewType === "chronicle.detail");
+assert.ok(detail, "showItem did not open a detail panel");
+const html = detail.webview.html;
+
+assert.match(html, /Postgres over MongoDB/, "the title is missing");
+assert.match(html, /Needs attention/, "a stale item should say so");
+assert.match(html, /no longer matches the code/, "a stale item needs its callout");
+assert.match(html, /Last verified/, "the facts grid is missing");
+assert.match(html, /never be marked stale on its own/, "an item without evidence should say so");
+assert.match(html, /data-command="verify"/, "the actions are missing");
+
+assert.match(html, /<strong>Postgres<\/strong>/, "bold should render, not show asterisks");
+assert.match(html, /<code>src\/lib\/repository\.ts<\/code>/, "inline code should render");
+assert.match(html, /<ol>/, "a numbered list should render as an ordered list");
+assert.match(html, /<h2>Alternatives<\/h2>/, "body headings should render");
+assert.match(html, /href="https:\/\/example\.com\/adr-7"/, "links should render");
+assert.doesNotMatch(html, /\*\*Postgres\*\*/, "raw Markdown leaked into the panel");
+
+// Raw HTML in a body must never reach the panel: bodies arrive through merges
+// and accepted agent proposals.
+await store.update(decision.id, { body: 'Careful: <img src=x onerror="alert(1)">' }, actor);
+await registered.get("chronicle.refresh")();
+await registered.get("chronicle.showItem")(decision.id);
+assert.doesNotMatch(detail.webview.html, /<img/, "raw HTML in a body was not escaped");
 
 await registered.get("chronicle.doctor")();
 await registered.get("chronicle.verifyAll")();
