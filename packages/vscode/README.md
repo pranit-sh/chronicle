@@ -23,23 +23,57 @@ budget and why. This is the transparency view: no hidden prompt.
 ## Getting started
 
 1. Run **Chronicle: Set up the knowledge layer** from the command palette.
-2. Say something worth remembering with **Chronicle: Remember this**. Chronicle
+2. Connect your coding agent:
+  - For Copilot, run **Chronicle: Configure MCP for Copilot**.
+  - For Cursor, run **Chronicle: Configure MCP for Cursor**.
+  - For Claude Code, run **Chronicle: Configure MCP for Claude Code**.
+  - For another MCP client, run **Chronicle: Copy MCP config** or **Chronicle: Open Agent Setup Guide**.
+3. Say something worth remembering with **Chronicle: Remember this**. Chronicle
    guesses the type and scope from the sentence and shows you its guess.
-3. Commit `.chronicle/`. Knowledge now follows branches, reviews and merges the
+4. Commit `.chronicle/`. Knowledge now follows branches, reviews and merges the
    same way your code does.
 
-To let agents read it, point them at the MCP server:
+The Copilot command creates `.vscode/mcp.json` like this:
+
+```json
+{
+  "servers": {
+    "chronicle": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@chronicle/mcp"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "CHRONICLE_ROOT": "${workspaceFolder}"
+      }
+    }
+  }
+}
+```
+
+Clients that use the common MCP `mcpServers` shape can use:
 
 ```json
 {
   "mcpServers": {
     "chronicle": {
       "command": "npx",
-      "args": ["-y", "@chronicle/mcp"]
+      "args": ["-y", "@chronicle/mcp"],
+      "env": {
+        "CHRONICLE_ROOT": "/absolute/path/to/your/repo"
+      }
     }
   }
 }
 ```
+
+The Cursor command creates `.cursor/mcp.json` in the workspace. The Claude Code
+command creates `.mcp.json` at the project root, which Claude Code treats as a
+project-scoped MCP server after workspace approval.
+
+Agents then get project knowledge through MCP tools such as `context_resolve`,
+`knowledge_search`, `knowledge_get` and `knowledge_propose`. The extension is
+the human review UI; the MCP server is the agent integration.
 
 ## Commands
 
@@ -47,6 +81,11 @@ To let agents read it, point them at the MCP server:
 | --- | --- |
 | Chronicle: Remember this | Capture a fact, rule or decision |
 | Chronicle: Remember the selected text | Same, seeded from your selection |
+| Chronicle: Configure MCP for Copilot | Create or update `.vscode/mcp.json` so Copilot can start the Chronicle MCP server |
+| Chronicle: Configure MCP for Cursor | Create or update `.cursor/mcp.json` so Cursor can start the Chronicle MCP server |
+| Chronicle: Configure MCP for Claude Code | Create or update `.mcp.json` so Claude Code can start the Chronicle MCP server |
+| Chronicle: Copy MCP config | Copy a generic `mcpServers` config for other MCP clients |
+| Chronicle: Open Agent Setup Guide | Show MCP setup snippets for supported agents |
 | Chronicle: What does the agent know here? | Open the resolved context package |
 | Chronicle: Verify everything | Re-check stored knowledge against the code |
 | Chronicle: Check the knowledge layer for problems | Merge conflicts, broken files, dangling references |

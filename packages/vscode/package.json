@@ -94,14 +94,26 @@
           "name": "Context",
           "icon": "media/chronicle.svg",
           "when": "chronicle.initialized"
+        },
+        {
+          "id": "chronicle.agentSetup",
+          "name": "Agent Setup",
+          "icon": "media/chronicle.svg",
+          "when": "chronicle.initialized",
+          "visibility": "collapsed"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "chronicle.gettingStarted",
-        "contents": "Give your coding agents reliable project knowledge.\n\nChronicle keeps what agents should know reviewable, project-owned, and scoped to the code it applies to. Agents can propose new knowledge, but nothing enters the knowledge base until you accept it.\n\n[Initialize Chronicle](command:chronicle.init)",
+        "contents": "Give your coding agents reliable project knowledge.\n\nChronicle has two parts: this extension for humans, and an MCP server for agents such as Copilot, Cursor and Claude. Initialize the repo first, then connect your agent.\n\n[Initialize Chronicle](command:chronicle.init)\n\n[Agent setup guide](command:chronicle.openMcpSetupGuide)",
         "when": "!chronicle.initialized"
+      },
+      {
+        "view": "chronicle.agentSetup",
+        "contents": "Connect your coding agents to Chronicle.\n\nThe extension is the human review UI. Agents read project knowledge through the Chronicle MCP server.\n\n[Copilot](command:chronicle.configureMcp)\n\n[Cursor](command:chronicle.configureCursorMcp)\n\n[Claude Code](command:chronicle.configureClaudeCodeMcp)\n\n[Copy MCP config](command:chronicle.copyMcpConfig)\n\n[Setup guide](command:chronicle.openMcpSetupGuide)",
+        "when": "chronicle.initialized"
       },
       {
         "view": "chronicle.knowledge",
@@ -128,6 +140,31 @@
         "command": "chronicle.init",
         "title": "Chronicle: Set up the knowledge layer",
         "icon": "$(add)"
+      },
+      {
+        "command": "chronicle.configureMcp",
+        "title": "Chronicle: Configure MCP for Copilot",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "chronicle.configureCursorMcp",
+        "title": "Chronicle: Configure MCP for Cursor",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "chronicle.configureClaudeCodeMcp",
+        "title": "Chronicle: Configure MCP for Claude Code",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "chronicle.copyMcpConfig",
+        "title": "Chronicle: Copy MCP config",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "chronicle.openMcpSetupGuide",
+        "title": "Chronicle: Open Agent Setup Guide",
+        "icon": "$(book)"
       },
       {
         "command": "chronicle.remember",
@@ -207,11 +244,6 @@
           "command": "chronicle.remember",
           "when": "view == chronicle.knowledge",
           "group": "navigation@1"
-        },
-        {
-          "command": "chronicle.filterByStatus",
-          "when": "view == chronicle.knowledge",
-          "group": "navigation@2"
         },
         {
           "command": "chronicle.verifyAll",

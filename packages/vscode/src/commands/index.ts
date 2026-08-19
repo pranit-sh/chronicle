@@ -43,6 +43,11 @@ export function registerCommands({
 }: CommandContext): vscode.Disposable[] {
   return [
     guard("chronicle.init", () => init(session)),
+    guard("chronicle.configureMcp", () => configureVsCodeMcp(session)),
+    guard("chronicle.configureCursorMcp", () => configureCursorMcp(session)),
+    guard("chronicle.configureClaudeCodeMcp", () => configureClaudeCodeMcp(session)),
+    guard("chronicle.copyMcpConfig", () => copyMcpConfig(session)),
+    guard("chronicle.openMcpSetupGuide", () => openMcpSetupGuide(session)),
     guard("chronicle.remember", () => remember(session)),
     guard("chronicle.rememberSelection", () => rememberSelection(session)),
     guard("chronicle.refresh", () => session.reload()),
@@ -86,9 +91,278 @@ async function init(session: ChronicleSession): Promise<void> {
   await ChronicleStore.init(folder.uri.fsPath, await session.actor());
   await session.reload();
 
-  void vscode.window.showInformationMessage(
+  const configure = "Configure Copilot";
+  const guide = "Agent setup guide";
+  const choice = await vscode.window.showInformationMessage(
     `Chronicle is set up. Knowledge lives in ${CHRONICLE_DIR}/ and is meant to be committed.`,
+    configure,
+    guide,
   );
+  if (choice === configure) await configureVsCodeMcp(session);
+  if (choice === guide) await openMcpSetupGuide(session);
+}
+
+async function configureVsCodeMcp(session: ChronicleSession): Promise<void> {
+  const folder = await initializedFolder(session);
+  const vscodeDir = vscode.Uri.joinPath(folder.uri, ".vscode");
+  const mcpUri = vscode.Uri.joinPath(vscodeDir, "mcp.json");
+
+  await vscode.workspace.fs.createDirectory(vscodeDir);
+
+  const config = await readJsonObject(mcpUri, ".vscode/mcp.json");
+  const servers = objectValue(config.servers);
+  const existing = servers.chronicle;
+
+  if (existing !== undefined) {
+    const replace = await vscode.window.showWarningMessage(
+      "This workspace already has a Chronicle MCP server in .vscode/mcp.json.",
+      "Replace it",
+      "Open file",
+      "Cancel",
+    );
+    if (replace === "Open file") {
+      await openDocument(mcpUri);
+      return;
+    }
+    if (replace !== "Replace it") return;
+  }
+
+  config.servers = {
+    ...servers,
+    chronicle: {
+      type: "stdio",
+      command: "npx",
+      args: ["-y", "@chronicle/mcp"],
+      cwd: "${workspaceFolder}",
+      env: {
+        CHRONICLE_ROOT: "${workspaceFolder}",
+      },
+    },
+  };
+
+  await vscode.workspace.fs.writeFile(mcpUri, Buffer.from(`${JSON.stringify(config, null, 2)}\n`, "utf8"));
+  await openDocument(mcpUri);
+
+  const guide = "Other agents";
+  const choice = await vscode.window.showInformationMessage(
+    "Chronicle MCP is configured for Copilot in this workspace. Reload MCP servers if Copilot does not pick it up immediately.",
+    guide,
+  );
+  if (choice === guide) await openMcpSetupGuide(session);
+}
+
+async function configureCursorMcp(session: ChronicleSession): Promise<void> {
+  const folder = await initializedFolder(session);
+  const cursorDir = vscode.Uri.joinPath(folder.uri, ".cursor");
+  const mcpUri = vscode.Uri.joinPath(cursorDir, "mcp.json");
+
+  await vscode.workspace.fs.createDirectory(cursorDir);
+
+  const config = await readJsonObject(mcpUri, ".cursor/mcp.json");
+  const mcpServers = objectValue(config.mcpServers);
+  const existing = mcpServers.chronicle;
+
+  if (existing !== undefined) {
+    const replace = await vscode.window.showWarningMessage(
+      "This workspace already has a Chronicle MCP server in .cursor/mcp.json.",
+      "Replace it",
+      "Open file",
+      "Cancel",
+    );
+    if (replace === "Open file") {
+      await openDocument(mcpUri);
+      return;
+    }
+    if (replace !== "Replace it") return;
+  }
+
+  config.mcpServers = {
+    ...mcpServers,
+    chronicle: chronicleMcpServer(folder.uri.fsPath),
+  };
+
+  await vscode.workspace.fs.writeFile(mcpUri, Buffer.from(`${JSON.stringify(config, null, 2)}\n`, "utf8"));
+  await openDocument(mcpUri);
+  void vscode.window.showInformationMessage(
+    "Chronicle MCP is configured for Cursor in this workspace. Restart Cursor or refresh MCP servers if it does not appear immediately.",
+  );
+}
+
+async function configureClaudeCodeMcp(session: ChronicleSession): Promise<void> {
+  const folder = await initializedFolder(session);
+  const configUri = vscode.Uri.joinPath(folder.uri, ".mcp.json");
+
+  const config = await readJsonObject(configUri, ".mcp.json");
+  const mcpServers = objectValue(config.mcpServers);
+  const existing = mcpServers.chronicle;
+
+  if (existing !== undefined) {
+    const replace = await vscode.window.showWarningMessage(
+      "This workspace already has a Chronicle MCP server in .mcp.json.",
+      "Replace it",
+      "Open file",
+      "Cancel",
+    );
+    if (replace === "Open file") {
+      await openDocument(configUri);
+      return;
+    }
+    if (replace !== "Replace it") return;
+  }
+
+  config.mcpServers = {
+    ...mcpServers,
+    chronicle: chronicleMcpServer(folder.uri.fsPath),
+  };
+
+  await vscode.workspace.fs.writeFile(configUri, Buffer.from(`${JSON.stringify(config, null, 2)}\n`, "utf8"));
+  await openDocument(configUri);
+  void vscode.window.showInformationMessage(
+    "Chronicle MCP is configured for Claude Code in this workspace. Start Claude Code here and approve the project MCP server when prompted.",
+  );
+}
+
+async function copyMcpConfig(session: ChronicleSession): Promise<void> {
+  const folder = await initializedFolder(session);
+  await vscode.env.clipboard.writeText(JSON.stringify({ mcpServers: { chronicle: chronicleMcpServer(folder.uri.fsPath) } }, null, 2));
+  void vscode.window.showInformationMessage("Chronicle MCP config copied. Paste it into any MCP client that supports mcpServers.");
+}
+
+async function openMcpSetupGuide(session: ChronicleSession): Promise<void> {
+  const folder = vscode.workspace.workspaceFolders?.[0] ?? session.folder;
+  const root = folder?.uri.fsPath ?? "<absolute path to your repository>";
+  const workspaceSnippet = JSON.stringify(
+    {
+      servers: {
+        chronicle: {
+          type: "stdio",
+          command: "npx",
+          args: ["-y", "@chronicle/mcp"],
+          cwd: "${workspaceFolder}",
+          env: { CHRONICLE_ROOT: "${workspaceFolder}" },
+        },
+      },
+    },
+    null,
+    2,
+  );
+  const mcpServersSnippet = JSON.stringify(
+    {
+      mcpServers: {
+        chronicle: chronicleMcpServer(root),
+      },
+    },
+    null,
+    2,
+  );
+
+  const document = await vscode.workspace.openTextDocument({
+    language: "markdown",
+    content: [
+      "# Connect your coding agent to Chronicle",
+      "",
+      "Installing the VS Code extension gives you the Chronicle UI. Agents read and propose project knowledge through the Chronicle MCP server.",
+      "",
+      "## 1. Initialize the repository",
+      "",
+      `Run **Chronicle: Set up the knowledge layer** so this repo has ${CHRONICLE_DIR}/config.yaml. Commit ${CHRONICLE_DIR}/ so knowledge follows branches and reviews like code.`,
+      "",
+      "## 2. Connect Copilot",
+      "",
+      "Run **Chronicle: Configure MCP for Copilot**. It creates or updates `.vscode/mcp.json` with:",
+      "",
+      "```json",
+      workspaceSnippet,
+      "```",
+      "",
+      "Then make sure MCP is enabled in Copilot Chat and reload/restart MCP servers if needed.",
+      "",
+      "## 3. Connect Cursor",
+      "",
+      "Run **Chronicle: Configure MCP for Cursor**. It creates or updates `.cursor/mcp.json` for this workspace.",
+      "",
+      "## 4. Connect Claude Code",
+      "",
+      "Run **Chronicle: Configure MCP for Claude Code**. It creates or updates `.mcp.json` at the project root. Start Claude Code in this repo and approve the project MCP server when prompted.",
+      "",
+      "## 5. Connect another MCP client",
+      "",
+      "For clients that use the common `mcpServers` JSON shape, add this to the client or project MCP config:",
+      "",
+      "```json",
+      mcpServersSnippet,
+      "```",
+      "",
+      "Use a project-level config when the client supports it, so teammates get the same agent setup. Use a user-level config when the client only supports global MCP servers.",
+      "",
+      "## What agents get",
+      "",
+      "Chronicle exposes these MCP capabilities:",
+      "",
+      "- `context_resolve`: returns the relevant rules, decisions, conventions and known issues for a file/task.",
+      "- `knowledge_search` and `knowledge_get`: let the agent check what has already been decided.",
+      "- `knowledge_propose`: lets the agent stage new knowledge for your review; it does not directly change accepted knowledge.",
+      "",
+      "Tell agents: **Before editing code, call Chronicle `context_resolve` for the file and task.**",
+      "",
+    ].join("\n"),
+  });
+  await vscode.window.showTextDocument(document, { preview: true });
+}
+
+async function initializedFolder(session: ChronicleSession): Promise<vscode.WorkspaceFolder> {
+  const folder = vscode.workspace.workspaceFolders?.[0];
+  if (!folder) throw new Error("Open a folder first.");
+
+  if (!session.initialized) {
+    const initialize = await vscode.window.showInformationMessage(
+      "Set up Chronicle in this workspace before connecting agents to it.",
+      "Initialize Chronicle",
+      "Cancel",
+    );
+    if (initialize !== "Initialize Chronicle") throw new Error("Chronicle setup cancelled.");
+    await ChronicleStore.init(folder.uri.fsPath, await session.actor());
+    await session.reload();
+  }
+
+  return folder;
+}
+
+function chronicleMcpServer(root: string): Record<string, unknown> {
+  return {
+    command: "npx",
+    args: ["-y", "@chronicle/mcp"],
+    env: { CHRONICLE_ROOT: root },
+  };
+}
+
+async function readJsonObject(uri: vscode.Uri, label: string): Promise<Record<string, unknown>> {
+  try {
+    const bytes = await vscode.workspace.fs.readFile(uri);
+    const text = Buffer.from(bytes).toString("utf8").trim();
+    if (!text) return {};
+    const parsed = JSON.parse(text) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error(`${label} must contain a JSON object.`);
+    }
+    return parsed as Record<string, unknown>;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "FileNotFound") return {};
+    if (error instanceof SyntaxError) {
+      await openDocument(uri);
+      throw new Error(`${label} is not valid JSON. Fix it or use the setup guide snippet manually.`);
+    }
+    throw error;
+  }
+}
+
+function objectValue(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+async function openDocument(uri: vscode.Uri): Promise<void> {
+  const document = await vscode.workspace.openTextDocument(uri);
+  await vscode.window.showTextDocument(document, { preview: false });
 }
 
 async function rememberSelection(session: ChronicleSession): Promise<void> {
