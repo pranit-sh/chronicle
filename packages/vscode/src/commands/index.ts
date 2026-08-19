@@ -17,6 +17,7 @@ import type { ContextTree } from "../trees/context.js";
 import type { KnowledgeFilter, KnowledgeTree } from "../trees/knowledge.js";
 import { DetailPanel } from "../webview/detail.js";
 import { ReviewPanel } from "../webview/review.js";
+import { AgentSetupPanel } from "../webview/setup.js";
 import { remember } from "./remember.js";
 
 export interface CommandContext {
@@ -46,7 +47,6 @@ export function registerCommands({
     guard("chronicle.configureMcp", () => configureVsCodeMcp(session)),
     guard("chronicle.configureCursorMcp", () => configureCursorMcp(session)),
     guard("chronicle.configureClaudeCodeMcp", () => configureClaudeCodeMcp(session)),
-    guard("chronicle.copyMcpConfig", () => copyMcpConfig(session)),
     guard("chronicle.openMcpSetupGuide", () => openMcpSetupGuide(session)),
     guard("chronicle.remember", () => remember(session)),
     guard("chronicle.rememberSelection", () => rememberSelection(session)),
@@ -222,92 +222,8 @@ async function configureClaudeCodeMcp(session: ChronicleSession): Promise<void> 
   );
 }
 
-async function copyMcpConfig(session: ChronicleSession): Promise<void> {
-  const folder = await initializedFolder(session);
-  await vscode.env.clipboard.writeText(JSON.stringify({ mcpServers: { chronicle: chronicleMcpServer(folder.uri.fsPath) } }, null, 2));
-  void vscode.window.showInformationMessage("Chronicle MCP config copied. Paste it into any MCP client that supports mcpServers.");
-}
-
 async function openMcpSetupGuide(session: ChronicleSession): Promise<void> {
-  const folder = vscode.workspace.workspaceFolders?.[0] ?? session.folder;
-  const root = folder?.uri.fsPath ?? "<absolute path to your repository>";
-  const workspaceSnippet = JSON.stringify(
-    {
-      servers: {
-        chronicle: {
-          type: "stdio",
-          command: "npx",
-          args: ["-y", "@chronicle/mcp"],
-          cwd: "${workspaceFolder}",
-          env: { CHRONICLE_ROOT: "${workspaceFolder}" },
-        },
-      },
-    },
-    null,
-    2,
-  );
-  const mcpServersSnippet = JSON.stringify(
-    {
-      mcpServers: {
-        chronicle: chronicleMcpServer(root),
-      },
-    },
-    null,
-    2,
-  );
-
-  const document = await vscode.workspace.openTextDocument({
-    language: "markdown",
-    content: [
-      "# Connect your coding agent to Chronicle",
-      "",
-      "Installing the VS Code extension gives you the Chronicle UI. Agents read and propose project knowledge through the Chronicle MCP server.",
-      "",
-      "## 1. Initialize the repository",
-      "",
-      `Run **Chronicle: Set up the knowledge layer** so this repo has ${CHRONICLE_DIR}/config.yaml. Commit ${CHRONICLE_DIR}/ so knowledge follows branches and reviews like code.`,
-      "",
-      "## 2. Connect Copilot",
-      "",
-      "Run **Chronicle: Configure MCP for Copilot**. It creates or updates `.vscode/mcp.json` with:",
-      "",
-      "```json",
-      workspaceSnippet,
-      "```",
-      "",
-      "Then make sure MCP is enabled in Copilot Chat and reload/restart MCP servers if needed.",
-      "",
-      "## 3. Connect Cursor",
-      "",
-      "Run **Chronicle: Configure MCP for Cursor**. It creates or updates `.cursor/mcp.json` for this workspace.",
-      "",
-      "## 4. Connect Claude Code",
-      "",
-      "Run **Chronicle: Configure MCP for Claude Code**. It creates or updates `.mcp.json` at the project root. Start Claude Code in this repo and approve the project MCP server when prompted.",
-      "",
-      "## 5. Connect another MCP client",
-      "",
-      "For clients that use the common `mcpServers` JSON shape, add this to the client or project MCP config:",
-      "",
-      "```json",
-      mcpServersSnippet,
-      "```",
-      "",
-      "Use a project-level config when the client supports it, so teammates get the same agent setup. Use a user-level config when the client only supports global MCP servers.",
-      "",
-      "## What agents get",
-      "",
-      "Chronicle exposes these MCP capabilities:",
-      "",
-      "- `context_resolve`: returns the relevant rules, decisions, conventions and known issues for a file/task.",
-      "- `knowledge_search` and `knowledge_get`: let the agent check what has already been decided.",
-      "- `knowledge_propose`: lets the agent stage new knowledge for your review; it does not directly change accepted knowledge.",
-      "",
-      "Tell agents: **Before editing code, call Chronicle `context_resolve` for the file and task.**",
-      "",
-    ].join("\n"),
-  });
-  await vscode.window.showTextDocument(document, { preview: true });
+  AgentSetupPanel.show(session);
 }
 
 async function initializedFolder(session: ChronicleSession): Promise<vscode.WorkspaceFolder> {

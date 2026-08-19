@@ -504,7 +504,70 @@ function components(): string {
   }
   .btn--primary:hover { background: var(--vscode-button-hoverBackground); }
   .btn--quiet { background: transparent; border-color: var(--chr-hairline); color: var(--chr-muted); }
-  .btn--quiet:hover { background: var(--chr-surface); color: var(--chr-fg); }`;
+  .btn--quiet:hover { background: var(--chr-surface); color: var(--chr-fg); }
+
+  .setup-shell { --chr-measure: 64rem; }
+  .setup-hero {
+    padding-top: var(--chr-7);
+    border-bottom: 1px solid var(--chr-hairline);
+  }
+  .setup-title { max-width: 42rem; font-size: 24px; }
+  .setup-lede {
+    max-width: 44rem;
+    margin: var(--chr-3) 0 0;
+    color: var(--chr-muted);
+    font-size: 13.5px;
+  }
+  .setup-steps {
+    margin: var(--chr-5) 0 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--chr-3);
+  }
+  .setup-step {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: var(--chr-3);
+    padding: var(--chr-4);
+    border: 1px solid var(--chr-hairline);
+    border-radius: var(--chr-r-md);
+    background: var(--chr-surface);
+  }
+  .setup-step-number {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--chr-r-pill);
+    background: var(--chr-raised);
+    color: var(--chr-muted);
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .setup-step-main { min-width: 0; }
+  .setup-step-title { margin: 3px 0 var(--chr-2); font-size: 13px; font-weight: 600; }
+  .setup-step-text { margin: 0 0 var(--chr-3); color: var(--chr-muted); font-size: 12.5px; }
+  .setup-inline-actions { margin-top: var(--chr-3); }
+  .setup-code {
+    margin: var(--chr-3) 0 0;
+    padding: var(--chr-3);
+    border: 1px solid var(--chr-hairline);
+    border-radius: var(--chr-r-md);
+    background: var(--vscode-textCodeBlock-background, var(--chr-surface));
+    color: var(--chr-fg);
+    overflow: auto;
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+  .setup-code code { padding: 0; background: transparent; }
+  .setup-list { margin: 0; padding-left: 1.25rem; color: var(--chr-muted); }
+  .setup-list li { margin: 0 0 var(--chr-2); }
+  @media (max-width: 720px) {
+    .setup-steps { grid-template-columns: 1fr; }
+    .setup-title { font-size: 20px; }
+  }`;
 }
 
 /** Rendered Markdown bodies. Written by hand, so they get real editorial type. */

@@ -27,7 +27,7 @@ budget and why. This is the transparency view: no hidden prompt.
   - For Copilot, run **Chronicle: Configure MCP for Copilot**.
   - For Cursor, run **Chronicle: Configure MCP for Cursor**.
   - For Claude Code, run **Chronicle: Configure MCP for Claude Code**.
-  - For another MCP client, run **Chronicle: Copy MCP config** or **Chronicle: Open Agent Setup Guide**.
+  - For another MCP client, open **Chronicle: Open Agent Setup Guide** and copy the generic snippet.
 3. Say something worth remembering with **Chronicle: Remember this**. Chronicle
    guesses the type and scope from the sentence and shows you its guess.
 4. Commit `.chronicle/`. Knowledge now follows branches, reviews and merges the
@@ -84,7 +84,6 @@ the human review UI; the MCP server is the agent integration.
 | Chronicle: Configure MCP for Copilot | Create or update `.vscode/mcp.json` so Copilot can start the Chronicle MCP server |
 | Chronicle: Configure MCP for Cursor | Create or update `.cursor/mcp.json` so Cursor can start the Chronicle MCP server |
 | Chronicle: Configure MCP for Claude Code | Create or update `.mcp.json` so Claude Code can start the Chronicle MCP server |
-| Chronicle: Copy MCP config | Copy a generic `mcpServers` config for other MCP clients |
 | Chronicle: Open Agent Setup Guide | Show MCP setup snippets for supported agents |
 | Chronicle: What does the agent know here? | Open the resolved context package |
 | Chronicle: Verify everything | Re-check stored knowledge against the code |
