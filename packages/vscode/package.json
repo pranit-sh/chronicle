@@ -7,13 +7,39 @@
   "description": "See, review and control the knowledge your AI coding agents work from",
   "publisher": "chronicle",
   "license": "MIT",
+  "author": "pranit-sh",
+  "homepage": "https://github.com/pranit-sh/chronicle#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pranit-sh/chronicle.git",
+    "directory": "packages/vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/pranit-sh/chronicle/issues"
+  },
   "engines": {
     "vscode": "^1.95.0"
   },
   "categories": [
-    "Other",
-    "AI"
+    "AI",
+    "Machine Learning",
+    "Snippets",
+    "Other"
   ],
+  "keywords": [
+    "ai",
+    "agents",
+    "knowledge",
+    "context",
+    "mcp",
+    "copilot",
+    "memory",
+    "documentation"
+  ],
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "main": "./dist/extension.cjs",
   "activationEvents": [
     "workspaceContains:.chronicle/config.yaml"
@@ -46,45 +72,54 @@
     "views": {
       "chronicle": [
         {
+          "id": "chronicle.gettingStarted",
+          "name": "Getting Started",
+          "icon": "media/chronicle.svg",
+          "when": "!chronicle.initialized"
+        },
+        {
           "id": "chronicle.knowledge",
           "name": "Knowledge",
-          "icon": "media/chronicle.svg"
+          "icon": "media/chronicle.svg",
+          "when": "chronicle.initialized"
         },
         {
           "id": "chronicle.proposals",
           "name": "Proposals",
-          "icon": "media/chronicle.svg"
+          "icon": "media/chronicle.svg",
+          "when": "chronicle.initialized"
         },
         {
           "id": "chronicle.context",
           "name": "Context",
-          "icon": "media/chronicle.svg"
+          "icon": "media/chronicle.svg",
+          "when": "chronicle.initialized"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "chronicle.knowledge",
-        "contents": "No knowledge layer in this workspace yet.\n\nChronicle keeps what your agents should know as reviewed, project-owned knowledge.\n\n[Initialize](command:chronicle.init)",
+        "view": "chronicle.gettingStarted",
+        "contents": "Give your coding agents reliable project knowledge.\n\nChronicle keeps what agents should know reviewable, project-owned, and scoped to the code it applies to. Agents can propose new knowledge, but nothing enters the knowledge base until you accept it.\n\n[Initialize Chronicle](command:chronicle.init)",
         "when": "!chronicle.initialized"
       },
       {
         "view": "chronicle.knowledge",
-        "contents": "No knowledge yet.\n\nRemember something useful for future agents.",
+        "contents": "No knowledge yet.\n\nKnowledge is the reviewed, project-owned information your agents can use. Remember something to add the first item.",
         "when": "chronicle.initialized && !chronicle.hasKnowledge"
       },
       {
         "view": "chronicle.proposals",
-        "contents": "Nothing waiting for review.\n\nWhen an agent learns something it stages a proposal here. Nothing an agent proposes reaches your knowledge base until you accept it."
+        "contents": "Nothing waiting for review.\n\nProposals are knowledge suggested by agents for your review. Nothing enters the knowledge base until you accept it."
       },
       {
         "view": "chronicle.context",
-        "contents": "No context yet.\n\nAdd knowledge to see what agents would be told here.",
+        "contents": "No context yet.\n\nContext shows which reviewed knowledge applies to the file you have open. Add knowledge to see what agents would be told here.",
         "when": "chronicle.initialized && !chronicle.hasKnowledge"
       },
       {
         "view": "chronicle.context",
-        "contents": "No context applies here.\n\nOpen a file or add knowledge scoped to this part of the project.",
+        "contents": "No context applies here.\n\nChronicle checked the open file, but no scoped knowledge matched this part of the project.",
         "when": "chronicle.initialized && chronicle.hasKnowledge"
       }
     ],

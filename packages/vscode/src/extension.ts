@@ -11,9 +11,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const knowledgeTree = new KnowledgeTree(session);
   const proposalTree = new ProposalTree(session);
   const contextTree = new ContextTree(session);
+  const gettingStartedTree: vscode.TreeDataProvider<vscode.TreeItem> = {
+    getTreeItem: (item) => item,
+    getChildren: () => [],
+  };
 
   context.subscriptions.push(
     session,
+    vscode.window.createTreeView("chronicle.gettingStarted", {
+      treeDataProvider: gettingStartedTree,
+    }),
     vscode.window.createTreeView("chronicle.knowledge", {
       treeDataProvider: knowledgeTree,
       showCollapseAll: true,
