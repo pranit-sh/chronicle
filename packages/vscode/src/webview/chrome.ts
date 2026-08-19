@@ -60,6 +60,17 @@ ${body}
 </html>`;
 }
 
+export function panelIcon(
+  extensionUri: vscode.Uri | undefined,
+  name: string,
+): { light: vscode.Uri; dark: vscode.Uri } | undefined {
+  if (!extensionUri) return undefined;
+  return {
+    light: vscode.Uri.joinPath(extensionUri, "media", `${name}-light.svg`),
+    dark: vscode.Uri.joinPath(extensionUri, "media", `${name}-dark.svg`),
+  };
+}
+
 // --- Components -----------------------------------------------------------
 
 /**
@@ -505,6 +516,15 @@ function components(): string {
   .btn--primary:hover { background: var(--vscode-button-hoverBackground); }
   .btn--quiet { background: transparent; border-color: var(--chr-hairline); color: var(--chr-muted); }
   .btn--quiet:hover { background: var(--chr-surface); color: var(--chr-fg); }
+
+  .review-actions {
+    margin-top: var(--chr-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--chr-2);
+  }
+  .review-actions-note { flex-basis: 100%; color: var(--chr-muted); font-size: 11.5px; }
 
   .setup-shell { --chr-measure: 64rem; }
   .setup-hero {

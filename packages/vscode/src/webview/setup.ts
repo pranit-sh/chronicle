@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 
 import { escapeHtml } from "../present.js";
 import type { ChronicleSession } from "../session.js";
-import { glyph, pageHtml } from "./chrome.js";
+import { glyph, pageHtml, panelIcon } from "./chrome.js";
 
 export class AgentSetupPanel {
   static #current: AgentSetupPanel | undefined;
@@ -11,13 +11,17 @@ export class AgentSetupPanel {
   readonly #panel: vscode.WebviewPanel;
   readonly #disposables: vscode.Disposable[] = [];
 
-  private constructor(private readonly session: ChronicleSession) {
+  private constructor(
+    private readonly session: ChronicleSession,
+    extensionUri?: vscode.Uri,
+  ) {
     this.#panel = vscode.window.createWebviewPanel(
       "chronicle.agentSetupGuide",
       "Agent Setup",
       { viewColumn: vscode.ViewColumn.Active },
       { enableScripts: true, retainContextWhenHidden: true },
     );
+    this.#panel.iconPath = panelIcon(extensionUri, "setup");
 
     this.#panel.onDidDispose(() => {
       AgentSetupPanel.#current = undefined;
@@ -30,8 +34,8 @@ export class AgentSetupPanel {
     );
   }
 
-  static show(session: ChronicleSession): void {
-    AgentSetupPanel.#current ??= new AgentSetupPanel(session);
+  static show(session: ChronicleSession, extensionUri?: vscode.Uri): void {
+    AgentSetupPanel.#current ??= new AgentSetupPanel(session, extensionUri);
     AgentSetupPanel.#current.#render();
     AgentSetupPanel.#current.#panel.reveal(vscode.ViewColumn.Active);
   }
@@ -57,21 +61,18 @@ export class AgentSetupPanel {
   }
 
   #render(): void {
-    const folder = vscode.workspace.workspaceFolders?.[0] ?? this.session.folder;
-    const root = folder?.uri.fsPath ?? "<absolute path to your repository>";
-    this.#panel.webview.html = pageHtml(this.#panel.webview, "Agent Setup", setupBody(root));
+    this.#panel.webview.html = pageHtml(this.#panel.webview, "Agent Setup", setupBody());
   }
 }
 
-function setupBody(root: string): string {
-  const copilotSnippet = JSON.stringify(
+function setupBody(): string {
+  const mcpSnippet = JSON.stringify(
     {
       servers: {
         chronicle: {
           type: "stdio",
           command: "npx",
           args: ["-y", "@chronicle/mcp"],
-          cwd: "${workspaceFolder}",
           env: { CHRONICLE_ROOT: "${workspaceFolder}" },
         },
       },
@@ -79,20 +80,6 @@ function setupBody(root: string): string {
     null,
     2,
   );
-  const genericSnippet = JSON.stringify(
-    {
-      mcpServers: {
-        chronicle: {
-          command: "npx",
-          args: ["-y", "@chronicle/mcp"],
-          env: { CHRONICLE_ROOT: root },
-        },
-      },
-    },
-    null,
-    2,
-  );
-
   return `<div class="shell setup-shell">
 <header class="masthead setup-hero">
   <p class="eyebrow"><span class="eyebrow-mark">${glyph("info")}</span><span class="eyebrow-kind">Chronicle Agent Setup</span></p>
@@ -110,14 +97,9 @@ function setupBody(root: string): string {
   </section>
 
   <section class="section">
-    <div class="section-head"><h2 class="section-title">Other MCP clients</h2></div>
-    <p class="empty">Use this shape for clients that support mcpServers.</p>
-    <pre class="setup-code"><code>${escapeHtml(genericSnippet)}</code></pre>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><h2 class="section-title">Copilot workspace file</h2></div>
-    <pre class="setup-code"><code>${escapeHtml(copilotSnippet)}</code></pre>
+    <div class="section-head"><h2 class="section-title">MCP workspace file</h2></div>
+    <p class="empty">Use this shape for workspace MCP configs.</p>
+    <pre class="setup-code"><code>${escapeHtml(mcpSnippet)}</code></pre>
   </section>
 
   <section class="section">

@@ -11,6 +11,7 @@ import {
   empty,
   glyph,
   pageHtml,
+  panelIcon,
   section,
   spec,
   type SpecField,
@@ -30,13 +31,17 @@ export class DetailPanel {
   #itemId: string | undefined;
   readonly #disposables: vscode.Disposable[] = [];
 
-  private constructor(private readonly session: ChronicleSession) {
+  private constructor(
+    private readonly session: ChronicleSession,
+    extensionUri?: vscode.Uri,
+  ) {
     this.#panel = vscode.window.createWebviewPanel(
       "chronicle.detail",
       "Chronicle",
       { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       { enableScripts: true, retainContextWhenHidden: true },
     );
+    this.#panel.iconPath = panelIcon(extensionUri, "knowledge");
 
     this.#panel.onDidDispose(() => {
       DetailPanel.#current = undefined;
@@ -51,8 +56,8 @@ export class DetailPanel {
     );
   }
 
-  static show(session: ChronicleSession, itemId: string): void {
-    DetailPanel.#current ??= new DetailPanel(session);
+  static show(session: ChronicleSession, itemId: string, extensionUri?: vscode.Uri): void {
+    DetailPanel.#current ??= new DetailPanel(session, extensionUri);
     DetailPanel.#current.#itemId = itemId;
     DetailPanel.#current.#render();
     DetailPanel.#current.#panel.reveal(vscode.ViewColumn.Beside, true);

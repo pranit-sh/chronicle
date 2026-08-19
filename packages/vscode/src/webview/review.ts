@@ -8,6 +8,7 @@ import {
   disclosure,
   glyph,
   pageHtml,
+  panelIcon,
   section,
   spec,
   type SpecField,
@@ -27,13 +28,17 @@ export class ReviewPanel {
   #proposalId: string | undefined;
   readonly #disposables: vscode.Disposable[] = [];
 
-  private constructor(private readonly session: ChronicleSession) {
+  private constructor(
+    private readonly session: ChronicleSession,
+    extensionUri?: vscode.Uri,
+  ) {
     this.#panel = vscode.window.createWebviewPanel(
       "chronicle.review",
       "Review proposal",
       { viewColumn: vscode.ViewColumn.Active },
       { enableScripts: true, retainContextWhenHidden: true },
     );
+    this.#panel.iconPath = panelIcon(extensionUri, "review");
 
     this.#panel.onDidDispose(() => {
       ReviewPanel.#current = undefined;
@@ -46,8 +51,8 @@ export class ReviewPanel {
     );
   }
 
-  static show(session: ChronicleSession, proposalId: string): void {
-    ReviewPanel.#current ??= new ReviewPanel(session);
+  static show(session: ChronicleSession, proposalId: string, extensionUri?: vscode.Uri): void {
+    ReviewPanel.#current ??= new ReviewPanel(session, extensionUri);
     ReviewPanel.#current.#proposalId = proposalId;
     ReviewPanel.#current.#render();
     ReviewPanel.#current.#panel.reveal();
@@ -150,6 +155,11 @@ function reviewBody(proposal: Proposal, lines: readonly DiffLine[], targetTitle?
 <span class="eyebrow-id" title="${escapeHtml(proposal.id)}">${escapeHtml(proposal.id)}</span>
 </div>
 <h1 class="title">${escapeHtml(proposalTitle(proposal, targetTitle))}</h1>
+<div class="review-actions">
+<button class="btn btn--primary" data-command="accept">Accept</button>
+<button class="btn" data-command="reject">Reject</button>
+<span class="review-actions-note">Nothing has been written to your knowledge base yet.</span>
+</div>
 </header>
 
 <main class="content">
@@ -157,11 +167,5 @@ ${section("Reason", `<p class="reason">${escapeHtml(proposal.reason)}</p>`)}
 ${section("Changes", diff(lines, proposal))}
 ${disclosure("Details", spec(fields))}
 </main>
-
-<footer class="actionbar">
-<button class="btn btn--primary" data-command="accept">Accept</button>
-<button class="btn" data-command="reject">Reject</button>
-<span class="actionbar-note">Nothing has been written to your knowledge base yet.</span>
-</footer>
 </div>`;
 }

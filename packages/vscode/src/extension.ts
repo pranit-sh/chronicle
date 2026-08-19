@@ -30,12 +30,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }),
     vscode.window.createTreeView("chronicle.proposals", { treeDataProvider: proposalTree }),
     vscode.window.createTreeView("chronicle.context", { treeDataProvider: contextTree }),
-    ...registerCommands({ session, knowledgeTree, contextTree }),
+    ...registerCommands({ session, knowledgeTree, contextTree, extensionUri: context.extensionUri }),
     createStatusBar(session, contextTree),
   );
 
   await session.reload();
-  await announcePending(session);
 }
 
 export function deactivate(): void {
@@ -97,21 +96,4 @@ function createStatusBar(session: ChronicleSession, contextTree: ContextTree): v
   update();
 
   return vscode.Disposable.from(...disposables);
-}
-
-/** Proposals are only useful if someone knows they are there. */
-async function announcePending(session: ChronicleSession): Promise<void> {
-  const pending = session.proposals.length;
-  if (pending === 0) return;
-
-  const review = "Review";
-  const choice = await vscode.window.showInformationMessage(
-    pending === 1
-      ? "An agent proposed something for your knowledge base."
-      : `${pending} agent proposals are waiting for review.`,
-    review,
-  );
-  if (choice === review) {
-    await vscode.commands.executeCommand("chronicle.proposals.focus");
-  }
 }

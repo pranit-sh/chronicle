@@ -25,6 +25,7 @@ export interface CommandContext {
   session: ChronicleSession;
   knowledgeTree: KnowledgeTree;
   contextTree: ContextTree;
+  extensionUri?: vscode.Uri;
 }
 
 /** Wraps a command so a thrown error becomes a message rather than a silent no-op. */
@@ -42,29 +43,30 @@ export function registerCommands({
   session,
   knowledgeTree,
   contextTree,
+  extensionUri,
 }: CommandContext): vscode.Disposable[] {
   return [
-    guard("chronicle.init", () => init(session)),
+    guard("chronicle.init", () => init(session, extensionUri)),
     guard("chronicle.configureMcp", () => configureVsCodeMcp(session)),
     guard("chronicle.configureCursorMcp", () => configureCursorMcp(session)),
     guard("chronicle.configureClaudeCodeMcp", () => configureClaudeCodeMcp(session)),
     guard("chronicle.addAgentInstructions", () => addAgentInstructions(session)),
-    guard("chronicle.openMcpSetupGuide", () => openMcpSetupGuide(session)),
+    guard("chronicle.openMcpSetupGuide", () => openMcpSetupGuide(session, extensionUri)),
     guard("chronicle.remember", () => remember(session)),
     guard("chronicle.rememberSelection", () => rememberSelection(session)),
     guard("chronicle.refresh", () => session.reload()),
 
     guard("chronicle.showItem", async (id: string) => {
-      DetailPanel.show(session, id);
+      DetailPanel.show(session, id, extensionUri);
     }),
-    guard("chronicle.openFile", (id: string) => openFile(session, id)),
+    guard("chronicle.openFile", (arg: unknown) => openFile(session, refOf(arg))),
     guard("chronicle.archiveItem", (arg: unknown) => archive(session, refOf(arg))),
     guard("chronicle.restoreItem", (arg: unknown) => restore(session, refOf(arg))),
     guard("chronicle.verifyItem", (arg: unknown) => verifyItems(session, refOf(arg))),
     guard("chronicle.verifyAll", () => verifyItems(session)),
 
     guard("chronicle.reviewProposal", async (arg: unknown) => {
-      ReviewPanel.show(session, refOf(arg));
+      ReviewPanel.show(session, refOf(arg), extensionUri);
     }),
     guard("chronicle.acceptProposal", (arg: unknown) => accept(session, refOf(arg))),
     guard("chronicle.rejectProposal", (arg: unknown) => reject(session, refOf(arg))),
@@ -84,7 +86,7 @@ function refOf(arg: unknown): string {
   return id;
 }
 
-async function init(session: ChronicleSession): Promise<void> {
+async function init(session: ChronicleSession, extensionUri?: vscode.Uri): Promise<void> {
   const folder = vscode.workspace.workspaceFolders?.[0];
   if (!folder) {
     throw new Error(`Open a folder first, so Chronicle knows where to put ${CHRONICLE_DIR}/.`);
@@ -98,7 +100,7 @@ async function init(session: ChronicleSession): Promise<void> {
     `Chronicle is set up. Knowledge lives in ${CHRONICLE_DIR}/ and is meant to be committed.`,
     guide,
   );
-  if (choice === guide) await openMcpSetupGuide(session);
+  if (choice === guide) await openMcpSetupGuide(session, extensionUri);
 }
 
 async function configureVsCodeMcp(session: ChronicleSession): Promise<void> {
@@ -132,7 +134,6 @@ async function configureVsCodeMcp(session: ChronicleSession): Promise<void> {
       type: "stdio",
       command: "npx",
       args: ["-y", "@chronicle/mcp"],
-      cwd: "${workspaceFolder}",
       env: {
         CHRONICLE_ROOT: "${workspaceFolder}",
       },
@@ -218,8 +219,8 @@ async function configureClaudeCodeMcp(session: ChronicleSession): Promise<void> 
   );
 }
 
-async function openMcpSetupGuide(session: ChronicleSession): Promise<void> {
-  AgentSetupPanel.show(session);
+async function openMcpSetupGuide(session: ChronicleSession, extensionUri?: vscode.Uri): Promise<void> {
+  AgentSetupPanel.show(session, extensionUri);
 }
 
 const instructionBlock = `<!-- chronicle-agent-instructions:start -->
