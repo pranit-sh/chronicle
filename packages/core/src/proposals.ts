@@ -346,7 +346,7 @@ export function proposalDiff(proposal: Proposal, target?: KnowledgeItem): DiffLi
     ];
     for (const [label, value] of fields) {
       if (value === undefined || (Array.isArray(value) && value.length === 0)) continue;
-      lines.push({ marker: " ", text: `    ${label}: ${formatValue(value)}` });
+      lines.push({ marker: "+", text: `    ${label}: ${formatValue(value)}` });
     }
     if (payload.body) {
       for (const line of String(payload.body).split("\n")) {

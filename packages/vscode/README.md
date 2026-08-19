@@ -28,9 +28,11 @@ budget and why. This is the transparency view: no hidden prompt.
   - For Cursor, run **Chronicle: Configure MCP for Cursor**.
   - For Claude Code, run **Chronicle: Configure MCP for Claude Code**.
   - For another MCP client, open **Chronicle: Open Agent Setup Guide** and copy the generic snippet.
-3. Say something worth remembering with **Chronicle: Remember this**. Chronicle
+3. Optional: run **Chronicle: Add agent instructions** to add Chronicle guidance
+   to `CLAUDE.md`, `.github/copilot-instructions.md` or a Cursor project rule.
+4. Say something worth remembering with **Chronicle: Remember this**. Chronicle
    guesses the type and scope from the sentence and shows you its guess.
-4. Commit `.chronicle/`. Knowledge now follows branches, reviews and merges the
+5. Commit `.chronicle/`. Knowledge now follows branches, reviews and merges the
    same way your code does.
 
 The Copilot command creates `.vscode/mcp.json` like this:
@@ -75,6 +77,12 @@ Agents then get project knowledge through MCP tools such as `context_resolve`,
 `knowledge_search`, `knowledge_get` and `knowledge_propose`. The extension is
 the human review UI; the MCP server is the agent integration.
 
+The instructions command preserves existing project guidance and adds an
+idempotent Chronicle block telling agents to use `context_resolve`,
+`knowledge_search`, `knowledge_get` and `knowledge_propose` when they need
+project knowledge. It can write `CLAUDE.md`, `.github/copilot-instructions.md`
+or `.cursor/rules/chronicle.mdc`.
+
 ## Commands
 
 | Command | What it does |
@@ -84,6 +92,7 @@ the human review UI; the MCP server is the agent integration.
 | Chronicle: Configure MCP for Copilot | Create or update `.vscode/mcp.json` so Copilot can start the Chronicle MCP server |
 | Chronicle: Configure MCP for Cursor | Create or update `.cursor/mcp.json` so Cursor can start the Chronicle MCP server |
 | Chronicle: Configure MCP for Claude Code | Create or update `.mcp.json` so Claude Code can start the Chronicle MCP server |
+| Chronicle: Add agent instructions | Add Chronicle guidance to Claude, Copilot or Cursor instruction files |
 | Chronicle: Open Agent Setup Guide | Show MCP setup snippets for supported agents |
 | Chronicle: What does the agent know here? | Open the resolved context package |
 | Chronicle: Verify everything | Re-check stored knowledge against the code |

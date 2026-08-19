@@ -111,7 +111,7 @@
       },
       {
         "view": "chronicle.agentSetup",
-        "contents": "Connect your coding agents to Chronicle.\n\nThe extension is the human review UI. Agents read project knowledge through the Chronicle MCP server.\n\n[Copilot](command:chronicle.configureMcp)\n\n[Cursor](command:chronicle.configureCursorMcp)\n\n[Claude Code](command:chronicle.configureClaudeCodeMcp)\n\n[Setup guide](command:chronicle.openMcpSetupGuide)",
+        "contents": "Connect your coding agents to Chronicle.\n\nThe extension is the human review UI. Agents read project knowledge through the Chronicle MCP server.\n\n[Open setup guide](command:chronicle.openMcpSetupGuide)",
         "when": "chronicle.initialized"
       },
       {
@@ -154,6 +154,11 @@
         "command": "chronicle.configureClaudeCodeMcp",
         "title": "Chronicle: Configure MCP for Claude Code",
         "icon": "$(plug)"
+      },
+      {
+        "command": "chronicle.addAgentInstructions",
+        "title": "Chronicle: Add agent instructions",
+        "icon": "$(notebook)"
       },
       {
         "command": "chronicle.openMcpSetupGuide",

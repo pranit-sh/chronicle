@@ -9,6 +9,7 @@ import {
   suggestedActions,
   verify,
 } from "@chronicle/core";
+import * as path from "node:path";
 import * as vscode from "vscode";
 
 import { statusLabel } from "../present.js";
@@ -47,6 +48,7 @@ export function registerCommands({
     guard("chronicle.configureMcp", () => configureVsCodeMcp(session)),
     guard("chronicle.configureCursorMcp", () => configureCursorMcp(session)),
     guard("chronicle.configureClaudeCodeMcp", () => configureClaudeCodeMcp(session)),
+    guard("chronicle.addAgentInstructions", () => addAgentInstructions(session)),
     guard("chronicle.openMcpSetupGuide", () => openMcpSetupGuide(session)),
     guard("chronicle.remember", () => remember(session)),
     guard("chronicle.rememberSelection", () => rememberSelection(session)),
@@ -91,14 +93,11 @@ async function init(session: ChronicleSession): Promise<void> {
   await ChronicleStore.init(folder.uri.fsPath, await session.actor());
   await session.reload();
 
-  const configure = "Configure Copilot";
   const guide = "Agent setup guide";
   const choice = await vscode.window.showInformationMessage(
     `Chronicle is set up. Knowledge lives in ${CHRONICLE_DIR}/ and is meant to be committed.`,
-    configure,
     guide,
   );
-  if (choice === configure) await configureVsCodeMcp(session);
   if (choice === guide) await openMcpSetupGuide(session);
 }
 
@@ -143,12 +142,9 @@ async function configureVsCodeMcp(session: ChronicleSession): Promise<void> {
   await vscode.workspace.fs.writeFile(mcpUri, Buffer.from(`${JSON.stringify(config, null, 2)}\n`, "utf8"));
   await openDocument(mcpUri);
 
-  const guide = "Other agents";
-  const choice = await vscode.window.showInformationMessage(
+  void vscode.window.showInformationMessage(
     "Chronicle MCP is configured for Copilot in this workspace. Reload MCP servers if Copilot does not pick it up immediately.",
-    guide,
   );
-  if (choice === guide) await openMcpSetupGuide(session);
 }
 
 async function configureCursorMcp(session: ChronicleSession): Promise<void> {
@@ -224,6 +220,115 @@ async function configureClaudeCodeMcp(session: ChronicleSession): Promise<void> 
 
 async function openMcpSetupGuide(session: ChronicleSession): Promise<void> {
   AgentSetupPanel.show(session);
+}
+
+const instructionBlock = `<!-- chronicle-agent-instructions:start -->
+## Chronicle project knowledge
+
+This repository uses Chronicle for reviewed project knowledge. Before making code changes, use the Chronicle MCP tools to resolve the relevant context for the files or task you are working on. Prefer Chronicle knowledge over stale notes, old chat history or guesses.
+
+If you learn a project rule, decision, convention, known issue or other durable fact that would be useful in future work, propose it back to Chronicle instead of leaving it only in chat.
+
+Use Chronicle MCP tools as follows:
+- \`context_resolve\` to get the applicable rules, decisions, conventions and known issues for the current task or file.
+- \`knowledge_search\` and \`knowledge_get\` to check existing project knowledge before assuming something is undecided.
+- \`knowledge_propose\` to suggest durable new knowledge, rules or decisions when they are worth adding. Proposed knowledge must still be reviewed by a human.
+<!-- chronicle-agent-instructions:end -->
+`;
+
+interface InstructionTarget {
+  label: string;
+  detail: string;
+  uri: (folder: vscode.WorkspaceFolder) => vscode.Uri;
+  prefix?: string;
+}
+
+interface InstructionPick {
+  label: string;
+  detail: string;
+  targets: InstructionTarget[];
+}
+
+const instructionTargets: InstructionTarget[] = [
+  {
+    label: "Claude Code",
+    detail: "CLAUDE.md",
+    uri: (folder) => vscode.Uri.joinPath(folder.uri, "CLAUDE.md"),
+  },
+  {
+    label: "Copilot",
+    detail: ".github/copilot-instructions.md",
+    uri: (folder) => vscode.Uri.joinPath(folder.uri, ".github", "copilot-instructions.md"),
+  },
+  {
+    label: "Cursor",
+    detail: ".cursor/rules/chronicle.mdc",
+    uri: (folder) => vscode.Uri.joinPath(folder.uri, ".cursor", "rules", "chronicle.mdc"),
+    prefix: "---\nalwaysApply: true\n---\n\n",
+  },
+];
+
+async function addAgentInstructions(session: ChronicleSession): Promise<void> {
+  const folder = await initializedFolder(session);
+  const picks: InstructionPick[] = [
+    { label: "All supported agents", detail: "CLAUDE.md, copilot-instructions.md and Cursor project rule", targets: instructionTargets },
+    ...instructionTargets.map((target) => ({ label: target.label, detail: target.detail, targets: [target] })),
+  ];
+  const picked = await vscode.window.showQuickPick(picks, {
+    title: "Add Chronicle instructions for which agent?",
+    placeHolder: "Choose where Chronicle should add agent guidance",
+    matchOnDetail: true,
+  });
+  if (!picked) return;
+
+  const updated: string[] = [];
+  const skipped: string[] = [];
+  for (const target of picked.targets) {
+    const result = await writeInstructionTarget(folder, target);
+    if (result === "updated") updated.push(target.detail);
+    else skipped.push(target.detail);
+  }
+
+  const message = updated.length
+    ? `Added Chronicle agent instructions to ${updated.join(", ")}.`
+    : "Those agent instructions already include Chronicle guidance.";
+  const open = updated.length === 1 ? "Open file" : undefined;
+  const choice = await vscode.window.showInformationMessage(
+    skipped.length ? `${message} Already present in ${skipped.join(", ")}.` : message,
+    ...(open ? [open] : []),
+  );
+  if (choice === open && updated[0]) {
+    const target = picked.targets.find((candidate) => candidate.detail === updated[0]);
+    if (target) await openDocument(target.uri(folder));
+  }
+}
+
+async function writeInstructionTarget(
+  folder: vscode.WorkspaceFolder,
+  target: InstructionTarget,
+): Promise<"updated" | "skipped"> {
+  const uri = target.uri(folder);
+  const existing = await readTextFile(uri);
+  if (existing.includes("chronicle-agent-instructions:start")) return "skipped";
+
+  const prefix = existing.length === 0 ? target.prefix ?? "" : "";
+  const spacer = existing.length > 0 && !existing.endsWith("\n") ? "\n\n" : existing.length > 0 ? "\n" : "";
+  await createParentDirectory(uri);
+  await vscode.workspace.fs.writeFile(uri, Buffer.from(`${prefix}${existing}${spacer}${instructionBlock}`, "utf8"));
+  return "updated";
+}
+
+async function readTextFile(uri: vscode.Uri): Promise<string> {
+  try {
+    return Buffer.from(await vscode.workspace.fs.readFile(uri)).toString("utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "FileNotFound") return "";
+    throw error;
+  }
+}
+
+async function createParentDirectory(uri: vscode.Uri): Promise<void> {
+  await vscode.workspace.fs.createDirectory(vscode.Uri.file(path.dirname(uri.fsPath)));
 }
 
 async function initializedFolder(session: ChronicleSession): Promise<vscode.WorkspaceFolder> {

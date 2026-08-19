@@ -38,6 +38,9 @@ export class AgentSetupPanel {
 
   async #handle(message: { command: string }): Promise<void> {
     switch (message.command) {
+      case "initialize":
+        await vscode.commands.executeCommand("chronicle.init");
+        break;
       case "configureCopilot":
         await vscode.commands.executeCommand("chronicle.configureMcp");
         break;
@@ -46,6 +49,9 @@ export class AgentSetupPanel {
         break;
       case "configureClaudeCode":
         await vscode.commands.executeCommand("chronicle.configureClaudeCodeMcp");
+        break;
+      case "addAgentInstructions":
+        await vscode.commands.executeCommand("chronicle.addAgentInstructions");
         break;
     }
   }
@@ -96,10 +102,11 @@ function setupBody(root: string): string {
 
 <main class="content">
   <section class="setup-steps" aria-label="Agent setup actions">
-    ${setupStep("1", "Initialize the repository", `Run Chronicle setup so this repo has ${CHRONICLE_DIR}/config.yaml. Commit ${CHRONICLE_DIR}/ so knowledge follows branches and reviews like code.`, "", "")}
+    ${setupStep("1", "Initialize the repository", `Run Chronicle setup so this repo has ${CHRONICLE_DIR}/config.yaml. Commit ${CHRONICLE_DIR}/ so knowledge follows branches and reviews like code.`, "initialize", "Initialize Chronicle")}
     ${setupStep("2", "Copilot", "Creates or updates .vscode/mcp.json so Copilot can start the Chronicle MCP server.", "configureCopilot", "Configure Copilot")}
     ${setupStep("3", "Cursor", "Creates or updates .cursor/mcp.json for this workspace.", "configureCursor", "Configure Cursor")}
     ${setupStep("4", "Claude Code", "Creates or updates .mcp.json at the project root. Start Claude Code here and approve the project MCP server when prompted.", "configureClaudeCode", "Configure Claude Code")}
+    ${setupStep("5", "Agent instructions", "Optionally add Chronicle guidance to CLAUDE.md, .github/copilot-instructions.md or a Cursor project rule so agents know when to use the MCP tools.", "addAgentInstructions", "Add instructions")}
   </section>
 
   <section class="section">
@@ -111,6 +118,11 @@ function setupBody(root: string): string {
   <section class="section">
     <div class="section-head"><h2 class="section-title">Copilot workspace file</h2></div>
     <pre class="setup-code"><code>${escapeHtml(copilotSnippet)}</code></pre>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2 class="section-title">Agent instruction files</h2></div>
+    <p class="empty">The instructions option preserves existing content and adds a Chronicle block to <code>CLAUDE.md</code>, <code>.github/copilot-instructions.md</code> or <code>.cursor/rules/chronicle.mdc</code>.</p>
   </section>
 
   <section class="section">
