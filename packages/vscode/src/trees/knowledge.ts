@@ -100,15 +100,18 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
 
       const items = this.#visible();
       if (items.length === 0) {
+        const isFiltered = Boolean(this.#search || this.#filter !== "all");
+        if (!isFiltered && !this.session.store?.stats().archived) return [];
+
         return [
-          { kind: "summary" },
+          ...(isFiltered ? [{ kind: "summary" as const }] : []),
           {
             kind: "message",
-            label: this.#search || this.#filter !== "all" ? "Nothing matches" : "Nothing remembered yet",
+            label: isFiltered ? "Nothing matches" : "No visible knowledge",
             detail:
-              this.#search || this.#filter !== "all"
+              isFiltered
                 ? "Clear the filter to see everything"
-                : "Use Chronicle: Remember this",
+                : "Archived items are hidden by default",
             icon: "info",
           },
         ];

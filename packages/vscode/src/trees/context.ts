@@ -21,8 +21,7 @@ type Node =
   | { kind: "header"; pkg: ContextPackage }
   | { kind: "entry"; entry: ResolvedEntry; rank: number }
   | { kind: "droppedGroup"; dropped: DroppedEntry[] }
-  | { kind: "dropped"; dropped: DroppedEntry }
-  | { kind: "message"; label: string; detail?: string };
+  | { kind: "dropped"; dropped: DroppedEntry };
 
 export class ContextTree implements vscode.TreeDataProvider<Node> {
   readonly onDidChangeTreeData: vscode.Event<void>;
@@ -117,12 +116,6 @@ export class ContextTree implements vscode.TreeDataProvider<Node> {
         };
         return row;
       }
-      case "message": {
-        const row = new vscode.TreeItem(node.label);
-        row.iconPath = new vscode.ThemeIcon("info");
-        row.description = node.detail;
-        return row;
-      }
     }
   }
 
@@ -137,13 +130,7 @@ export class ContextTree implements vscode.TreeDataProvider<Node> {
     if (!pkg) return [];
 
     if (pkg.entries.length === 0 && pkg.trace.dropped.length === 0) {
-      return [
-        {
-          kind: "message",
-          label: "Nothing applies to this file",
-          detail: "no knowledge in scope",
-        },
-      ];
+      return [];
     }
 
     const nodes: Node[] = [{ kind: "header", pkg }];

@@ -162,7 +162,14 @@ export class ChronicleSession implements vscode.Disposable {
 
   #publish(): void {
     void vscode.commands.executeCommand("setContext", "chronicle.initialized", this.initialized);
+    void vscode.commands.executeCommand("setContext", "chronicle.hasKnowledge", this.#hasKnowledge());
     this.#emitter.fire();
+  }
+
+  #hasKnowledge(): boolean {
+    const stats = this.#store?.stats();
+    if (!stats) return false;
+    return stats.active + stats.confirmed + stats.proposed + stats.stale + stats.archived > 0;
   }
 
   dispose(): void {

@@ -57,7 +57,7 @@
         },
         {
           "id": "chronicle.context",
-          "name": "Active context",
+          "name": "Context",
           "icon": "media/chronicle.svg"
         }
       ]
@@ -65,11 +65,27 @@
     "viewsWelcome": [
       {
         "view": "chronicle.knowledge",
-        "contents": "No knowledge layer in this workspace yet.\n\nChronicle keeps what your agents should know as Markdown in `.chronicle/`, committed alongside your code.\n\n[Set up Chronicle](command:chronicle.init)"
+        "contents": "No knowledge layer in this workspace yet.\n\nChronicle keeps what your agents should know as reviewed, project-owned knowledge.\n\n[Initialize](command:chronicle.init)",
+        "when": "!chronicle.initialized"
+      },
+      {
+        "view": "chronicle.knowledge",
+        "contents": "No knowledge yet.\n\nRemember something useful for future agents.",
+        "when": "chronicle.initialized && !chronicle.hasKnowledge"
       },
       {
         "view": "chronicle.proposals",
         "contents": "Nothing waiting for review.\n\nWhen an agent learns something it stages a proposal here. Nothing an agent proposes reaches your knowledge base until you accept it."
+      },
+      {
+        "view": "chronicle.context",
+        "contents": "No context yet.\n\nAdd knowledge to see what agents would be told here.",
+        "when": "chronicle.initialized && !chronicle.hasKnowledge"
+      },
+      {
+        "view": "chronicle.context",
+        "contents": "No context applies here.\n\nOpen a file or add knowledge scoped to this part of the project.",
+        "when": "chronicle.initialized && chronicle.hasKnowledge"
       }
     ],
     "commands": [

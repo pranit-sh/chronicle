@@ -86,12 +86,9 @@ async function init(session: ChronicleSession): Promise<void> {
   await ChronicleStore.init(folder.uri.fsPath, await session.actor());
   await session.reload();
 
-  const remember = "Remember something";
-  const choice = await vscode.window.showInformationMessage(
+  void vscode.window.showInformationMessage(
     `Chronicle is set up. Knowledge lives in ${CHRONICLE_DIR}/ and is meant to be committed.`,
-    remember,
   );
-  if (choice === remember) await vscode.commands.executeCommand("chronicle.remember");
 }
 
 async function rememberSelection(session: ChronicleSession): Promise<void> {
