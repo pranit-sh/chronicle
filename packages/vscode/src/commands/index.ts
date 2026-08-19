@@ -367,15 +367,6 @@ async function accept(session: ChronicleSession, reference: string): Promise<voi
   const result = await acceptProposal(store, reference, await session.actor());
   ReviewPanel.dismiss(result.proposal.id);
   await session.reload();
-
-  if (result.item) {
-    const open = "Open it";
-    const choice = await vscode.window.showInformationMessage(
-      `Accepted: ${result.item.title}`,
-      open,
-    );
-    if (choice === open) await vscode.commands.executeCommand("chronicle.showItem", result.item.id);
-  }
 }
 
 async function reject(session: ChronicleSession, reference: string): Promise<void> {
