@@ -138,7 +138,7 @@ function alert(item: KnowledgeItem): string {
     return callout(
       "bad",
       "Needs attention",
-      "Evidence no longer matches the code. Update or archive this item.",
+      "Verification checks no longer match the code. Update or archive this item.",
     );
   }
   if (expired(item)) {
@@ -210,11 +210,11 @@ ${notes ? `<span class="record-note">${escapeHtml(notes)}</span>` : ""}
 function evidenceSection(item: KnowledgeItem): string {
   if (!item.evidence.length) {
     return section(
-      "Evidence",
-      empty("No automated evidence configured."),
+      "Verification",
+      empty("No checks configured."),
     );
   }
-  return section("Evidence", `<ul class="records">${item.evidence.map(evidenceRow).join("")}</ul>`, {
+  return section("Verification", `<ul class="records">${item.evidence.map(evidenceRow).join("")}</ul>`, {
     count: item.evidence.length,
   });
 }

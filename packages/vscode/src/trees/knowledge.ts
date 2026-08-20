@@ -5,14 +5,10 @@ import { itemIcon, itemTooltip, relativeTime, statusLabel, typeLabel } from "../
 import type { ChronicleSession } from "../session.js";
 
 /**
- * The knowledge tree.
- *
- * The top row is deliberately a summary rather than a folder: the first thing
- * a developer should see is how much of what the agent believes is still true.
+ * The knowledge tree groups reviewed project knowledge by type, status or scope.
  */
 
 type Node =
-  | { kind: "summary" }
   | { kind: "message"; label: string; detail?: string; icon: string }
   | { kind: "group"; label: string; key: string; items: KnowledgeItem[] }
   | { kind: "item"; item: KnowledgeItem };
@@ -61,8 +57,6 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
 
   getTreeItem(node: Node): vscode.TreeItem {
     switch (node.kind) {
-      case "summary":
-        return this.#summaryRow();
       case "message": {
         const row = new vscode.TreeItem(node.label);
         row.iconPath = new vscode.ThemeIcon(node.icon);
@@ -104,7 +98,6 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
         if (!isFiltered && !this.session.store?.stats().archived) return [];
 
         return [
-          ...(isFiltered ? [{ kind: "summary" as const }] : []),
           {
             kind: "message",
             label: isFiltered ? "Nothing matches" : "No visible knowledge",
@@ -116,7 +109,7 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
           },
         ];
       }
-      return [{ kind: "summary" }, ...this.#groups(items)];
+      return this.#groups(items);
     }
 
     return node.kind === "group" ? node.items.map((item) => ({ kind: "item", item })) : [];
@@ -185,48 +178,6 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
       label: typeLabel(type),
       items: items.filter((item) => item.type === type),
     })).filter((group) => group.items.length > 0);
-  }
-
-  /**
-   * The summary row answers the question the developer actually has: can I
-   * trust what my agent is being told right now?
-   */
-  #summaryRow(): vscode.TreeItem {
-    const store = this.session.store;
-    const stats = store?.stats() ?? { proposed: 0, confirmed: 0, active: 0, stale: 0, archived: 0 };
-    const live = stats.active + stats.confirmed + stats.proposed;
-    const pending = this.session.proposals.length;
-
-    const parts = [`${live} in play`];
-    if (stats.stale) parts.push(`${stats.stale} need attention`);
-    if (pending) parts.push(`${pending} to review`);
-
-    const row = new vscode.TreeItem(parts.join(" · "));
-    row.iconPath = new vscode.ThemeIcon(
-      stats.stale || pending ? "circle-large-outline" : "pass-filled",
-      new vscode.ThemeColor(
-        stats.stale ? "problemsWarningIcon.foreground" : "testing.iconPassed",
-      ),
-    );
-    row.description = this.#filterDescription();
-    row.contextValue = "summary";
-    row.command = {
-      command: "chronicle.filterByStatus",
-      title: "Filter knowledge",
-    };
-    row.tooltip = new vscode.MarkdownString(
-      [
-        `**${live}** items are being served to agents.`,
-        stats.stale ? `**${stats.stale}** no longer match the code.` : "",
-        pending ? `**${pending}** proposals are waiting for you.` : "",
-        stats.archived ? `${stats.archived} archived.` : "",
-        "",
-        "Click to filter.",
-      ]
-        .filter(Boolean)
-        .join("  \n"),
-    );
-    return row;
   }
 
   #filterDescription(): string {

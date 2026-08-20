@@ -97,7 +97,7 @@
         },
         {
           "id": "chronicle.agentSetup",
-          "name": "Agent Setup",
+          "name": "Guide",
           "icon": "media/chronicle.svg",
           "when": "chronicle.initialized"
         }
@@ -106,12 +106,12 @@
     "viewsWelcome": [
       {
         "view": "chronicle.gettingStarted",
-        "contents": "Give your coding agents reliable project knowledge.\n\nChronicle has two parts: this extension for humans, and an MCP server for agents such as Copilot, Cursor and Claude. Initialize the repo first, then connect your agent.\n\n[Initialize Chronicle](command:chronicle.init)\n\n[Agent setup guide](command:chronicle.openMcpSetupGuide)",
+        "contents": "Give your coding agents reliable project knowledge.\n\nUse Chronicle to review, organize and serve project knowledge to agents such as Copilot, Cursor and Claude. Initialize the repo, then connect your agent.\n\n[Initialize Chronicle](command:chronicle.init)\n\n[Open guide](command:chronicle.openMcpSetupGuide)",
         "when": "!chronicle.initialized"
       },
       {
         "view": "chronicle.agentSetup",
-        "contents": "Connect your coding agents to Chronicle.\n\nThe extension is the human review UI. Agents read project knowledge through the Chronicle MCP server.\n\n[Open setup guide](command:chronicle.openMcpSetupGuide)",
+        "contents": "Learn the Chronicle workflow, command palette actions, verification check syntax and agent setup.\n\n[Open guide](command:chronicle.openMcpSetupGuide)",
         "when": "chronicle.initialized"
       },
       {
@@ -162,7 +162,7 @@
       },
       {
         "command": "chronicle.openMcpSetupGuide",
-        "title": "Chronicle: Open Agent Setup Guide",
+        "title": "Chronicle: Open Guide",
         "icon": "$(book)"
       },
       {
@@ -251,7 +251,7 @@
         },
         {
           "command": "chronicle.refresh",
-          "when": "view == chronicle.knowledge || view == chronicle.proposals || view == chronicle.context",
+          "when": "view == chronicle.knowledge",
           "group": "navigation@4"
         }
       ],

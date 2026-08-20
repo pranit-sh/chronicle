@@ -45,10 +45,8 @@ export async function remember(session: ChronicleSession, seed?: string): Promis
     (await vscode.window.showInputBox({
       title: "Remember this",
       prompt: "Say it the way you would say it to a teammate",
-      placeHolder: "Never call the database directly from an API handler",
+      placeHolder: "Add a rule, decision, convention, context, issue, or domain note",
       ignoreFocusOut: true,
-      validateInput: (value) =>
-        value.trim().length < 8 ? "Give it a few more words so it still makes sense next month" : undefined,
     }));
 
   if (!statement?.trim()) return;
@@ -78,14 +76,11 @@ export async function remember(session: ChronicleSession, seed?: string): Promis
   await session.reload();
 
   const open = "Open it";
-  const evidence = "Attach evidence";
   const choice = await vscode.window.showInformationMessage(
     `Remembered as a ${item.type}: ${item.title}`,
     open,
-    evidence,
   );
   if (choice === open) await vscode.commands.executeCommand("chronicle.showItem", item.id);
-  if (choice === evidence) await vscode.commands.executeCommand("chronicle.openFile", item.id);
 }
 
 async function confirmType(

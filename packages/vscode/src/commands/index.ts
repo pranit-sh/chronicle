@@ -95,7 +95,7 @@ async function init(session: ChronicleSession, extensionUri?: vscode.Uri): Promi
   await ChronicleStore.init(folder.uri.fsPath, await session.actor());
   await session.reload();
 
-  const guide = "Agent setup guide";
+  const guide = "Open guide";
   const choice = await vscode.window.showInformationMessage(
     `Chronicle is set up. Knowledge lives in ${CHRONICLE_DIR}/ and is meant to be committed.`,
     guide,
@@ -372,7 +372,7 @@ async function readJsonObject(uri: vscode.Uri, label: string): Promise<Record<st
     if ((error as NodeJS.ErrnoException).code === "FileNotFound") return {};
     if (error instanceof SyntaxError) {
       await openDocument(uri);
-      throw new Error(`${label} is not valid JSON. Fix it or use the setup guide snippet manually.`);
+      throw new Error(`${label} is not valid JSON. Fix it or use the guide snippet manually.`);
     }
     throw error;
   }
@@ -436,7 +436,7 @@ async function verifyItems(session: ChronicleSession, reference?: string): Promi
 
   if (report.results.length === 0) {
     void vscode.window.showInformationMessage(
-      "Nothing to check yet. Attach evidence to an item so Chronicle can tell when it goes out of date.",
+      "Nothing to check yet. Add verification checks to an item so Chronicle can tell when it goes out of date.",
     );
     return;
   }
