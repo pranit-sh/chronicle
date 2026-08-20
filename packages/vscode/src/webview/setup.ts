@@ -94,6 +94,7 @@ function setupBody(): string {
       <li>Connect your agent to Chronicle through MCP.</li>
       <li>The agent resolves project context before it plans or edits, without waiting for you to ask.</li>
       <li>The agent decides when conversation facts are durable project knowledge and stages proposals without waiting for a “remember this” prompt.</li>
+      <li>Some agents still need an explicit nudge. If Chronicle tools are not used, ask: <code>Use Chronicle context for this task</code> or <code>Propose this to Chronicle if it should persist</code>.</li>
       <li>Review proposals in VS Code before they become accepted project knowledge.</li>
     </ul>
   </section>
@@ -116,6 +117,7 @@ function setupBody(): string {
       <li><code>context_resolve</code> returns the relevant rules, decisions, conventions and known issues for a file or task; agents call it before planning or editing.</li>
       <li><code>knowledge_search</code> and <code>knowledge_get</code> let the agent check what has already been decided.</li>
       <li><code>knowledge_propose</code> lets the agent stage new or updated knowledge when it decides a conversation fact should persist.</li>
+      <li>Chronicle exposes the tools and writes agent instructions, but the agent client decides when a tool call happens.</li>
     </ul>
   </section>
 

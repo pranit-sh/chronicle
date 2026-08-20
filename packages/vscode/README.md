@@ -104,6 +104,10 @@ to call `context_resolve` before planning or editing, and to stage a
 is durable project knowledge. The extension is the human review UI; the MCP
 server is the agent integration.
 
+Tool use still depends on the agent client and model. If an agent ignores the
+instructions, nudge it directly with “Use Chronicle context for this task” or
+“Propose this to Chronicle if it should persist.”
+
 The instructions command preserves existing project guidance and adds an
 idempotent Chronicle block telling agents to proactively use `context_resolve`,
 `knowledge_search`, `knowledge_get` and `knowledge_propose` when project

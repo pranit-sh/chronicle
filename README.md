@@ -108,6 +108,9 @@ gated by `authority.autoLearn` in `config.yaml`. Agents are instructed to call
 `context_resolve` before planning or editing and to stage `knowledge_propose`
 when they judge that conversation information is durable project knowledge;
 they do not need to wait for an explicit “remember this” request.
+Tool use is still ultimately controlled by the agent client and model. If an
+agent skips Chronicle, prompt it explicitly: “Use Chronicle context for this
+task” or “Propose this to Chronicle if it should persist.”
 Resource: `chronicle://knowledge/{id}`. Prompt: `remember`.
 
 ## What an item looks like
