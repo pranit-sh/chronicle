@@ -11,9 +11,10 @@ the window onto it.
 **Knowledge** — everything the project knows, grouped by type, status or scope.
 Open an item to read the full Markdown record, edit it, verify it or archive it.
 
-**Proposals** — when an agent notices something worth remembering it stages a
-proposal here. Nothing an agent proposes reaches your knowledge base until you
-accept it. Every proposal opens as a diff showing exactly what would land.
+**Proposals** — when an agent notices something worth remembering it can stage a
+proposal here without waiting for an explicit “remember this” request. Nothing
+an agent proposes reaches your knowledge base until you accept it. Every
+proposal opens as a diff showing exactly what would land.
 
 **Active context** — the exact package an agent would receive for the file you
 are editing, in the order it would see it, including what was left out for the
@@ -25,16 +26,13 @@ palette actions, verification check syntax and agent setup.
 ## Getting started
 
 1. Run **Chronicle: Set up the knowledge layer** from the command palette.
-2. Connect your coding agent:
-  - For Copilot, run **Chronicle: Configure MCP for Copilot**.
-  - For Cursor, run **Chronicle: Configure MCP for Cursor**.
-  - For Claude Code, run **Chronicle: Configure MCP for Claude Code**.
-  - For another MCP client, open **Chronicle: Open Guide** and copy the generic snippet.
-3. Optional: run **Chronicle: Add agent instructions** to add Chronicle guidance
-   to `CLAUDE.md`, `.github/copilot-instructions.md` or a Cursor project rule.
-4. Say something worth remembering with **Chronicle: Remember this**. Chronicle
-   guesses the type and scope from the sentence and shows you its guess.
-5. Open **Chronicle: Open Guide** for command palette actions, check syntax and
+2. Open **Chronicle: Open Guide** and use the setup buttons for Copilot,
+  Cursor, Claude Code or the generic MCP snippet.
+3. Optional: use the guide’s agent-instructions button to add Chronicle guidance
+  to `CLAUDE.md`, `.github/copilot-instructions.md` or a Cursor project rule.
+4. Let connected agents stage proposals when conversation facts are worth
+  remembering, or use **Chronicle: Remember this** to capture one manually.
+5. Open **Chronicle: Open Guide** for available actions, check syntax and
   agent setup snippets.
 6. Commit `.chronicle/`. Knowledge now follows branches, reviews and merges the
    same way your code does.
@@ -100,29 +98,26 @@ command creates `.mcp.json` at the project root, which Claude Code treats as a
 project-scoped MCP server after workspace approval.
 
 Agents then get project knowledge through MCP tools such as `context_resolve`,
-`knowledge_search`, `knowledge_get` and `knowledge_propose`. The extension is
-the human review UI; the MCP server is the agent integration.
+`knowledge_search`, `knowledge_get` and `knowledge_propose`. They are instructed
+to call `context_resolve` before planning or editing, and to stage a
+`knowledge_propose` proposal whenever they judge that conversation information
+is durable project knowledge. The extension is the human review UI; the MCP
+server is the agent integration.
 
 The instructions command preserves existing project guidance and adds an
-idempotent Chronicle block telling agents to use `context_resolve`,
-`knowledge_search`, `knowledge_get` and `knowledge_propose` when they need
-project knowledge. It can write `CLAUDE.md`, `.github/copilot-instructions.md`
-or `.cursor/rules/chronicle.mdc`.
+idempotent Chronicle block telling agents to proactively use `context_resolve`,
+`knowledge_search`, `knowledge_get` and `knowledge_propose` when project
+knowledge may affect the task or when the conversation reveals knowledge worth
+reviewing. It can write `CLAUDE.md`, `.github/copilot-instructions.md` or
+`.cursor/rules/chronicle.mdc`.
 
 ## Commands
 
 | Command | What it does |
 | --- | --- |
 | Chronicle: Remember this | Capture a fact, rule or decision |
-| Chronicle: Remember the selected text | Same, seeded from your selection |
-| Chronicle: Configure MCP for Copilot | Create or update `.vscode/mcp.json` so Copilot can start the Chronicle MCP server |
-| Chronicle: Configure MCP for Cursor | Create or update `.cursor/mcp.json` so Cursor can start the Chronicle MCP server |
-| Chronicle: Configure MCP for Claude Code | Create or update `.mcp.json` so Claude Code can start the Chronicle MCP server |
-| Chronicle: Add agent instructions | Add Chronicle guidance to Claude, Copilot or Cursor instruction files |
-| Chronicle: Open Guide | Show the workflow, command palette actions, verification check syntax and MCP setup snippets |
+| Chronicle: Open Guide | Show the workflow, available actions, verification check syntax and MCP setup snippets |
 | Chronicle: What does the agent know here? | Open the resolved context package |
-| Chronicle: Verify everything | Re-check stored knowledge against the code |
-| Chronicle: Check the knowledge layer for problems | Merge conflicts, broken files, dangling references |
 
 ## Settings
 

@@ -6,7 +6,7 @@ import { type GlobalOptions, resolveCwd } from "../workspace.js";
 export function registerServe(program: Command): void {
   program
     .command("serve")
-    .description("Run the MCP server on stdio so coding agents can read this project's knowledge")
+    .description("Run the MCP server so coding agents resolve context and stage knowledge proposals")
     .option("--agent <name>", "identify the connecting agent in provenance records")
     .action(async function (this: Command) {
       const options = this.optsWithGlobals<GlobalOptions & { agent?: string }>();

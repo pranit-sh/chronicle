@@ -144,7 +144,7 @@ const GLYPH_PATHS: Record<GlyphName, string> = {
   context: `<path d="M1.4 8h3.1l1.7-4.2 2.5 8.4 1.8-4.2h3.1"/>`,
   issue: `<path d="M8 2.4 14.5 13.5H1.5z"/><path d="M8 6.3v3.3"/><circle cx="8" cy="11.5" r="0.75"/>`,
   proposal: `<path d="M4.6 2.3h4.9l3.3 3.3v8.1H4.6z"/><path d="M9.4 2.3v3.4h3.4"/><path d="M6.6 9.1h3.6M6.6 11.3h2.3"/>`,
-  info: `<circle cx="8" cy="8" r="6.2"/><path d="M8 7.3v3.9"/><circle cx="8" cy="5.1" r="0.75"/>`,
+  info: `<circle cx="8" cy="8" r="6.2"/><path d="M8 7.3v3.9"/><circle cx="8" cy="5.1" r="0.3"/>`,
 };
 
 export function glyph(name: GlyphName): string {

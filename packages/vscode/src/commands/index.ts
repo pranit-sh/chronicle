@@ -228,12 +228,14 @@ const instructionBlock = `<!-- chronicle-agent-instructions:start -->
 
 This repository uses Chronicle for reviewed project knowledge. Before making code changes, use the Chronicle MCP tools to resolve the relevant context for the files or task you are working on. Prefer Chronicle knowledge over stale notes, old chat history or guesses.
 
-If you learn a project rule, decision, convention, known issue or other durable fact that would be useful in future work, propose it back to Chronicle instead of leaving it only in chat.
+Resolve context proactively before planning or editing; do not wait for the developer to ask you to pull context from Chronicle.
+
+As the conversation unfolds, decide whether information from the developer is durable project knowledge: a rule, decision, convention, architectural fact, domain concept, current context note or known issue that would help future agents. When it is worth keeping, propose it back to Chronicle yourself instead of leaving it only in chat. Do not wait for the developer to say "remember", "record" or "add it". Proposals are staged for human review and are not accepted knowledge until the developer approves them.
 
 Use Chronicle MCP tools as follows:
-- \`context_resolve\` to get the applicable rules, decisions, conventions and known issues for the current task or file.
+- \`context_resolve\` to get the applicable rules, decisions, conventions and known issues for the current task or file before planning or editing.
 - \`knowledge_search\` and \`knowledge_get\` to check existing project knowledge before assuming something is undecided.
-- \`knowledge_propose\` to suggest durable new knowledge, rules or decisions when they are worth adding. Proposed knowledge must still be reviewed by a human.
+- \`knowledge_propose\` to stage durable new or updated knowledge when you judge it worth adding. Proposed knowledge must still be reviewed by a human.
 <!-- chronicle-agent-instructions:end -->
 `;
 

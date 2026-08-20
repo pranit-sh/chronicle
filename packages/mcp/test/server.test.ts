@@ -101,7 +101,14 @@ describe("tool surface", () => {
   it("tells the agent to resolve context before editing", async () => {
     const instructions = client.getInstructions() ?? "";
     expect(instructions).toContain("context_resolve");
+    expect(instructions).toContain("Do not wait");
     expect(instructions).toContain("do not reverse a recorded");
+  });
+
+  it("tells the agent to propose durable conversation knowledge proactively", async () => {
+    const instructions = client.getInstructions() ?? "";
+    expect(instructions).toContain("As the conversation unfolds");
+    expect(instructions).toContain("knowledge_propose yourself");
   });
 });
 

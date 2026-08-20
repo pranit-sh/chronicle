@@ -38,7 +38,7 @@ export function registerProposals(program: Command): void {
   program
     .command("proposals")
     .alias("ps")
-    .description("List knowledge changes staged by agents and awaiting your review")
+    .description("List knowledge changes staged by agents for your review")
     .action(async function (this: Command) {
       const options = this.optsWithGlobals<GlobalOptions>();
       const store = await openStore(options);
@@ -225,7 +225,7 @@ export function registerProposals(program: Command): void {
         });
       } else {
         if (statement.length === 0) {
-          throw new ChronicleError("invalid_input", "Say what should be proposed, or pass --update / --archive.");
+          throw new ChronicleError("invalid_input", "Say what to propose, or pass --update / --archive.");
         }
         const text = statement.join(" ");
         const classified = classifyStatement(text, Object.keys(store.config.scopes));

@@ -92,9 +92,8 @@ function setupBody(): string {
     <div class="section-head"><h2 class="section-title">Agent workflow</h2></div>
     <ul class="setup-list">
       <li>Connect your agent to Chronicle through MCP.</li>
-      <li>Ask the agent to resolve the project context before it plans or edits.</li>
-      <li>Let the agent search existing rules, decisions, conventions and known issues while it works.</li>
-      <li>Ask the agent to propose new knowledge when it learns something that should persist.</li>
+      <li>The agent resolves project context before it plans or edits, without waiting for you to ask.</li>
+      <li>The agent decides when conversation facts are durable project knowledge and stages proposals without waiting for a “remember this” prompt.</li>
       <li>Review proposals in VS Code before they become accepted project knowledge.</li>
     </ul>
   </section>
@@ -108,17 +107,22 @@ function setupBody(): string {
     ${setupStep("2", "Copilot", "Creates or updates .vscode/mcp.json so Copilot can start the Chronicle MCP server.", "configureCopilot", "Configure Copilot")}
     ${setupStep("3", "Cursor", "Creates or updates .cursor/mcp.json for this workspace.", "configureCursor", "Configure Cursor")}
     ${setupStep("4", "Claude Code", "Creates or updates .mcp.json at the project root. Start Claude Code here and approve the project MCP server when prompted.", "configureClaudeCode", "Configure Claude Code")}
-    ${setupStep("5", "Agent instructions", "Optionally add Chronicle guidance to CLAUDE.md, .github/copilot-instructions.md or a Cursor project rule so agents know when to use the MCP tools.", "addAgentInstructions", "Add instructions")}
+    ${setupStep("5", "Agent instructions", "Add Chronicle guidance to CLAUDE.md, .github/copilot-instructions.md or a Cursor project rule so agents proactively use MCP context and propose durable knowledge.", "addAgentInstructions", "Add instructions")}
   </section>
 
   <section class="section">
     <div class="section-head"><h2 class="section-title">What agents can do</h2></div>
     <ul class="setup-list">
-      <li><code>context_resolve</code> returns the relevant rules, decisions, conventions and known issues for a file or task.</li>
+      <li><code>context_resolve</code> returns the relevant rules, decisions, conventions and known issues for a file or task; agents call it before planning or editing.</li>
       <li><code>knowledge_search</code> and <code>knowledge_get</code> let the agent check what has already been decided.</li>
-      <li><code>knowledge_propose</code> stages new or updated knowledge for review.</li>
-      <li>Accepted knowledge stays human-controlled; proposals wait in VS Code until you accept or reject them.</li>
+      <li><code>knowledge_propose</code> lets the agent stage new or updated knowledge when it decides a conversation fact should persist.</li>
     </ul>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2 class="section-title">MCP workspace file</h2></div>
+    <p class="empty">Use this shape for workspace MCP configs.</p>
+    <pre class="setup-code"><code>${escapeHtml(mcpSnippet)}</code></pre>
   </section>
 
   <section class="section">
@@ -141,23 +145,12 @@ function setupBody(): string {
   </section>
 
   <section class="section">
-    <div class="section-head"><h2 class="section-title">MCP workspace file</h2></div>
-    <p class="empty">Use this shape for workspace MCP configs.</p>
-    <pre class="setup-code"><code>${escapeHtml(mcpSnippet)}</code></pre>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><h2 class="section-title">Agent instruction files</h2></div>
-    <p class="empty">The instructions option preserves existing content and adds a Chronicle block to <code>CLAUDE.md</code>, <code>.github/copilot-instructions.md</code> or <code>.cursor/rules/chronicle.mdc</code>.</p>
-  </section>
-
-  <section class="section">
     <div class="section-head"><h2 class="section-title">Manual workflow</h2></div>
     <ul class="setup-list">
       <li>Use <code>Chronicle: Remember this</code> or <code>Chronicle: Remember the selected text</code> to add rules, decisions, conventions, context, issues and domain notes yourself.</li>
       <li>Open items from the Knowledge view to read details, edit the Markdown file or archive outdated knowledge.</li>
       <li>Use <code>Chronicle: What does the agent know here?</code> to inspect the exact context package for the active file.</li>
-      <li>Run <code>Chronicle: Verify everything</code> after adding checks or before trusting older knowledge.</li>
+      <li>Use the Knowledge view’s verify button after adding checks or before trusting older knowledge.</li>
     </ul>
   </section>
 
@@ -165,11 +158,7 @@ function setupBody(): string {
     <div class="section-head"><h2 class="section-title">Command palette</h2></div>
     <ul class="setup-list">
       <li><code>Chronicle: Remember this</code> captures new knowledge from a sentence.</li>
-      <li><code>Chronicle: Remember the selected text</code> captures selected editor text.</li>
       <li><code>Chronicle: What does the agent know here?</code> opens the resolved context for the current file.</li>
-      <li><code>Chronicle: Verify everything</code> re-checks configured verification checks.</li>
-      <li><code>Chronicle: Check the knowledge layer for problems</code> finds broken files, merge conflicts and dangling references.</li>
-      <li><code>Chronicle: Configure MCP for Copilot</code>, <code>Cursor</code> or <code>Claude Code</code> connects your agent to Chronicle.</li>
     </ul>
   </section>
 </main>

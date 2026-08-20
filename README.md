@@ -104,7 +104,10 @@ Every command takes `--json`.
 Read tools: `context_resolve(file?, task?, openFiles?, branch?)`,
 `knowledge_search(query, type?, scope?)`, `knowledge_get(id)`.
 Write tool: `knowledge_propose(...)`, which stages a proposal and nothing more,
-gated by `authority.autoLearn` in `config.yaml`.
+gated by `authority.autoLearn` in `config.yaml`. Agents are instructed to call
+`context_resolve` before planning or editing and to stage `knowledge_propose`
+when they judge that conversation information is durable project knowledge;
+they do not need to wait for an explicit “remember this” request.
 Resource: `chronicle://knowledge/{id}`. Prompt: `remember`.
 
 ## What an item looks like

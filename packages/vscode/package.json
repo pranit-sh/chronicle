@@ -1,7 +1,7 @@
 {
   "name": "chronicle-vscode",
   "displayName": "Chronicle",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "description": "See, review and control the knowledge your AI coding agents work from",
@@ -111,7 +111,7 @@
       },
       {
         "view": "chronicle.agentSetup",
-        "contents": "Learn the Chronicle workflow, command palette actions, verification check syntax and agent setup.\n\n[Open guide](command:chronicle.openMcpSetupGuide)",
+        "contents": "Learn the Chronicle workflow, available actions, verification check syntax and agent setup.\n\n[Open guide](command:chronicle.openMcpSetupGuide)",
         "when": "chronicle.initialized"
       },
       {
@@ -235,6 +235,26 @@
         "command": "chronicle.filterByStatus",
         "title": "Chronicle: Filter knowledge",
         "icon": "$(filter)"
+      },
+      {
+        "command": "chronicle.gettingStarted.focus",
+        "title": "Chronicle: Focus on Getting Started View"
+      },
+      {
+        "command": "chronicle.knowledge.focus",
+        "title": "Chronicle: Focus on Knowledge View"
+      },
+      {
+        "command": "chronicle.proposals.focus",
+        "title": "Chronicle: Focus on Proposals View"
+      },
+      {
+        "command": "chronicle.context.focus",
+        "title": "Chronicle: Focus on Context View"
+      },
+      {
+        "command": "chronicle.agentSetup.focus",
+        "title": "Chronicle: Focus on Guide View"
       }
     ],
     "menus": {
@@ -300,6 +320,30 @@
       ],
       "commandPalette": [
         {
+          "command": "chronicle.configureMcp",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.configureCursorMcp",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.configureClaudeCodeMcp",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.addAgentInstructions",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.rememberSelection",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.refresh",
+          "when": "false"
+        },
+        {
           "command": "chronicle.showItem",
           "when": "false"
         },
@@ -308,7 +352,59 @@
           "when": "false"
         },
         {
+          "command": "chronicle.archiveItem",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.restoreItem",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.verifyItem",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.verifyAll",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.doctor",
+          "when": "false"
+        },
+        {
           "command": "chronicle.reviewProposal",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.acceptProposal",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.rejectProposal",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.filterByStatus",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.gettingStarted.focus",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.knowledge.focus",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.proposals.focus",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.context.focus",
+          "when": "false"
+        },
+        {
+          "command": "chronicle.agentSetup.focus",
           "when": "false"
         }
       ]

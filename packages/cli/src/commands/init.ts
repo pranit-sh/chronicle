@@ -25,7 +25,8 @@ export function registerInit(program: Command): void {
       print();
       print("Next steps:");
       print(`  1. Describe your scopes in ${color.bold(`${CHRONICLE_DIR}/config.yaml`)}`);
-      print(`  2. Capture your first rule: ${color.bold('chronicle remember "Never edit generated/**"')}`);
-      print(`  3. See what an agent would receive: ${color.bold("chronicle context --file src/index.ts")}`);
+      print(`  2. Capture durable human-authored knowledge: ${color.bold('chronicle remember "Never edit generated/**"')}`);
+      print(`  3. Connect your coding agent to MCP with: ${color.bold("chronicle serve")}`);
+      print(`  4. Preview resolved agent context with: ${color.bold("chronicle context --file src/index.ts")}`);
     });
 }
