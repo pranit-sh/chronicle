@@ -4,6 +4,7 @@ dist/
 .DS_Store
 coverage/
 *.log
+*.vsix
 
 # Chronicle derives this from the committed Markdown in .chronicle/knowledge/
 .chronicle/.cache/

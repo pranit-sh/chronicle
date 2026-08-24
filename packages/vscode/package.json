@@ -1,17 +1,19 @@
 {
   "name": "chronicle-vscode",
   "displayName": "Chronicle",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "See, review and control the knowledge your AI coding agents work from",
-  "publisher": "chronicle",
+  "publisher": "pranit-sh",
   "license": "MIT",
   "author": "pranit-sh",
+  "icon": "media/icon.png",
+  "pricing": "Free",
   "homepage": "https://github.com/pranit-sh/chronicle#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pranit-sh/chronicle.git",
+    "url": "git+https://github.com/pranit-sh/chronicle.git",
     "directory": "packages/vscode"
   },
   "bugs": {
@@ -22,8 +24,6 @@
   },
   "categories": [
     "AI",
-    "Machine Learning",
-    "Snippets",
     "Other"
   ],
   "keywords": [
@@ -44,11 +44,26 @@
   "activationEvents": [
     "workspaceContains:.chronicle/config.yaml"
   ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "Chronicle reads .chronicle/ from the workspace and runs its verification checks against your files, so it needs a trusted workspace."
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Chronicle needs direct file system access to read and write the .chronicle/ knowledge layer."
+    }
+  },
   "scripts": {
+    "vscode:prepublish": "pnpm --filter @chronicle/core build && pnpm run build",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "node test/smoke.mjs && node test/packaged.mjs",
-    "package": "vsce package --no-dependencies --allow-missing-repository"
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
   },
   "dependencies": {
     "@chronicle/core": "workspace:*",

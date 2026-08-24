@@ -145,6 +145,17 @@ pnpm test         # unit tests, then the VS Code smoke test against the bundle
 pnpm test:unit    # just the fast ones
 ```
 
+To run the VS Code extension against a real editor, press <kbd>F5</kbd> for an
+Extension Development Host, or install a build into the editor you already use:
+
+```bash
+pnpm --filter chronicle-vscode package
+code --install-extension packages/vscode/chronicle-vscode-*.vsix --force
+```
+
+`cursor` works in place of `code`, and `--force` is what lets a rebuild replace
+an installed copy carrying the same version number.
+
 Chronicle dogfoods itself: this repository has its own `.chronicle/`, and the
 rules in it are verified by `chronicle verify` against this codebase.
 

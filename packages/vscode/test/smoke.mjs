@@ -222,24 +222,30 @@ for (const name of [
 }
 
 const knowledge = events.get("chronicle.knowledge");
-const roots = knowledge.getChildren();
-assert.equal(roots[0].kind, "summary", "the first row should be the status summary");
-const summary = knowledge.getTreeItem(roots[0]);
-assert.match(summary.label, /in play/, `unexpected summary: ${summary.label}`);
-assert.match(summary.label, /need attention/, "the stale item should be surfaced in the summary");
-assert.match(summary.label, /to review/, "the pending proposal should be surfaced in the summary");
-
-const groups = roots.slice(1);
+const groups = knowledge.getChildren();
 assert.ok(groups.length >= 2, "expected the knowledge to be grouped by type");
+assert.ok(
+  groups.every((group) => group.kind === "group"),
+  "every root row should be a group",
+);
+
+const itemRows = [];
 for (const group of groups) {
   const row = knowledge.getTreeItem(group);
   assert.ok(row.label, "a group row needs a label");
+  assert.equal(row.description, String(group.items.length), "a group should count its items");
   for (const child of knowledge.getChildren(group)) {
     const childRow = knowledge.getTreeItem(child);
     assert.ok(childRow.label, "an item row needs a label");
     assert.equal(childRow.command.command, "chronicle.showItem");
+    itemRows.push(childRow);
   }
 }
+
+// A stale item has to be visible as such from the tree, without opening it.
+const staleRow = itemRows.find((row) => row.label === "Postgres over MongoDB");
+assert.ok(staleRow, "the stale decision is missing from the tree");
+assert.match(staleRow.description, /stale/, "a stale item should say so on its row");
 
 const proposals = events.get("chronicle.proposals");
 const pending = proposals.getChildren();
@@ -258,7 +264,6 @@ assert.equal(proposals.getChildren().length, 0, "the accepted proposal should be
 assert.ok(
   knowledge
     .getChildren()
-    .slice(1)
     .some((group) => group.items?.some((item) => item.title === "Auth lives in src/auth")),
   "the accepted proposal should now be knowledge",
 );
@@ -272,9 +277,9 @@ const html = detail.webview.html;
 
 assert.match(html, /Postgres over MongoDB/, "the title is missing");
 assert.match(html, /Needs attention/, "a stale item should say so");
-assert.match(html, /no longer matches the code/, "a stale item needs its callout");
+assert.match(html, /no longer match the code/, "a stale item needs its callout");
 assert.match(html, /Last verified/, "the facts grid is missing");
-assert.match(html, /never be marked stale on its own/, "an item without evidence should say so");
+assert.match(html, /No checks configured/, "an item without evidence should say so");
 assert.match(html, /data-command="verify"/, "the actions are missing");
 
 assert.match(html, /<strong>Postgres<\/strong>/, "bold should render, not show asterisks");

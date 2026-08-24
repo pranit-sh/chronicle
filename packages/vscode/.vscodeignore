@@ -6,4 +6,9 @@ tsup.config.ts
 node_modules/**
 **/*.map
 **/*.ts
-!media/**
+
+# The marketplace reads the rendered PNG; the source drawing stays in git only.
+media/icon.svg
+
+.vscodeignore
+*.vsix
