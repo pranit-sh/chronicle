@@ -1,16 +1,20 @@
 # codicil-cli
 
-> The command line for Codicil — a developer-controlled, versioned knowledge layer for your AI coding agents.
+> Project knowledge for AI coding agents. A CLI for storing, checking and reviewing what your agents should remember.
 
 [![npm version](https://img.shields.io/npm/v/codicil-cli.svg)](https://www.npmjs.com/package/codicil-cli)
-[![license](https://img.shields.io/npm/l/codicil.svg)](https://github.com/pranit-sh/codicil/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/codicil-cli.svg)](https://github.com/pranit-sh/codicil/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/npm/dm/codicil-cli)](https://www.npmjs.com/package/codicil-cli)
 [![Issues](https://img.shields.io/github/issues/pranit-sh/codicil.svg)](https://github.com/pranit-sh/codicil/issues)
 
-Codicil keeps a project's knowledge — rules, decisions, architecture,
-conventions, domain concepts, current context and known issues — as Markdown in
-`.codicil/`, committed alongside your code. This CLI initializes that store,
-reviews what agents propose, and inspects what's known.
+Codicil keeps project knowledge as Markdown in `.codicil/`, committed alongside
+your code. Use the CLI to:
+
+- **initialize** a versioned knowledge layer in any repo.
+- **remember** rules, decisions, architecture, conventions, context and issues.
+- **resolve context** for a file or task before an agent edits.
+- **verify** evidence checks against the working tree.
+- **review proposals** staged by agents over MCP.
 
 ---
 

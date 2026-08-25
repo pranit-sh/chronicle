@@ -1,7 +1,7 @@
 {
   "name": "codicil-mcp",
   "version": "0.1.0",
-  "description": "Model Context Protocol server exposing a Codicil knowledge layer to AI coding agents",
+  "description": "Expose Codicil project knowledge to AI coding agents over the Model Context Protocol.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

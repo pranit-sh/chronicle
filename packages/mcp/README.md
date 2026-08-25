@@ -1,6 +1,6 @@
 # codicil-mcp
 
-> A developer-controlled, versioned knowledge layer for your AI coding agents — served over MCP.
+> Project knowledge for AI coding agents, served over MCP.
 
 [![npm version](https://img.shields.io/npm/v/codicil-mcp.svg)](https://www.npmjs.com/package/codicil-mcp)
 [![license](https://img.shields.io/npm/l/codicil-mcp.svg)](https://github.com/pranit-sh/codicil/blob/main/LICENSE)

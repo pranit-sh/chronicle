@@ -1,7 +1,7 @@
 {
   "name": "codicil-cli",
   "version": "0.1.0",
-  "description": "Command line for Codicil, a versioned knowledge layer for AI coding agents",
+  "description": "Store, inspect, verify and review Codicil project knowledge from the command line.",
   "type": "module",
   "bin": {
     "codicil": "./dist/bin.js"
