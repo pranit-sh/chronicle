@@ -4,7 +4,7 @@ import type {
   KnowledgeStatusName,
   KnowledgeTypeName,
   Proposal,
-} from "@chronicle/core";
+} from "@codicil/core";
 import * as vscode from "vscode";
 
 /** One glyph per knowledge type, so the tree is scannable without reading it. */

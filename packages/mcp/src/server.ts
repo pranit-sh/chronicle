@@ -3,8 +3,8 @@ import {
   KNOWLEDGE_STATUSES,
   KNOWLEDGE_TYPES,
   RULE_ENFORCEMENTS,
-  ChronicleError,
-  ChronicleStore,
+  CodicilError,
+  CodicilStore,
   type KnowledgeStatusName,
   type KnowledgeTypeName,
   classifyStatement,
@@ -14,29 +14,29 @@ import {
   renderContextPackage,
   renderDiff,
   resolveContextForStore,
-} from "@chronicle/core";
+} from "@codicil/core";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 
 import { errorResult, formatItem, formatSearchHit, textResult } from "./format.js";
 
-export interface ChronicleServerOptions {
-  /** Directory to search upwards from for `.chronicle/`. Defaults to `process.cwd()`. */
+export interface CodicilServerOptions {
+  /** Directory to search upwards from for `.codicil/`. Defaults to `process.cwd()`. */
   cwd?: string;
   /** Recorded as the author of anything this agent stages. */
   agentId?: string;
   version?: string;
 }
 
-const KNOWLEDGE_URI_PREFIX = "chronicle://knowledge/";
+const KNOWLEDGE_URI_PREFIX = "codicil://knowledge/";
 
 /**
  * Re-opens the store on every call. Knowledge is plain Markdown that the
  * developer, Git and the CLI all write to, so the server must never trust a
  * snapshot it took at startup. The mtime keyed cache makes this cheap.
  */
-async function openStore(cwd: string): Promise<ChronicleStore> {
-  return ChronicleStore.open(cwd);
+async function openStore(cwd: string): Promise<CodicilStore> {
+  return CodicilStore.open(cwd);
 }
 
 function stagedMessage(proposalId: string, diff: string): string {
@@ -45,28 +45,28 @@ function stagedMessage(proposalId: string, diff: string): string {
     "",
     diff,
     "",
-    `The developer can review it with \`chronicle diff ${proposalId}\` and accept, edit or reject it.`,
+    `The developer can review it with \`codicil diff ${proposalId}\` and accept, edit or reject it.`,
     "Tell them it is waiting rather than saying it has been saved.",
   ].join("\n");
 }
 
 function describeError(error: unknown): string {
-  if (error instanceof ChronicleError) {
+  if (error instanceof CodicilError) {
     if (error.code === "not_initialized") {
-      return `${error.message} Chronicle has no knowledge layer in this project yet, so there is no project context to supply.`;
+      return `${error.message} Codicil has no knowledge layer in this project yet, so there is no project context to supply.`;
     }
     return error.message;
   }
   return (error as Error).message ?? String(error);
 }
 
-export function createChronicleServer(options: ChronicleServerOptions = {}): McpServer {
+export function createCodicilServer(options: CodicilServerOptions = {}): McpServer {
   const cwd = options.cwd ?? process.cwd();
   const server = new McpServer(
-    { name: "chronicle", version: options.version ?? "0.1.0" },
+    { name: "codicil", version: options.version ?? "0.1.0" },
     {
       instructions: [
-        "Chronicle is this project's knowledge layer: its rules, decisions, architecture, domain",
+        "Codicil is this project's knowledge layer: its rules, decisions, architecture, domain",
         "concepts, conventions, current situation and known issues, scoped to the parts of the",
         "codebase they apply to.",
         "",

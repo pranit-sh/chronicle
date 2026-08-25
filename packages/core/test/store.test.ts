@@ -5,8 +5,8 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { readHistory } from "../src/history.js";
-import { chroniclePaths } from "../src/paths.js";
-import { ChronicleStore, itemSlug } from "../src/store.js";
+import { codicilPaths } from "../src/paths.js";
+import { CodicilStore, itemSlug } from "../src/store.js";
 import type { Actor } from "../src/schema.js";
 
 const actor: Actor = { kind: "human", id: "tester" };
@@ -14,24 +14,24 @@ const actor: Actor = { kind: "human", id: "tester" };
 let root: string;
 
 beforeEach(async () => {
-  root = await mkdtemp(path.join(tmpdir(), "chronicle-store-"));
+  root = await mkdtemp(path.join(tmpdir(), "codicil-store-"));
 });
 
 afterEach(async () => {
   await rm(root, { recursive: true, force: true });
 });
 
-async function initStore(): Promise<ChronicleStore> {
-  return ChronicleStore.init(root, actor);
+async function initStore(): Promise<CodicilStore> {
+  return CodicilStore.init(root, actor);
 }
 
-describe("ChronicleStore.init", () => {
-  it("lays out .chronicle and records an init event", async () => {
+describe("CodicilStore.init", () => {
+  it("lays out .codicil and records an init event", async () => {
     const store = await initStore();
-    const paths = chroniclePaths(root);
+    const paths = codicilPaths(root);
 
     expect(await readFile(paths.configFile, "utf8")).toContain("version: 1");
-    expect(await readFile(path.join(paths.chronicleDir, ".gitignore"), "utf8")).toContain(".cache/");
+    expect(await readFile(path.join(paths.codicilDir, ".gitignore"), "utf8")).toContain(".cache/");
     expect(store.config.budget.maxItems).toBe(25);
 
     const history = await readHistory(paths);
@@ -41,11 +41,11 @@ describe("ChronicleStore.init", () => {
 
   it("refuses to initialize twice", async () => {
     await initStore();
-    await expect(ChronicleStore.init(root, actor)).rejects.toThrow(/already exists/);
+    await expect(CodicilStore.init(root, actor)).rejects.toThrow(/already exists/);
   });
 });
 
-describe("ChronicleStore.create", () => {
+describe("CodicilStore.create", () => {
   it("writes a slugged Markdown file with ordered frontmatter", async () => {
     const store = await initStore();
     const item = await store.create(
@@ -60,7 +60,7 @@ describe("ChronicleStore.create", () => {
     );
 
     expect(item.filePath).toBe(
-      path.join(root, ".chronicle/knowledge/rules/never-call-the-db-directly-from-api-handlers.md"),
+      path.join(root, ".codicil/knowledge/rules/never-call-the-db-directly-from-api-handlers.md"),
     );
     const raw = await readFile(item.filePath, "utf8");
     expect(raw.startsWith("---\n")).toBe(true);
@@ -119,7 +119,7 @@ describe("ChronicleStore.create", () => {
   });
 });
 
-describe("ChronicleStore reload and cache", () => {
+describe("CodicilStore reload and cache", () => {
   it("reads items back from disk in a fresh store", async () => {
     const store = await initStore();
     const created = await store.create(
@@ -127,7 +127,7 @@ describe("ChronicleStore reload and cache", () => {
       actor,
     );
 
-    const reopened = await ChronicleStore.openAt(root);
+    const reopened = await CodicilStore.openAt(root);
     const item = reopened.get(created.id);
     expect(item?.title).toBe("An organization has exactly one owner");
     expect(item?.type).toBe("domain");
@@ -139,16 +139,16 @@ describe("ChronicleStore reload and cache", () => {
     const raw = await readFile(created.filePath, "utf8");
     await writeFile(created.filePath, raw.replace("Original title", "Hand edited title"), "utf8");
 
-    const reopened = await ChronicleStore.openAt(root);
+    const reopened = await CodicilStore.openAt(root);
     expect(reopened.get(created.id)?.title).toBe("Hand edited title");
   });
 
   it("survives a corrupt index cache", async () => {
     const store = await initStore();
     const created = await store.create({ type: "rule", title: "Cached rule" }, actor);
-    await writeFile(chroniclePaths(root).indexCacheFile, "{ not json", "utf8");
+    await writeFile(codicilPaths(root).indexCacheFile, "{ not json", "utf8");
 
-    const reopened = await ChronicleStore.openAt(root);
+    const reopened = await CodicilStore.openAt(root);
     expect(reopened.get(created.id)?.title).toBe("Cached rule");
   });
 
@@ -156,13 +156,13 @@ describe("ChronicleStore reload and cache", () => {
     const store = await initStore();
     const created = await store.create({ type: "rule", title: "Original" }, actor);
     const raw = await readFile(created.filePath, "utf8");
-    await writeFile(path.join(root, ".chronicle/knowledge/rules/copy.md"), raw, "utf8");
+    await writeFile(path.join(root, ".codicil/knowledge/rules/copy.md"), raw, "utf8");
 
-    await expect(ChronicleStore.openAt(root)).rejects.toThrow(/Duplicate knowledge id/);
+    await expect(CodicilStore.openAt(root)).rejects.toThrow(/Duplicate knowledge id/);
   });
 });
 
-describe("ChronicleStore.update", () => {
+describe("CodicilStore.update", () => {
   it("renames the file when the title changes but keeps the id", async () => {
     const store = await initStore();
     const created = await store.create({ type: "rule", title: "Old name" }, actor);
@@ -186,25 +186,25 @@ describe("ChronicleStore.update", () => {
     const created = await store.create({ type: "rule", title: "Logged" }, actor);
     await store.update(created.id, { confidence: 0.4 }, actor);
 
-    const events = await readHistory(chroniclePaths(root), { itemId: created.id });
+    const events = await readHistory(codicilPaths(root), { itemId: created.id });
     const update = events.find((event) => event.op === "update");
     expect(update?.before).toMatchObject({ confidence: 0.8 });
     expect(update?.after).toMatchObject({ confidence: 0.4 });
   });
 });
 
-describe("ChronicleStore archive and restore", () => {
+describe("CodicilStore archive and restore", () => {
   it("moves the file between knowledge and archive", async () => {
     const store = await initStore();
     const created = await store.create({ type: "rule", title: "Retired rule" }, actor);
 
     const archived = await store.archive(created.id, actor);
     expect(archived.status).toBe("archived");
-    expect(archived.filePath).toBe(path.join(root, ".chronicle/archive/rules/retired-rule.md"));
+    expect(archived.filePath).toBe(path.join(root, ".codicil/archive/rules/retired-rule.md"));
 
     const restored = await store.restore(created.id, actor);
     expect(restored.status).toBe("active");
-    expect(restored.filePath).toBe(path.join(root, ".chronicle/knowledge/rules/retired-rule.md"));
+    expect(restored.filePath).toBe(path.join(root, ".codicil/knowledge/rules/retired-rule.md"));
   });
 
   it("hides archived items from listings unless asked for", async () => {
@@ -218,7 +218,7 @@ describe("ChronicleStore archive and restore", () => {
   });
 });
 
-describe("ChronicleStore.resolveRef", () => {
+describe("CodicilStore.resolveRef", () => {
   it("accepts a full id, an id prefix and a slug", async () => {
     const store = await initStore();
     const created = await store.create({ type: "rule", title: "Referenced rule" }, actor);
@@ -234,7 +234,7 @@ describe("ChronicleStore.resolveRef", () => {
   });
 });
 
-describe("ChronicleStore.list", () => {
+describe("CodicilStore.list", () => {
   it("filters by type, scope subtree, tag and free text", async () => {
     const store = await initStore();
     await store.create({ type: "rule", title: "API rule", scopes: ["backend.api"], tags: ["http"] }, actor);

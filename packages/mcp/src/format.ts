@@ -3,7 +3,7 @@ import {
   type KnowledgeItem,
   leadParagraph,
   truncate,
-} from "@chronicle/core";
+} from "@codicil/core";
 
 /**
  * Everything an agent reads comes back as plain Markdown. Models handle prose

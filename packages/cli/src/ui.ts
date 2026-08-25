@@ -1,4 +1,4 @@
-import type { Evidence, KnowledgeItem, KnowledgeStatusName } from "@chronicle/core";
+import type { Evidence, KnowledgeItem, KnowledgeStatusName } from "@codicil/core";
 
 const colorEnabled = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
 
@@ -165,7 +165,7 @@ export function formatDetail(item: KnowledgeItem): string {
   lines.push("");
   lines.push(
     color.gray(
-      `Actions: chronicle show ${shortId(item.id)} · chronicle verify ${shortId(item.id)} · chronicle archive ${shortId(item.id)} · chronicle history --item ${shortId(item.id)}`,
+      `Actions: codicil show ${shortId(item.id)} · codicil verify ${shortId(item.id)} · codicil archive ${shortId(item.id)} · codicil history --item ${shortId(item.id)}`,
     ),
   );
   return lines.join("\n");

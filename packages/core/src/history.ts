@@ -2,7 +2,7 @@ import { appendFile, readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { ensureDir, listFilesRecursive } from "./fs-utils.js";
-import type { ChroniclePaths } from "./paths.js";
+import type { CodicilPaths } from "./paths.js";
 import { type Actor, type HistoryEvent, HistoryEventSchema, type HistoryOp } from "./schema.js";
 
 /**
@@ -11,7 +11,7 @@ import { type Actor, type HistoryEvent, HistoryEventSchema, type HistoryOp } fro
  * follows branches the same way the knowledge does.
  */
 
-function dayFile(paths: ChroniclePaths, timestamp: string): string {
+function dayFile(paths: CodicilPaths, timestamp: string): string {
   const day = timestamp.slice(0, 10);
   return path.join(paths.historyDir, `${day}.jsonl`);
 }
@@ -27,7 +27,7 @@ export interface HistoryInput {
   ts?: string;
 }
 
-export async function appendHistory(paths: ChroniclePaths, input: HistoryInput): Promise<HistoryEvent> {
+export async function appendHistory(paths: CodicilPaths, input: HistoryInput): Promise<HistoryEvent> {
   const event = HistoryEventSchema.parse({ ...input, ts: input.ts ?? new Date().toISOString() });
   await ensureDir(paths.historyDir);
   await appendFile(dayFile(paths, event.ts), `${JSON.stringify(event)}\n`, "utf8");
@@ -43,7 +43,7 @@ export interface HistoryQuery {
 }
 
 export async function readHistory(
-  paths: ChroniclePaths,
+  paths: CodicilPaths,
   query: HistoryQuery = {},
 ): Promise<HistoryEvent[]> {
   const files = await listFilesRecursive(paths.historyDir, ".jsonl");

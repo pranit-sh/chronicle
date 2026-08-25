@@ -23,10 +23,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@chronicle/core':
+      '@codicil/core':
         specifier: workspace:*
         version: link:../core
-      '@chronicle/mcp':
+      codicil-mcp:
         specifier: workspace:*
         version: link:../mcp
       commander:
@@ -54,7 +54,7 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@chronicle/core':
+      '@codicil/core':
         specifier: workspace:*
         version: link:../core
       '@modelcontextprotocol/server':
@@ -70,7 +70,7 @@ importers:
 
   packages/vscode:
     dependencies:
-      '@chronicle/core':
+      '@codicil/core':
         specifier: workspace:*
         version: link:../core
       markdown-it:

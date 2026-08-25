@@ -3,14 +3,14 @@ import path from "node:path";
 
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
-import { ChronicleError, formatZodError } from "./errors.js";
+import { CodicilError, formatZodError } from "./errors.js";
 import { atomicWrite, ensureDir, listFilesRecursive } from "./fs-utils.js";
 import { appendHistory } from "./history.js";
 import { newProposalId } from "./ids.js";
-import type { ChroniclePaths } from "./paths.js";
+import type { CodicilPaths } from "./paths.js";
 import {
   type Actor,
-  type ChronicleConfig,
+  type CodicilConfig,
   type FieldChange,
   type KnowledgeDraft,
   KnowledgeDraftSchema,
@@ -21,19 +21,19 @@ import {
   UPDATABLE_FIELDS,
   type UpdatableField,
 } from "./schema.js";
-import type { ChronicleStore } from "./store.js";
+import type { CodicilStore } from "./store.js";
 
 /**
  * The staging area that makes "AI proposes, developer disposes" structural
  * rather than a convention. Agents can write here and nowhere else; accepting a
- * proposal is the only path from this directory into `.chronicle/knowledge`.
+ * proposal is the only path from this directory into `.codicil/knowledge`.
  */
 
-function proposalFile(paths: ChroniclePaths, id: string): string {
+function proposalFile(paths: CodicilPaths, id: string): string {
   return path.join(paths.proposalsDir, `${id}.yaml`);
 }
 
-export async function listProposals(paths: ChroniclePaths): Promise<Proposal[]> {
+export async function listProposals(paths: CodicilPaths): Promise<Proposal[]> {
   const files = await listFilesRecursive(paths.proposalsDir, ".yaml");
   const proposals: Proposal[] = [];
   for (const file of files) {
@@ -41,7 +41,7 @@ export async function listProposals(paths: ChroniclePaths): Promise<Proposal[]> 
     if (!raw.trim()) continue;
     const parsed = ProposalSchema.safeParse(parseYaml(raw));
     if (!parsed.success) {
-      throw new ChronicleError(
+      throw new CodicilError(
         "invalid_document",
         formatZodError(parsed.error, `${path.basename(file)} is not a valid proposal:`),
         parsed.error.issues,
@@ -52,22 +52,22 @@ export async function listProposals(paths: ChroniclePaths): Promise<Proposal[]> 
   return proposals.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
-export async function resolveProposal(paths: ChroniclePaths, reference: string): Promise<Proposal> {
+export async function resolveProposal(paths: CodicilPaths, reference: string): Promise<Proposal> {
   const proposals = await listProposals(paths);
   const matches = proposals.filter(
     (proposal) => proposal.id === reference || (reference.length >= 4 && proposal.id.startsWith(reference)),
   );
   if (matches.length === 1) return matches[0] as Proposal;
   if (matches.length === 0) {
-    throw new ChronicleError("not_found", `No proposal matches "${reference}".`);
+    throw new CodicilError("not_found", `No proposal matches "${reference}".`);
   }
-  throw new ChronicleError(
+  throw new CodicilError(
     "ambiguous_reference",
     `"${reference}" matches ${matches.length} proposals: ${matches.map((p) => p.id).join(", ")}`,
   );
 }
 
-async function writeProposal(paths: ChroniclePaths, proposal: Proposal): Promise<Proposal> {
+async function writeProposal(paths: CodicilPaths, proposal: Proposal): Promise<Proposal> {
   await ensureDir(paths.proposalsDir);
   await atomicWrite(proposalFile(paths, proposal.id), stringifyYaml(proposal, { lineWidth: 0 }));
   return proposal;
@@ -78,7 +78,7 @@ async function writeProposal(paths: ChroniclePaths, proposal: Proposal): Promise
  * a human running the CLI is the reviewer, not a party that needs reviewing.
  */
 export function assertMayPropose(
-  config: ChronicleConfig,
+  config: CodicilConfig,
   proposedBy: Actor,
   op: ProposalOp,
   target?: KnowledgeItem,
@@ -86,7 +86,7 @@ export function assertMayPropose(
   if (proposedBy.kind !== "agent") return;
 
   if (!config.authority.autoLearn) {
-    throw new ChronicleError(
+    throw new CodicilError(
       "forbidden",
       "This project has authority.autoLearn disabled, so agents may not stage knowledge proposals.",
     );
@@ -96,7 +96,7 @@ export function assertMayPropose(
   const touchesSettledKnowledge =
     target?.type === "rule" || (target?.type === "decision" && target.decisionStatus === "accepted");
   if (touchesSettledKnowledge && !config.authority.autoModifyRules) {
-    throw new ChronicleError(
+    throw new CodicilError(
       "forbidden",
       `This project has authority.autoModifyRules disabled, so agents may not propose changes to an accepted ${target?.type}. Raise it with the developer instead.`,
     );
@@ -131,14 +131,14 @@ export interface ProposeCreateInput {
 }
 
 export async function proposeCreate(
-  store: ChronicleStore,
+  store: CodicilStore,
   input: ProposeCreateInput,
 ): Promise<Proposal> {
   assertMayPropose(store.config, input.proposedBy, "create");
 
   const draft = KnowledgeDraftSchema.safeParse(input.draft);
   if (!draft.success) {
-    throw new ChronicleError(
+    throw new CodicilError(
       "invalid_input",
       formatZodError(draft.error, "Invalid proposed knowledge:"),
       draft.error.issues,
@@ -173,7 +173,7 @@ export interface ProposeChangeInput {
 }
 
 export async function proposeChange(
-  store: ChronicleStore,
+  store: CodicilStore,
   input: ProposeChangeInput,
 ): Promise<Proposal> {
   const target = store.resolveRef(input.targetRef);
@@ -181,7 +181,7 @@ export async function proposeChange(
 
   const changes = input.op === "update" ? buildChanges(target, input.patch ?? {}) : undefined;
   if (input.op === "update" && Object.keys(changes ?? {}).length === 0) {
-    throw new ChronicleError(
+    throw new CodicilError(
       "invalid_input",
       `That proposal would not change anything about "${target.title}".`,
     );
@@ -223,13 +223,13 @@ export interface AcceptResult {
 }
 
 export async function acceptProposal(
-  store: ChronicleStore,
+  store: CodicilStore,
   reference: string,
   actor: Actor,
   options: AcceptOptions = {},
 ): Promise<AcceptResult> {
   if (actor.kind === "agent") {
-    throw new ChronicleError(
+    throw new CodicilError(
       "forbidden",
       "Proposals can only be accepted by a person. An agent may stage knowledge but never ratify it.",
     );
@@ -243,7 +243,7 @@ export async function acceptProposal(
     case "create": {
       const merged = KnowledgeDraftSchema.safeParse({ ...proposal.payload, ...overrides });
       if (!merged.success) {
-        throw new ChronicleError(
+        throw new CodicilError(
           "invalid_input",
           formatZodError(merged.error, "The proposal cannot be accepted as edited:"),
           merged.error.issues,
@@ -289,7 +289,7 @@ export async function acceptProposal(
 }
 
 export async function rejectProposal(
-  store: ChronicleStore,
+  store: CodicilStore,
   reference: string,
   actor: Actor,
   reason?: string,

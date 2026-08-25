@@ -2,16 +2,16 @@ import { readFile, rm, stat } from "node:fs/promises";
 import path from "node:path";
 
 import { loadConfig, writeDefaultConfig } from "./config.js";
-import { ChronicleError, formatZodError } from "./errors.js";
+import { CodicilError, formatZodError } from "./errors.js";
 import { atomicWrite, ensureDir, listFilesRecursive, moveFile, pathExists } from "./fs-utils.js";
 import { appendHistory } from "./history.js";
 import { matchesReference, newKnowledgeId, slugify, uniqueSlug } from "./ids.js";
 import { parseMarkdownDocument, serializeMarkdownDocument } from "./frontmatter.js";
 import {
-  CHRONICLE_DIR,
-  type ChroniclePaths,
-  LEGACY_CHRONICLE_DIR,
-  chroniclePaths,
+  CODICIL_DIR,
+  type CodicilPaths,
+  LEGACY_CODICIL_DIR,
+  codicilPaths,
   findLegacyRoot,
   findWorkspaceRoot,
   toRepoRelative,
@@ -19,7 +19,7 @@ import {
 import { extractSections } from "./sections.js";
 import {
   type Actor,
-  type ChronicleConfig,
+  type CodicilConfig,
   type Evidence,
   type KnowledgeDraft,
   KnowledgeDraftSchema,
@@ -115,21 +115,21 @@ function matchesFilter(item: KnowledgeItem, filter: KnowledgeFilter): boolean {
 }
 
 /**
- * Reads and writes the Markdown knowledge files under `.chronicle/`. The
+ * Reads and writes the Markdown knowledge files under `.codicil/`. The
  * Markdown is always authoritative; the in-memory map and the JSON cache are
  * derived and can be deleted at any time.
  */
-export class ChronicleStore {
-  readonly paths: ChroniclePaths;
-  #config: ChronicleConfig;
+export class CodicilStore {
+  readonly paths: CodicilPaths;
+  #config: CodicilConfig;
   #items = new Map<string, KnowledgeItem>();
 
-  private constructor(paths: ChroniclePaths, config: ChronicleConfig) {
+  private constructor(paths: CodicilPaths, config: CodicilConfig) {
     this.paths = paths;
     this.#config = config;
   }
 
-  get config(): ChronicleConfig {
+  get config(): CodicilConfig {
     return this.#config;
   }
 
@@ -137,37 +137,37 @@ export class ChronicleStore {
     return this.paths.root;
   }
 
-  /** Finds the nearest `.chronicle/` walking up from `cwd`. */
-  static async open(cwd: string = process.cwd()): Promise<ChronicleStore> {
+  /** Finds the nearest `.codicil/` walking up from `cwd`. */
+  static async open(cwd: string = process.cwd()): Promise<CodicilStore> {
     const root = await findWorkspaceRoot(cwd);
     if (!root) {
       const legacy = await findLegacyRoot(cwd);
       if (legacy) {
-        throw new ChronicleError(
+        throw new CodicilError(
           "legacy_directory",
-          `Found a ${LEGACY_CHRONICLE_DIR}/ directory in ${legacy}, which is what Chronicle used before 0.1.0. Rename it with \`git mv ${LEGACY_CHRONICLE_DIR} ${CHRONICLE_DIR}\`.`,
+          `Found a ${LEGACY_CODICIL_DIR}/ directory in ${legacy}, which is what Codicil used before 0.1.0. Rename it with \`git mv ${LEGACY_CODICIL_DIR} ${CODICIL_DIR}\`.`,
         );
       }
-      throw new ChronicleError(
+      throw new CodicilError(
         "not_initialized",
-        `No ${CHRONICLE_DIR} directory found in ${cwd} or any parent. Run \`chronicle init\` first.`,
+        `No ${CODICIL_DIR} directory found in ${cwd} or any parent. Run \`codicil init\` first.`,
       );
     }
-    return ChronicleStore.openAt(root);
+    return CodicilStore.openAt(root);
   }
 
-  static async openAt(root: string): Promise<ChronicleStore> {
-    const paths = chroniclePaths(root);
+  static async openAt(root: string): Promise<CodicilStore> {
+    const paths = codicilPaths(root);
     const config = await loadConfig(paths);
-    const store = new ChronicleStore(paths, config);
+    const store = new CodicilStore(paths, config);
     await store.reload();
     return store;
   }
 
-  static async init(root: string, actor: Actor): Promise<ChronicleStore> {
-    const paths = chroniclePaths(root);
+  static async init(root: string, actor: Actor): Promise<CodicilStore> {
+    const paths = codicilPaths(root);
     if (await pathExists(paths.configFile)) {
-      throw new ChronicleError("already_initialized", `${paths.chronicleDir} already exists.`);
+      throw new CodicilError("already_initialized", `${paths.codicilDir} already exists.`);
     }
     for (const dir of Object.values(TYPE_DIRECTORIES)) {
       await ensureDir(path.join(paths.knowledgeDir, dir));
@@ -176,14 +176,14 @@ export class ChronicleStore {
     await ensureDir(paths.proposalsDir);
     await ensureDir(paths.historyDir);
     await writeDefaultConfig(paths);
-    await atomicWrite(path.join(paths.chronicleDir, ".gitignore"), `${".cache/"}\n`);
-    await atomicWrite(path.join(paths.chronicleDir, "README.md"), chronicleReadme());
+    await atomicWrite(path.join(paths.codicilDir, ".gitignore"), `${".cache/"}\n`);
+    await atomicWrite(path.join(paths.codicilDir, "README.md"), codicilReadme());
     await appendHistory(paths, {
       op: "init",
       actor,
-      summary: "Initialized the Chronicle knowledge layer",
+      summary: "Initialized the Codicil knowledge layer",
     });
-    return ChronicleStore.openAt(root);
+    return CodicilStore.openAt(root);
   }
 
   async reload(): Promise<void> {
@@ -217,7 +217,7 @@ export class ChronicleStore {
         const document = parseMarkdownDocument(raw);
         const parsed = KnowledgeFrontmatterSchema.safeParse(document.data);
         if (!parsed.success) {
-          throw new ChronicleError(
+          throw new CodicilError(
             "invalid_document",
             formatZodError(parsed.error, `${relative} is not a valid knowledge item:`),
             parsed.error.issues,
@@ -230,7 +230,7 @@ export class ChronicleStore {
 
       const existing = items.get(frontmatter.id);
       if (existing) {
-        throw new ChronicleError(
+        throw new CodicilError(
           "conflict",
           `Duplicate knowledge id ${frontmatter.id} in ${toRepoRelative(this.paths.root, existing.filePath)} and ${relative}.`,
         );
@@ -265,9 +265,9 @@ export class ChronicleStore {
     );
     if (matches.length === 1) return matches[0] as KnowledgeItem;
     if (matches.length === 0) {
-      throw new ChronicleError("not_found", `No knowledge item matches "${reference}".`);
+      throw new CodicilError("not_found", `No knowledge item matches "${reference}".`);
     }
-    throw new ChronicleError(
+    throw new CodicilError(
       "ambiguous_reference",
       `"${reference}" matches ${matches.length} items: ${matches.map((item) => item.id).join(", ")}`,
     );
@@ -292,7 +292,7 @@ export class ChronicleStore {
   ): Promise<KnowledgeItem> {
     const parsedDraft = KnowledgeDraftSchema.safeParse(draft);
     if (!parsedDraft.success) {
-      throw new ChronicleError(
+      throw new CodicilError(
         "invalid_input",
         formatZodError(parsedDraft.error, "Invalid knowledge draft:"),
         parsedDraft.error.issues,
@@ -442,7 +442,7 @@ export class ChronicleStore {
   #validateFrontmatter(candidate: Record<string, unknown>): KnowledgeFrontmatter {
     const parsed = KnowledgeFrontmatterSchema.safeParse(candidate);
     if (!parsed.success) {
-      throw new ChronicleError(
+      throw new CodicilError(
         "invalid_input",
         formatZodError(parsed.error, "Invalid knowledge item:"),
         parsed.error.issues,
@@ -540,8 +540,8 @@ function summarize(item: KnowledgeItem): Record<string, unknown> {
   };
 }
 
-function chronicleReadme(): string {
-  return `# Chronicle knowledge layer
+function codicilReadme(): string {
+  return `# Codicil knowledge layer
 
 This directory is the project's knowledge layer: what the project believes, why,
 where it applies, and whether it is still true. It is committed to Git on
@@ -553,7 +553,7 @@ purpose, so knowledge follows branches exactly like code does.
 - \`knowledge/\` — one Markdown file per item, grouped by type. The Markdown is
   the source of truth; edit it by hand whenever you like.
 - \`proposals/\` — staged changes awaiting review. AI agents may write here, and
-  nowhere else. Review them with \`chronicle proposals\`.
+  nowhere else. Review them with \`codicil proposals\`.
 - \`archive/\` — items kept for history but no longer supplied to agents.
 - \`history/\` — an append-only changelog, one JSONL file per day.
 - \`.cache/\` — derived index, gitignored, safe to delete.
@@ -561,10 +561,10 @@ purpose, so knowledge follows branches exactly like code does.
 ## Everyday commands
 
 \`\`\`
-chronicle remember "Never call the DB directly from API handlers"
-chronicle context --file src/api/users.ts --task "add pagination"
-chronicle proposals
-chronicle verify
+codicil remember "Never call the DB directly from API handlers"
+codicil context --file src/api/users.ts --task "add pagination"
+codicil proposals
+codicil verify
 \`\`\`
 `;
 }

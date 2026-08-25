@@ -3,7 +3,7 @@ import {
   type ResolutionRequest,
   renderContextPackage,
   resolveContextForStore,
-} from "@chronicle/core";
+} from "@codicil/core";
 import type { Command } from "commander";
 
 import { collect, parseInteger } from "../options.js";
@@ -56,7 +56,7 @@ function renderTrace(pkg: ContextPackage): string {
 export function registerContext(program: Command): void {
   program
     .command("context")
-    .description("Preview the Chronicle context an AI agent resolves for a file and task")
+    .description("Preview the Codicil context an AI agent resolves for a file and task")
     .option("-f, --file <path>", "the file being worked on")
     .option("-d, --dir <path>", "the directory being worked in")
     .option("-t, --task <text>", "what the agent has been asked to do")

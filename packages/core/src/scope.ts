@@ -1,6 +1,6 @@
 import picomatch from "picomatch";
 
-import { type ChronicleConfig, ROOT_SCOPE } from "./schema.js";
+import { type CodicilConfig, ROOT_SCOPE } from "./schema.js";
 
 /**
  * Scopes form a dotted hierarchy: `backend.api.auth` inherits from
@@ -47,13 +47,13 @@ function compile(globs: readonly string[]): Matcher {
 
 /**
  * Turns a file path into the scope chain that is active for it, using the
- * `scopes` map from `.chronicle/config.yaml`.
+ * `scopes` map from `.codicil/config.yaml`.
  */
 export class ScopeResolver {
   #scopeMatchers: Array<{ scope: string; matches: Matcher }>;
   #excluded: Matcher;
 
-  constructor(config: ChronicleConfig) {
+  constructor(config: CodicilConfig) {
     this.#scopeMatchers = Object.entries(config.scopes)
       .map(([scope, globs]) => ({ scope, matches: compile(globs) }))
       // Deepest first so callers can read the most specific match off the top.

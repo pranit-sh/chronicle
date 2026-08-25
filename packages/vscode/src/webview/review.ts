@@ -1,8 +1,8 @@
-import { type DiffLine, type Proposal, proposalDiff } from "@chronicle/core";
+import { type DiffLine, type Proposal, proposalDiff } from "@codicil/core";
 import * as vscode from "vscode";
 
 import { escapeHtml, humanize, proposalTitle, relativeTime } from "../present.js";
-import type { ChronicleSession } from "../session.js";
+import type { CodicilSession } from "../session.js";
 import {
   blankSlate,
   disclosure,
@@ -29,11 +29,11 @@ export class ReviewPanel {
   readonly #disposables: vscode.Disposable[] = [];
 
   private constructor(
-    private readonly session: ChronicleSession,
+    private readonly session: CodicilSession,
     extensionUri?: vscode.Uri,
   ) {
     this.#panel = vscode.window.createWebviewPanel(
-      "chronicle.review",
+      "codicil.review",
       "Review proposal",
       { viewColumn: vscode.ViewColumn.Active },
       { enableScripts: true, retainContextWhenHidden: true },
@@ -51,7 +51,7 @@ export class ReviewPanel {
     );
   }
 
-  static show(session: ChronicleSession, proposalId: string, extensionUri?: vscode.Uri): void {
+  static show(session: CodicilSession, proposalId: string, extensionUri?: vscode.Uri): void {
     ReviewPanel.#current ??= new ReviewPanel(session, extensionUri);
     ReviewPanel.#current.#proposalId = proposalId;
     ReviewPanel.#current.#render();
@@ -67,9 +67,9 @@ export class ReviewPanel {
   async #handle(message: { command: string }): Promise<void> {
     if (!this.#proposalId) return;
     if (message.command === "accept") {
-      await vscode.commands.executeCommand("chronicle.acceptProposal", this.#proposalId);
+      await vscode.commands.executeCommand("codicil.acceptProposal", this.#proposalId);
     } else if (message.command === "reject") {
-      await vscode.commands.executeCommand("chronicle.rejectProposal", this.#proposalId);
+      await vscode.commands.executeCommand("codicil.rejectProposal", this.#proposalId);
     }
   }
 

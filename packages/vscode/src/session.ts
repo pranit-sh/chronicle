@@ -1,26 +1,26 @@
 import {
   type Actor,
-  CHRONICLE_DIR,
-  ChronicleError,
-  ChronicleStore,
+  CODICIL_DIR,
+  CodicilError,
+  CodicilStore,
   type Proposal,
   listProposals,
-} from "@chronicle/core";
+} from "@codicil/core";
 import * as vscode from "vscode";
 
 /**
  * Owns the single open store for the workspace and keeps it in step with the
  * files on disk.
  *
- * The Markdown under `.chronicle/` is authoritative and a developer is expected
+ * The Markdown under `.codicil/` is authoritative and a developer is expected
  * to edit it by hand, switch branches, and pull. So the extension watches the
  * directory and reloads rather than assuming it is the only writer.
  */
-export class ChronicleSession implements vscode.Disposable {
+export class CodicilSession implements vscode.Disposable {
   readonly onDidChange: vscode.Event<void>;
 
   #folder: vscode.WorkspaceFolder | undefined;
-  #store: ChronicleStore | undefined;
+  #store: CodicilStore | undefined;
   #proposals: Proposal[] = [];
   #loadError: string | undefined;
   #watcher: vscode.FileSystemWatcher | undefined;
@@ -37,7 +37,7 @@ export class ChronicleSession implements vscode.Disposable {
     );
   }
 
-  get store(): ChronicleStore | undefined {
+  get store(): CodicilStore | undefined {
     return this.#store;
   }
 
@@ -58,10 +58,10 @@ export class ChronicleSession implements vscode.Disposable {
   }
 
   /** Throws a message worth showing a person if the layer is not usable. */
-  requireStore(): ChronicleStore {
+  requireStore(): CodicilStore {
     if (this.#store) return this.#store;
     throw new Error(
-      this.#loadError ?? "This workspace has no Chronicle knowledge layer yet. Run Chronicle: Set up the knowledge layer.",
+      this.#loadError ?? "This workspace has no Codicil knowledge layer yet. Run Codicil: Set up the knowledge layer.",
     );
   }
 
@@ -80,7 +80,7 @@ export class ChronicleSession implements vscode.Disposable {
     const root = folder.uri.fsPath;
     try {
       const configured = await vscode.workspace.fs
-        .stat(vscode.Uri.joinPath(folder.uri, CHRONICLE_DIR, "config.yaml"))
+        .stat(vscode.Uri.joinPath(folder.uri, CODICIL_DIR, "config.yaml"))
         .then(
           () => true,
           () => false,
@@ -89,15 +89,15 @@ export class ChronicleSession implements vscode.Disposable {
         this.#store = undefined;
         this.#proposals = [];
       } else {
-        this.#store = await ChronicleStore.openAt(root);
+        this.#store = await CodicilStore.openAt(root);
         this.#proposals = await listProposals(this.#store.paths);
       }
     } catch (error) {
       // A broken file must not take the view down; the tree renders the reason
-      // and points at Chronicle: Check the knowledge layer for problems.
+      // and points at Codicil: Check the knowledge layer for problems.
       this.#store = undefined;
       this.#proposals = [];
-      this.#loadError = error instanceof ChronicleError ? error.message : (error as Error).message;
+      this.#loadError = error instanceof CodicilError ? error.message : (error as Error).message;
     }
 
     this.#ensureWatcher(folder);
@@ -114,7 +114,7 @@ export class ChronicleSession implements vscode.Disposable {
   }
 
   async actor(): Promise<Actor> {
-    const configured = vscode.workspace.getConfiguration("chronicle").get<string>("actor");
+    const configured = vscode.workspace.getConfiguration("codicil").get<string>("actor");
     if (configured) return { kind: "human", id: configured };
 
     const gitName = await this.#gitUserName();
@@ -142,7 +142,7 @@ export class ChronicleSession implements vscode.Disposable {
     if (this.#watcher) return;
     // The derived cache changes on every read, so watching it would loop.
     const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(folder, `${CHRONICLE_DIR}/{knowledge,archive,proposals}/**`),
+      new vscode.RelativePattern(folder, `${CODICIL_DIR}/{knowledge,archive,proposals}/**`),
     );
     const onEvent = () => this.scheduleReload();
     watcher.onDidCreate(onEvent);
@@ -150,7 +150,7 @@ export class ChronicleSession implements vscode.Disposable {
     watcher.onDidDelete(onEvent);
 
     const config = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(folder, `${CHRONICLE_DIR}/config.yaml`),
+      new vscode.RelativePattern(folder, `${CODICIL_DIR}/config.yaml`),
     );
     config.onDidCreate(onEvent);
     config.onDidChange(onEvent);
@@ -161,8 +161,8 @@ export class ChronicleSession implements vscode.Disposable {
   }
 
   #publish(): void {
-    void vscode.commands.executeCommand("setContext", "chronicle.initialized", this.initialized);
-    void vscode.commands.executeCommand("setContext", "chronicle.hasKnowledge", this.#hasKnowledge());
+    void vscode.commands.executeCommand("setContext", "codicil.initialized", this.initialized);
+    void vscode.commands.executeCommand("setContext", "codicil.hasKnowledge", this.#hasKnowledge());
     this.#emitter.fire();
   }
 

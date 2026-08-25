@@ -4,23 +4,23 @@ import path from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { chronicleSizeBytes, isHealthy, runDoctor } from "../src/doctor.js";
+import { codicilSizeBytes, isHealthy, runDoctor } from "../src/doctor.js";
 import { appendHistory, groupByDay, readHistory } from "../src/history.js";
 import { proposeChange, proposeCreate } from "../src/proposals.js";
 import type { Actor } from "../src/schema.js";
-import { ChronicleStore } from "../src/store.js";
+import { CodicilStore } from "../src/store.js";
 
 const actor: Actor = { kind: "human", id: "tester" };
 const agent: Actor = { kind: "agent", id: "cursor" };
 
 let root: string;
-let store: ChronicleStore;
+let store: CodicilStore;
 
 const codes = (diagnoses: readonly { code: string }[]) => diagnoses.map((d) => d.code);
 
 beforeEach(async () => {
-  root = await mkdtemp(path.join(tmpdir(), "chronicle-doctor-"));
-  store = await ChronicleStore.init(root, actor);
+  root = await mkdtemp(path.join(tmpdir(), "codicil-doctor-"));
+  store = await CodicilStore.init(root, actor);
 });
 
 afterEach(async () => {
@@ -36,23 +36,23 @@ describe("doctor", () => {
   });
 
   it("says what to do when there is no knowledge layer at all", async () => {
-    const empty = await mkdtemp(path.join(tmpdir(), "chronicle-bare-"));
+    const empty = await mkdtemp(path.join(tmpdir(), "codicil-bare-"));
     const report = await runDoctor(empty);
     expect(report.initialized).toBe(false);
-    expect(report.diagnoses[0]?.fix).toBe("Run chronicle init");
+    expect(report.diagnoses[0]?.fix).toBe("Run codicil init");
     await rm(empty, { recursive: true, force: true });
   });
 
   it("tells a pre-0.1.0 checkout to rename .context rather than re-initialize", async () => {
-    const legacy = await mkdtemp(path.join(tmpdir(), "chronicle-legacy-"));
+    const legacy = await mkdtemp(path.join(tmpdir(), "codicil-legacy-"));
     await mkdir(path.join(legacy, ".context", "knowledge"), { recursive: true });
 
     const report = await runDoctor(legacy);
     expect(report.initialized).toBe(false);
     expect(report.diagnoses[0]?.code).toBe("legacy_directory");
-    expect(report.diagnoses[0]?.fix).toBe("Run git mv .context .chronicle");
+    expect(report.diagnoses[0]?.fix).toBe("Run git mv .context .codicil");
 
-    await expect(ChronicleStore.open(legacy)).rejects.toThrow(/git mv \.context \.chronicle/);
+    await expect(CodicilStore.open(legacy)).rejects.toThrow(/git mv \.context \.codicil/);
     await rm(legacy, { recursive: true, force: true });
   });
 
@@ -74,7 +74,7 @@ describe("doctor", () => {
 
   it("finds conflict markers in config and history too, not just knowledge", async () => {
     await writeFile(
-      path.join(root, ".chronicle/history/2026-08-18.jsonl"),
+      path.join(root, ".codicil/history/2026-08-18.jsonl"),
       `${"<".repeat(7)} HEAD\n`,
       "utf8",
     );
@@ -93,7 +93,7 @@ describe("doctor", () => {
 
   it("explains a knowledge file with broken frontmatter instead of throwing", async () => {
     await writeFile(
-      path.join(root, ".chronicle/knowledge/rules/handwritten.md"),
+      path.join(root, ".codicil/knowledge/rules/handwritten.md"),
       "---\ntype: rule\n---\n\nNo id, no title.\n",
       "utf8",
     );
@@ -106,7 +106,7 @@ describe("doctor", () => {
   it("catches the duplicate ids a bad merge leaves behind", async () => {
     const item = await store.create({ type: "rule", title: "Use pnpm" }, actor);
     const raw = await readFile(item.filePath, "utf8");
-    await writeFile(path.join(root, ".chronicle/knowledge/rules/use-pnpm-copy.md"), raw, "utf8");
+    await writeFile(path.join(root, ".codicil/knowledge/rules/use-pnpm-copy.md"), raw, "utf8");
 
     const report = await runDoctor(root);
     const duplicate = report.diagnoses.find((d) => d.code === "duplicate_id");
@@ -153,7 +153,7 @@ describe("doctor", () => {
     );
     const report = await runDoctor(root);
     const expired = report.diagnoses.find((d) => d.code === "expired");
-    expect(expired?.fix).toBe("Run chronicle verify");
+    expect(expired?.fix).toBe("Run codicil verify");
   });
 
   it("points out a scope no file path will ever activate", async () => {
@@ -195,14 +195,14 @@ describe("doctor", () => {
   });
 
   it("warns when the derived cache is not gitignored", async () => {
-    await rm(path.join(root, ".chronicle/.gitignore"));
+    await rm(path.join(root, ".codicil/.gitignore"));
     const report = await runDoctor(root);
     expect(codes(report.diagnoses)).toContain("cache_not_ignored");
   });
 
   it("reports unreadable changelog lines without losing the readable ones", async () => {
     await writeFile(
-      path.join(root, ".chronicle/history/2026-08-18.jsonl"),
+      path.join(root, ".codicil/history/2026-08-18.jsonl"),
       '{"not":"json"\nnonsense\n',
       "utf8",
     );
@@ -212,15 +212,15 @@ describe("doctor", () => {
   });
 
   it("never reads the derived cache, which is allowed to be anything", async () => {
-    await mkdir(path.join(root, ".chronicle/.cache"), { recursive: true });
-    await writeFile(path.join(root, ".chronicle/.cache/index.json"), `${"<".repeat(7)} HEAD`, "utf8");
+    await mkdir(path.join(root, ".codicil/.cache"), { recursive: true });
+    await writeFile(path.join(root, ".codicil/.cache/index.json"), `${"<".repeat(7)} HEAD`, "utf8");
     const report = await runDoctor(root);
     expect(codes(report.diagnoses)).not.toContain("conflict_markers");
   });
 
   it("measures how much space the knowledge layer takes", async () => {
     await store.create({ type: "rule", title: "Use pnpm" }, actor);
-    expect(await chronicleSizeBytes(root)).toBeGreaterThan(0);
+    expect(await codicilSizeBytes(root)).toBeGreaterThan(0);
   });
 });
 

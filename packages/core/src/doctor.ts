@@ -2,21 +2,21 @@ import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 
 import { loadConfig } from "./config.js";
-import { ChronicleError, formatZodError } from "./errors.js";
+import { CodicilError, formatZodError } from "./errors.js";
 import { pathExists } from "./fs-utils.js";
 import { parseMarkdownDocument } from "./frontmatter.js";
 import { listProposals } from "./proposals.js";
 import {
-  CHRONICLE_DIR,
-  type ChroniclePaths,
-  LEGACY_CHRONICLE_DIR,
-  chroniclePaths,
+  CODICIL_DIR,
+  type CodicilPaths,
+  LEGACY_CODICIL_DIR,
+  codicilPaths,
   toRepoRelative,
 } from "./paths.js";
 import { KnowledgeFrontmatterSchema, TYPE_DIRECTORIES } from "./schema.js";
 
 /**
- * Health checks over `.chronicle/` itself.
+ * Health checks over `.codicil/` itself.
  *
  * Everything here reads the directory directly rather than going through the
  * store, because the whole point is to explain why the store will not open.
@@ -58,8 +58,8 @@ function findConflictMarkers(contents: string): number[] {
   return lines;
 }
 
-/** Every file under `.chronicle/`, including dotfiles, excluding the derived cache. */
-async function chronicleFiles(paths: ChroniclePaths): Promise<string[]> {
+/** Every file under `.codicil/`, including dotfiles, excluding the derived cache. */
+async function codicilFiles(paths: CodicilPaths): Promise<string[]> {
   const found: string[] = [];
   async function walk(current: string): Promise<void> {
     let entries;
@@ -75,19 +75,19 @@ async function chronicleFiles(paths: ChroniclePaths): Promise<string[]> {
       else if (entry.isFile()) found.push(full);
     }
   }
-  await walk(paths.chronicleDir);
+  await walk(paths.codicilDir);
   return found.sort();
 }
 
 export async function runDoctor(root: string): Promise<DoctorReport> {
-  const paths = chroniclePaths(root);
+  const paths = codicilPaths(root);
   const diagnoses: Diagnosis[] = [];
   const relative = (file: string) => toRepoRelative(root, file);
 
   const add = (diagnosis: Diagnosis) => diagnoses.push(diagnosis);
 
-  if (!(await pathExists(paths.chronicleDir))) {
-    const legacy = await pathExists(path.join(root, LEGACY_CHRONICLE_DIR));
+  if (!(await pathExists(paths.codicilDir))) {
+    const legacy = await pathExists(path.join(root, LEGACY_CODICIL_DIR));
     return {
       root,
       initialized: false,
@@ -96,14 +96,14 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
           ? {
               level: "error",
               code: "legacy_directory",
-              message: `This project still uses ${LEGACY_CHRONICLE_DIR}/, which Chronicle used before 0.1.0.`,
-              fix: `Run git mv ${LEGACY_CHRONICLE_DIR} ${CHRONICLE_DIR}`,
+              message: `This project still uses ${LEGACY_CODICIL_DIR}/, which Codicil used before 0.1.0.`,
+              fix: `Run git mv ${LEGACY_CODICIL_DIR} ${CODICIL_DIR}`,
             }
           : {
               level: "error",
               code: "not_initialized",
-              message: `No ${CHRONICLE_DIR} directory in ${root}.`,
-              fix: "Run chronicle init",
+              message: `No ${CODICIL_DIR} directory in ${root}.`,
+              fix: "Run codicil init",
             },
       ],
       counts: { error: 1, warning: 0, info: 0 },
@@ -111,9 +111,9 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
     };
   }
 
-  const files = await chronicleFiles(paths);
+  const files = await codicilFiles(paths);
 
-  // 1. Conflict markers anywhere under .chronicle/, including config and history.
+  // 1. Conflict markers anywhere under .codicil/, including config and history.
   for (const file of files) {
     const raw = await readFile(file, "utf8").catch(() => undefined);
     if (raw === undefined) continue;
@@ -124,13 +124,13 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
       code: "conflict_markers",
       message: `Unresolved Git conflict markers on line${lines.length > 1 ? "s" : ""} ${lines.join(", ")}.`,
       file: relative(file),
-      fix: "Resolve the merge by hand, then re-run chronicle doctor",
+      fix: "Resolve the merge by hand, then re-run codicil doctor",
     });
   }
 
   const hasConflict = diagnoses.some((diagnosis) => diagnosis.code === "conflict_markers");
 
-  // 2. Config parses and is a valid Chronicle config.
+  // 2. Config parses and is a valid Codicil config.
   let config;
   try {
     config = await loadConfig(paths);
@@ -139,14 +139,14 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         level: "warning",
         code: "missing_config",
         message: "No config.yaml, so the built-in defaults are in force.",
-        fix: `Run chronicle init, or write ${CHRONICLE_DIR}/config.yaml by hand`,
+        fix: `Run codicil init, or write ${CODICIL_DIR}/config.yaml by hand`,
       });
     }
   } catch (error) {
     add({
       level: "error",
       code: "invalid_config",
-      message: error instanceof ChronicleError ? error.message : String(error),
+      message: error instanceof CodicilError ? error.message : String(error),
       file: relative(paths.configFile),
     });
   }
@@ -188,7 +188,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         code: "misplaced_archived",
         message: `${item.title} is archived but still sits in knowledge/.`,
         file: relative(file),
-        fix: `Run chronicle archive ${item.id}`,
+        fix: `Run codicil archive ${item.id}`,
       });
     }
     if (item.status !== "archived" && inArchive) {
@@ -197,7 +197,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         code: "misplaced_active",
         message: `${item.title} is in archive/ but its status is ${item.status}.`,
         file: relative(file),
-        fix: `Run chronicle restore ${item.id}`,
+        fix: `Run codicil restore ${item.id}`,
       });
     }
 
@@ -208,7 +208,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         code: "misfiled_type",
         message: `${item.title} is a ${item.type} but does not live in knowledge/${TYPE_DIRECTORIES[item.type]}/.`,
         file: relative(file),
-        fix: "Move the file, or let Chronicle rewrite it with chronicle show --json then re-create",
+        fix: "Move the file, or let Codicil rewrite it with codicil show --json then re-create",
       });
     }
 
@@ -218,7 +218,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         code: "expired",
         message: `${item.title} expired on ${item.expiresAt.slice(0, 10)} but is still active.`,
         file: relative(file),
-        fix: "Run chronicle verify",
+        fix: "Run codicil verify",
       });
     }
 
@@ -235,7 +235,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
             code: "unmapped_scope",
             message: `Scope "${scope}" is not mapped to any code path, so no file will ever activate it.`,
             file: relative(file),
-            fix: `Add ${scope} to scopes in ${CHRONICLE_DIR}/config.yaml`,
+            fix: `Add ${scope} to scopes in ${CODICIL_DIR}/config.yaml`,
           });
         }
       }
@@ -287,7 +287,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         level: "warning",
         code: "orphan_proposal",
         message: `Proposal ${proposal.id} targets ${proposal.targetId}, which no longer exists.`,
-        fix: `Run chronicle reject ${proposal.id}`,
+        fix: `Run codicil reject ${proposal.id}`,
       });
     }
   }
@@ -296,12 +296,12 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
       level: "info",
       code: "pending_proposals",
       message: `${proposals.length} proposal${proposals.length === 1 ? "" : "s"} waiting for review.`,
-      fix: "Run chronicle proposals",
+      fix: "Run codicil proposals",
     });
   }
 
   // 6. The derived cache must never be committed.
-  const gitignore = path.join(paths.chronicleDir, ".gitignore");
+  const gitignore = path.join(paths.codicilDir, ".gitignore");
   const ignored = await readFile(gitignore, "utf8").catch(() => "");
   if (!ignored.split("\n").some((line) => line.trim().replace(/^\//, "").startsWith(".cache"))) {
     const rootIgnore = await readFile(path.join(root, ".gitignore"), "utf8").catch(() => "");
@@ -310,7 +310,7 @@ export async function runDoctor(root: string): Promise<DoctorReport> {
         level: "warning",
         code: "cache_not_ignored",
         message: "The derived index cache is not gitignored, so it will churn in every diff.",
-        fix: `Add .cache/ to ${CHRONICLE_DIR}/.gitignore`,
+        fix: `Add .cache/ to ${CODICIL_DIR}/.gitignore`,
       });
     }
   }
@@ -368,10 +368,10 @@ export function isHealthy(report: DoctorReport): boolean {
 }
 
 /** Rough directory size, used to reassure the developer the layer stays small. */
-export async function chronicleSizeBytes(root: string): Promise<number> {
-  const paths = chroniclePaths(root);
+export async function codicilSizeBytes(root: string): Promise<number> {
+  const paths = codicilPaths(root);
   let total = 0;
-  for (const file of await chronicleFiles(paths)) {
+  for (const file of await codicilFiles(paths)) {
     total += (await stat(file).catch(() => ({ size: 0 }))).size;
   }
   return total;

@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "chronicle": {
+    "codicil": {
       "command": "node",
       "args": ["${workspaceFolder}/packages/mcp/dist/bin.js"],
       "env": {
-        "CHRONICLE_ROOT": "${workspaceFolder}"
+        "CODICIL_ROOT": "${workspaceFolder}"
       }
     }
   }

@@ -1,4 +1,4 @@
-import { ChronicleError, type Evidence, EvidenceSchema } from "@chronicle/core";
+import { CodicilError, type Evidence, EvidenceSchema } from "@codicil/core";
 import type { Command } from "commander";
 
 import { parseInteger } from "../options.js";
@@ -30,13 +30,13 @@ function buildEvidence(options: AddOptions): Evidence {
     (value) => value !== undefined,
   );
   if (candidates.length === 0) {
-    throw new ChronicleError(
+    throw new CodicilError(
       "invalid_input",
       "Say what to check: --file, --glob, --grep, --commit or --ref.",
     );
   }
   if (candidates.length > 1) {
-    throw new ChronicleError("invalid_input", "Attach one predicate at a time.");
+    throw new CodicilError("invalid_input", "Attach one predicate at a time.");
   }
 
   if (options.file) return EvidenceSchema.parse({ kind: "file", path: options.file, expect });
@@ -86,7 +86,7 @@ export function registerEvidence(program: Command): void {
     .action(async function (this: Command, reference: string) {
       const options = this.optsWithGlobals<AddOptions>();
       if (options.expect !== "present" && options.expect !== "absent") {
-        throw new ChronicleError("invalid_input", "--expect must be present or absent.");
+        throw new CodicilError("invalid_input", "--expect must be present or absent.");
       }
       const store = await openStore(options);
       const actor = await resolveActor(options);
@@ -107,7 +107,7 @@ export function registerEvidence(program: Command): void {
       print(`${color.green("Attached")} ${describeEvidence(added)}`);
       print(color.gray(`to ${item.title} (${shortId(item.id)})`));
       print();
-      print(color.gray(`Check it now with chronicle verify ${shortId(item.id)}`));
+      print(color.gray(`Check it now with codicil verify ${shortId(item.id)}`));
     });
 
   evidence
@@ -143,7 +143,7 @@ export function registerEvidence(program: Command): void {
     .alias("rm")
     .description("Detach an evidence predicate by its index")
     .argument("<reference>", "id, id prefix, or filename slug")
-    .argument("<index>", "index shown by chronicle evidence list")
+    .argument("<index>", "index shown by codicil evidence list")
     .action(async function (this: Command, reference: string, index: string) {
       const options = this.optsWithGlobals<GlobalOptions>();
       const store = await openStore(options);
@@ -152,7 +152,7 @@ export function registerEvidence(program: Command): void {
       const position = parseInteger(index, "index") ?? -1;
 
       if (position < 0 || position >= current.evidence.length) {
-        throw new ChronicleError(
+        throw new CodicilError(
           "invalid_input",
           `"${current.title}" has ${current.evidence.length} evidence entries, so ${index} is out of range.`,
         );

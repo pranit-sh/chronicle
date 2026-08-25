@@ -3,7 +3,7 @@ import {
   type HistoryOp,
   groupByDay,
   readHistory,
-} from "@chronicle/core";
+} from "@codicil/core";
 import type { Command } from "commander";
 
 import { parseInteger } from "../options.js";

@@ -5,7 +5,7 @@ import { promisify } from "node:util";
 
 import picomatch from "picomatch";
 
-import type { ChronicleConfig, Evidence } from "./schema.js";
+import type { CodicilConfig, Evidence } from "./schema.js";
 
 const run = promisify(execFile);
 
@@ -66,7 +66,7 @@ async function walk(root: string, isExcluded: (relativePath: string) => boolean)
 
 export async function createEvidenceContext(
   root: string,
-  config: ChronicleConfig,
+  config: CodicilConfig,
 ): Promise<EvidenceContext> {
   const isExcluded = config.exclude.length ? picomatch(config.exclude, { dot: true }) : () => false;
   const files = await walk(root, isExcluded);

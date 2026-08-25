@@ -2,12 +2,12 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { type Actor, ChronicleStore, chroniclePaths, listProposals } from "@chronicle/core";
+import { type Actor, CodicilStore, codicilPaths, listProposals } from "@codicil/core";
 import { Client } from "@modelcontextprotocol/client";
 import { InMemoryTransport } from "@modelcontextprotocol/server";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { createChronicleServer } from "../src/server.js";
+import { createCodicilServer } from "../src/server.js";
 
 const actor: Actor = { kind: "human", id: "tester" };
 
@@ -35,9 +35,9 @@ async function callTool(name: string, args: Record<string, unknown> = {}): Promi
 }
 
 beforeEach(async () => {
-  root = await mkdtemp(path.join(tmpdir(), "chronicle-mcp-"));
-  const store = await ChronicleStore.init(root, actor);
-  await writeFile(path.join(root, ".chronicle/config.yaml"), CONFIG, "utf8");
+  root = await mkdtemp(path.join(tmpdir(), "codicil-mcp-"));
+  const store = await CodicilStore.init(root, actor);
+  await writeFile(path.join(root, ".codicil/config.yaml"), CONFIG, "utf8");
 
   await store.create(
     { type: "rule", title: "Use TypeScript everywhere", scopes: ["project"], enforcement: "must" },
@@ -68,7 +68,7 @@ beforeEach(async () => {
     actor,
   );
 
-  const server = createChronicleServer({ cwd: root, agentId: "test-agent" });
+  const server = createCodicilServer({ cwd: root, agentId: "test-agent" });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   client = new Client({ name: "test-agent", version: "1.0.0" });
   await Promise.all([client.connect(clientTransport), server.connect(serverTransport)]);
@@ -208,7 +208,7 @@ describe("resources", () => {
     const { resources } = await client.listResources();
     const names = resources.map((resource) => resource.name);
     expect(names).toContain("PostgreSQL over MongoDB");
-    expect(resources[0]?.uri.startsWith("chronicle://knowledge/")).toBe(true);
+    expect(resources[0]?.uri.startsWith("codicil://knowledge/")).toBe(true);
   });
 
   it("reads a single item by uri", async () => {
@@ -236,13 +236,13 @@ describe("knowledge_propose", () => {
     expect(text).toContain("This is not project knowledge yet");
     expect(text).toContain("+ new decision: Use Redis for rate limiting");
 
-    const proposals = await listProposals(chroniclePaths(root));
+    const proposals = await listProposals(codicilPaths(root));
     expect(proposals).toHaveLength(1);
     expect(proposals[0]?.proposedBy).toEqual({ kind: "agent", id: "test-agent" });
     expect(proposals[0]?.payload?.source).toBe("ai");
 
     // Nothing reached the knowledge layer.
-    const store = await ChronicleStore.openAt(root);
+    const store = await CodicilStore.openAt(root);
     expect(store.list({ query: "Redis" })).toHaveLength(0);
   });
 
@@ -266,7 +266,7 @@ describe("knowledge_propose", () => {
   });
 
   it("refuses to rewrite an accepted rule while autoModifyRules is off", async () => {
-    const store = await ChronicleStore.openAt(root);
+    const store = await CodicilStore.openAt(root);
     const rule = store.list({ query: "Never call the database" })[0];
     const result = await client.callTool({
       name: "knowledge_propose",
@@ -282,7 +282,7 @@ describe("knowledge_propose", () => {
   });
 
   it("stages an update to softer knowledge", async () => {
-    const store = await ChronicleStore.openAt(root);
+    const store = await CodicilStore.openAt(root);
     const convention = await store.create(
       { type: "convention", title: "Files are kebab-case" },
       actor,
@@ -324,8 +324,8 @@ describe("the remember prompt", () => {
 
 describe("uninitialized project", () => {
   it("explains itself instead of failing opaquely", async () => {
-    const bare = await mkdtemp(path.join(tmpdir(), "chronicle-bare-"));
-    const server = createChronicleServer({ cwd: bare });
+    const bare = await mkdtemp(path.join(tmpdir(), "codicil-bare-"));
+    const server = createCodicilServer({ cwd: bare });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const bareClient = new Client({ name: "test-agent", version: "1.0.0" });
     await Promise.all([bareClient.connect(clientTransport), server.connect(serverTransport)]);

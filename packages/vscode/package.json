@@ -1,6 +1,6 @@
 {
-  "name": "chronicle-vscode",
-  "displayName": "Chronicle",
+  "name": "codicil-vscode",
+  "displayName": "Codicil",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,14 +10,14 @@
   "author": "pranit-sh",
   "icon": "media/icon.png",
   "pricing": "Free",
-  "homepage": "https://github.com/pranit-sh/chronicle#readme",
+  "homepage": "https://github.com/pranit-sh/codicil#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pranit-sh/chronicle.git",
+    "url": "git+https://github.com/pranit-sh/codicil.git",
     "directory": "packages/vscode"
   },
   "bugs": {
-    "url": "https://github.com/pranit-sh/chronicle/issues"
+    "url": "https://github.com/pranit-sh/codicil/issues"
   },
   "engines": {
     "vscode": "^1.95.0"
@@ -42,7 +42,7 @@
   },
   "main": "./dist/extension.cjs",
   "activationEvents": [
-    "workspaceContains:.chronicle/config.yaml"
+    "workspaceContains:.codicil/config.yaml"
   ],
   "extensionKind": [
     "workspace"
@@ -50,15 +50,15 @@
   "capabilities": {
     "untrustedWorkspaces": {
       "supported": false,
-      "description": "Chronicle reads .chronicle/ from the workspace and runs its verification checks against your files, so it needs a trusted workspace."
+      "description": "Codicil reads .codicil/ from the workspace and runs its verification checks against your files, so it needs a trusted workspace."
     },
     "virtualWorkspaces": {
       "supported": false,
-      "description": "Chronicle needs direct file system access to read and write the .chronicle/ knowledge layer."
+      "description": "Codicil needs direct file system access to read and write the .codicil/ knowledge layer."
     }
   },
   "scripts": {
-    "vscode:prepublish": "pnpm --filter @chronicle/core build && pnpm run build",
+    "vscode:prepublish": "pnpm --filter @codicil/core build && pnpm run build",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "node test/smoke.mjs && node test/packaged.mjs",
@@ -66,7 +66,7 @@
     "publish": "vsce publish --no-dependencies"
   },
   "dependencies": {
-    "@chronicle/core": "workspace:*",
+    "@codicil/core": "workspace:*",
     "markdown-it": "^15.0.0"
   },
   "devDependencies": {
@@ -78,361 +78,361 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "chronicle",
-          "title": "Chronicle",
-          "icon": "media/chronicle.svg"
+          "id": "codicil",
+          "title": "Codicil",
+          "icon": "media/codicil.svg"
         }
       ]
     },
     "views": {
-      "chronicle": [
+      "codicil": [
         {
-          "id": "chronicle.gettingStarted",
+          "id": "codicil.gettingStarted",
           "name": "Getting Started",
-          "icon": "media/chronicle.svg",
-          "when": "!chronicle.initialized"
+          "icon": "media/codicil.svg",
+          "when": "!codicil.initialized"
         },
         {
-          "id": "chronicle.knowledge",
+          "id": "codicil.knowledge",
           "name": "Knowledge",
-          "icon": "media/chronicle.svg",
-          "when": "chronicle.initialized"
+          "icon": "media/codicil.svg",
+          "when": "codicil.initialized"
         },
         {
-          "id": "chronicle.proposals",
+          "id": "codicil.proposals",
           "name": "Proposals",
-          "icon": "media/chronicle.svg",
-          "when": "chronicle.initialized"
+          "icon": "media/codicil.svg",
+          "when": "codicil.initialized"
         },
         {
-          "id": "chronicle.context",
+          "id": "codicil.context",
           "name": "Context",
-          "icon": "media/chronicle.svg",
-          "when": "chronicle.initialized"
+          "icon": "media/codicil.svg",
+          "when": "codicil.initialized"
         },
         {
-          "id": "chronicle.agentSetup",
+          "id": "codicil.agentSetup",
           "name": "Guide",
-          "icon": "media/chronicle.svg",
-          "when": "chronicle.initialized"
+          "icon": "media/codicil.svg",
+          "when": "codicil.initialized"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "chronicle.gettingStarted",
-        "contents": "Give your coding agents reliable project knowledge.\n\nUse Chronicle to review, organize and serve project knowledge to agents such as Copilot, Cursor and Claude. Initialize the repo, then connect your agent.\n\n[Initialize Chronicle](command:chronicle.init)\n\n[Open guide](command:chronicle.openMcpSetupGuide)",
-        "when": "!chronicle.initialized"
+        "view": "codicil.gettingStarted",
+        "contents": "Give your coding agents reliable project knowledge.\n\nUse Codicil to review, organize and serve project knowledge to agents such as Copilot, Cursor and Claude. Initialize the repo, then connect your agent.\n\n[Initialize Codicil](command:codicil.init)\n\n[Open guide](command:codicil.openMcpSetupGuide)",
+        "when": "!codicil.initialized"
       },
       {
-        "view": "chronicle.agentSetup",
-        "contents": "Learn the Chronicle workflow, available actions, verification check syntax and agent setup.\n\n[Open guide](command:chronicle.openMcpSetupGuide)",
-        "when": "chronicle.initialized"
+        "view": "codicil.agentSetup",
+        "contents": "Learn the Codicil workflow, available actions, verification check syntax and agent setup.\n\n[Open guide](command:codicil.openMcpSetupGuide)",
+        "when": "codicil.initialized"
       },
       {
-        "view": "chronicle.knowledge",
+        "view": "codicil.knowledge",
         "contents": "No knowledge yet.\n\nKnowledge is the reviewed, project-owned information your agents can use. Remember something to add the first item.",
-        "when": "chronicle.initialized && !chronicle.hasKnowledge"
+        "when": "codicil.initialized && !codicil.hasKnowledge"
       },
       {
-        "view": "chronicle.proposals",
+        "view": "codicil.proposals",
         "contents": "Nothing waiting for review.\n\nProposals are knowledge suggested by agents for your review. Nothing enters the knowledge base until you accept it."
       },
       {
-        "view": "chronicle.context",
+        "view": "codicil.context",
         "contents": "No context yet.\n\nContext shows which reviewed knowledge applies to the file you have open. Add knowledge to see what agents would be told here.",
-        "when": "chronicle.initialized && !chronicle.hasKnowledge"
+        "when": "codicil.initialized && !codicil.hasKnowledge"
       },
       {
-        "view": "chronicle.context",
-        "contents": "No context applies here.\n\nChronicle checked the open file, but no scoped knowledge matched this part of the project.",
-        "when": "chronicle.initialized && chronicle.hasKnowledge"
+        "view": "codicil.context",
+        "contents": "No context applies here.\n\nCodicil checked the open file, but no scoped knowledge matched this part of the project.",
+        "when": "codicil.initialized && codicil.hasKnowledge"
       }
     ],
     "commands": [
       {
-        "command": "chronicle.init",
-        "title": "Chronicle: Set up the knowledge layer",
+        "command": "codicil.init",
+        "title": "Codicil: Set up the knowledge layer",
         "icon": "$(add)"
       },
       {
-        "command": "chronicle.configureMcp",
-        "title": "Chronicle: Configure MCP for Copilot",
+        "command": "codicil.configureMcp",
+        "title": "Codicil: Configure MCP for Copilot",
         "icon": "$(plug)"
       },
       {
-        "command": "chronicle.configureCursorMcp",
-        "title": "Chronicle: Configure MCP for Cursor",
+        "command": "codicil.configureCursorMcp",
+        "title": "Codicil: Configure MCP for Cursor",
         "icon": "$(plug)"
       },
       {
-        "command": "chronicle.configureClaudeCodeMcp",
-        "title": "Chronicle: Configure MCP for Claude Code",
+        "command": "codicil.configureClaudeCodeMcp",
+        "title": "Codicil: Configure MCP for Claude Code",
         "icon": "$(plug)"
       },
       {
-        "command": "chronicle.addAgentInstructions",
-        "title": "Chronicle: Add agent instructions",
+        "command": "codicil.addAgentInstructions",
+        "title": "Codicil: Add agent instructions",
         "icon": "$(notebook)"
       },
       {
-        "command": "chronicle.openMcpSetupGuide",
-        "title": "Chronicle: Open Guide",
+        "command": "codicil.openMcpSetupGuide",
+        "title": "Codicil: Open Guide",
         "icon": "$(book)"
       },
       {
-        "command": "chronicle.remember",
-        "title": "Chronicle: Remember this",
+        "command": "codicil.remember",
+        "title": "Codicil: Remember this",
         "icon": "$(lightbulb)"
       },
       {
-        "command": "chronicle.rememberSelection",
-        "title": "Chronicle: Remember the selected text"
+        "command": "codicil.rememberSelection",
+        "title": "Codicil: Remember the selected text"
       },
       {
-        "command": "chronicle.refresh",
-        "title": "Chronicle: Refresh",
+        "command": "codicil.refresh",
+        "title": "Codicil: Refresh",
         "icon": "$(refresh)"
       },
       {
-        "command": "chronicle.showItem",
-        "title": "Chronicle: Show knowledge item"
+        "command": "codicil.showItem",
+        "title": "Codicil: Show knowledge item"
       },
       {
-        "command": "chronicle.openFile",
-        "title": "Chronicle: Open the Markdown file",
+        "command": "codicil.openFile",
+        "title": "Codicil: Open the Markdown file",
         "icon": "$(go-to-file)"
       },
       {
-        "command": "chronicle.archiveItem",
-        "title": "Chronicle: Archive",
+        "command": "codicil.archiveItem",
+        "title": "Codicil: Archive",
         "icon": "$(archive)"
       },
       {
-        "command": "chronicle.restoreItem",
-        "title": "Chronicle: Restore",
+        "command": "codicil.restoreItem",
+        "title": "Codicil: Restore",
         "icon": "$(history)"
       },
       {
-        "command": "chronicle.verifyItem",
-        "title": "Chronicle: Verify against the code",
+        "command": "codicil.verifyItem",
+        "title": "Codicil: Verify against the code",
         "icon": "$(check)"
       },
       {
-        "command": "chronicle.verifyAll",
-        "title": "Chronicle: Verify everything",
+        "command": "codicil.verifyAll",
+        "title": "Codicil: Verify everything",
         "icon": "$(check-all)"
       },
       {
-        "command": "chronicle.reviewProposal",
-        "title": "Chronicle: Review proposal"
+        "command": "codicil.reviewProposal",
+        "title": "Codicil: Review proposal"
       },
       {
-        "command": "chronicle.acceptProposal",
-        "title": "Chronicle: Accept proposal",
+        "command": "codicil.acceptProposal",
+        "title": "Codicil: Accept proposal",
         "icon": "$(check)"
       },
       {
-        "command": "chronicle.rejectProposal",
-        "title": "Chronicle: Reject proposal",
+        "command": "codicil.rejectProposal",
+        "title": "Codicil: Reject proposal",
         "icon": "$(close)"
       },
       {
-        "command": "chronicle.showContext",
-        "title": "Chronicle: What does the agent know here?",
+        "command": "codicil.showContext",
+        "title": "Codicil: What does the agent know here?",
         "icon": "$(eye)"
       },
       {
-        "command": "chronicle.doctor",
-        "title": "Chronicle: Check the knowledge layer for problems"
+        "command": "codicil.doctor",
+        "title": "Codicil: Check the knowledge layer for problems"
       },
       {
-        "command": "chronicle.filterByStatus",
-        "title": "Chronicle: Filter knowledge",
+        "command": "codicil.filterByStatus",
+        "title": "Codicil: Filter knowledge",
         "icon": "$(filter)"
       },
       {
-        "command": "chronicle.gettingStarted.focus",
-        "title": "Chronicle: Focus on Getting Started View"
+        "command": "codicil.gettingStarted.focus",
+        "title": "Codicil: Focus on Getting Started View"
       },
       {
-        "command": "chronicle.knowledge.focus",
-        "title": "Chronicle: Focus on Knowledge View"
+        "command": "codicil.knowledge.focus",
+        "title": "Codicil: Focus on Knowledge View"
       },
       {
-        "command": "chronicle.proposals.focus",
-        "title": "Chronicle: Focus on Proposals View"
+        "command": "codicil.proposals.focus",
+        "title": "Codicil: Focus on Proposals View"
       },
       {
-        "command": "chronicle.context.focus",
-        "title": "Chronicle: Focus on Context View"
+        "command": "codicil.context.focus",
+        "title": "Codicil: Focus on Context View"
       },
       {
-        "command": "chronicle.agentSetup.focus",
-        "title": "Chronicle: Focus on Guide View"
+        "command": "codicil.agentSetup.focus",
+        "title": "Codicil: Focus on Guide View"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "chronicle.remember",
-          "when": "view == chronicle.knowledge",
+          "command": "codicil.remember",
+          "when": "view == codicil.knowledge",
           "group": "navigation@1"
         },
         {
-          "command": "chronicle.verifyAll",
-          "when": "view == chronicle.knowledge",
+          "command": "codicil.verifyAll",
+          "when": "view == codicil.knowledge",
           "group": "navigation@3"
         },
         {
-          "command": "chronicle.refresh",
-          "when": "view == chronicle.knowledge",
+          "command": "codicil.refresh",
+          "when": "view == codicil.knowledge",
           "group": "navigation@4"
         }
       ],
       "view/item/context": [
         {
-          "command": "chronicle.openFile",
-          "when": "view == chronicle.knowledge && viewItem =~ /^item/",
+          "command": "codicil.openFile",
+          "when": "view == codicil.knowledge && viewItem =~ /^item/",
           "group": "inline@1"
         },
         {
-          "command": "chronicle.verifyItem",
-          "when": "view == chronicle.knowledge && viewItem =~ /^item/",
+          "command": "codicil.verifyItem",
+          "when": "view == codicil.knowledge && viewItem =~ /^item/",
           "group": "1_act@1"
         },
         {
-          "command": "chronicle.archiveItem",
-          "when": "view == chronicle.knowledge && viewItem == item",
+          "command": "codicil.archiveItem",
+          "when": "view == codicil.knowledge && viewItem == item",
           "group": "1_act@2"
         },
         {
-          "command": "chronicle.restoreItem",
-          "when": "view == chronicle.knowledge && viewItem == item.archived",
+          "command": "codicil.restoreItem",
+          "when": "view == codicil.knowledge && viewItem == item.archived",
           "group": "1_act@2"
         },
         {
-          "command": "chronicle.acceptProposal",
-          "when": "view == chronicle.proposals && viewItem == proposal",
+          "command": "codicil.acceptProposal",
+          "when": "view == codicil.proposals && viewItem == proposal",
           "group": "inline@1"
         },
         {
-          "command": "chronicle.rejectProposal",
-          "when": "view == chronicle.proposals && viewItem == proposal",
+          "command": "codicil.rejectProposal",
+          "when": "view == codicil.proposals && viewItem == proposal",
           "group": "inline@2"
         }
       ],
       "editor/context": [
         {
-          "command": "chronicle.rememberSelection",
+          "command": "codicil.rememberSelection",
           "when": "editorHasSelection",
-          "group": "chronicle@1"
+          "group": "codicil@1"
         },
         {
-          "command": "chronicle.showContext",
-          "group": "chronicle@2"
+          "command": "codicil.showContext",
+          "group": "codicil@2"
         }
       ],
       "commandPalette": [
         {
-          "command": "chronicle.configureMcp",
+          "command": "codicil.configureMcp",
           "when": "false"
         },
         {
-          "command": "chronicle.configureCursorMcp",
+          "command": "codicil.configureCursorMcp",
           "when": "false"
         },
         {
-          "command": "chronicle.configureClaudeCodeMcp",
+          "command": "codicil.configureClaudeCodeMcp",
           "when": "false"
         },
         {
-          "command": "chronicle.addAgentInstructions",
+          "command": "codicil.addAgentInstructions",
           "when": "false"
         },
         {
-          "command": "chronicle.rememberSelection",
+          "command": "codicil.rememberSelection",
           "when": "false"
         },
         {
-          "command": "chronicle.refresh",
+          "command": "codicil.refresh",
           "when": "false"
         },
         {
-          "command": "chronicle.showItem",
+          "command": "codicil.showItem",
           "when": "false"
         },
         {
-          "command": "chronicle.openFile",
+          "command": "codicil.openFile",
           "when": "false"
         },
         {
-          "command": "chronicle.archiveItem",
+          "command": "codicil.archiveItem",
           "when": "false"
         },
         {
-          "command": "chronicle.restoreItem",
+          "command": "codicil.restoreItem",
           "when": "false"
         },
         {
-          "command": "chronicle.verifyItem",
+          "command": "codicil.verifyItem",
           "when": "false"
         },
         {
-          "command": "chronicle.verifyAll",
+          "command": "codicil.verifyAll",
           "when": "false"
         },
         {
-          "command": "chronicle.doctor",
+          "command": "codicil.doctor",
           "when": "false"
         },
         {
-          "command": "chronicle.reviewProposal",
+          "command": "codicil.reviewProposal",
           "when": "false"
         },
         {
-          "command": "chronicle.acceptProposal",
+          "command": "codicil.acceptProposal",
           "when": "false"
         },
         {
-          "command": "chronicle.rejectProposal",
+          "command": "codicil.rejectProposal",
           "when": "false"
         },
         {
-          "command": "chronicle.filterByStatus",
+          "command": "codicil.filterByStatus",
           "when": "false"
         },
         {
-          "command": "chronicle.gettingStarted.focus",
+          "command": "codicil.gettingStarted.focus",
           "when": "false"
         },
         {
-          "command": "chronicle.knowledge.focus",
+          "command": "codicil.knowledge.focus",
           "when": "false"
         },
         {
-          "command": "chronicle.proposals.focus",
+          "command": "codicil.proposals.focus",
           "when": "false"
         },
         {
-          "command": "chronicle.context.focus",
+          "command": "codicil.context.focus",
           "when": "false"
         },
         {
-          "command": "chronicle.agentSetup.focus",
+          "command": "codicil.agentSetup.focus",
           "when": "false"
         }
       ]
     },
     "configuration": {
-      "title": "Chronicle",
+      "title": "Codicil",
       "properties": {
-        "chronicle.statusBar.enabled": {
+        "codicil.statusBar.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Show how many knowledge items apply to the file you are editing."
         },
-        "chronicle.groupBy": {
+        "codicil.groupBy": {
           "type": "string",
           "enum": [
             "type",

@@ -1,6 +1,6 @@
 import type { ZodError } from "zod";
 
-export type ChronicleErrorCode =
+export type CodicilErrorCode =
   | "not_initialized"
   | "already_initialized"
   /** A pre-0.1.0 `.context/` directory that needs renaming. */
@@ -13,13 +13,13 @@ export type ChronicleErrorCode =
   | "forbidden"
   | "conflict";
 
-export class ChronicleError extends Error {
-  readonly code: ChronicleErrorCode;
+export class CodicilError extends Error {
+  readonly code: CodicilErrorCode;
   readonly details: unknown;
 
-  constructor(code: ChronicleErrorCode, message: string, details?: unknown) {
+  constructor(code: CodicilErrorCode, message: string, details?: unknown) {
     super(message);
-    this.name = "ChronicleError";
+    this.name = "CodicilError";
     this.code = code;
     this.details = details;
   }

@@ -1,9 +1,9 @@
-import type { Evidence, KnowledgeItem } from "@chronicle/core";
+import type { Evidence, KnowledgeItem } from "@codicil/core";
 import MarkdownIt from "markdown-it";
 import * as vscode from "vscode";
 
 import { describeEvidence, escapeHtml, humanize, relativeTime, typeNoun } from "../present.js";
-import type { ChronicleSession } from "../session.js";
+import type { CodicilSession } from "../session.js";
 import {
   blankSlate,
   callout,
@@ -32,12 +32,12 @@ export class DetailPanel {
   readonly #disposables: vscode.Disposable[] = [];
 
   private constructor(
-    private readonly session: ChronicleSession,
+    private readonly session: CodicilSession,
     extensionUri?: vscode.Uri,
   ) {
     this.#panel = vscode.window.createWebviewPanel(
-      "chronicle.detail",
-      "Chronicle",
+      "codicil.detail",
+      "Codicil",
       { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       { enableScripts: true, retainContextWhenHidden: true },
     );
@@ -56,7 +56,7 @@ export class DetailPanel {
     );
   }
 
-  static show(session: ChronicleSession, itemId: string, extensionUri?: vscode.Uri): void {
+  static show(session: CodicilSession, itemId: string, extensionUri?: vscode.Uri): void {
     DetailPanel.#current ??= new DetailPanel(session, extensionUri);
     DetailPanel.#current.#itemId = itemId;
     DetailPanel.#current.#render();
@@ -67,16 +67,16 @@ export class DetailPanel {
     if (!this.#itemId) return;
     switch (message.command) {
       case "open":
-        await vscode.commands.executeCommand("chronicle.openFile", this.#itemId);
+        await vscode.commands.executeCommand("codicil.openFile", this.#itemId);
         break;
       case "verify":
-        await vscode.commands.executeCommand("chronicle.verifyItem", this.#itemId);
+        await vscode.commands.executeCommand("codicil.verifyItem", this.#itemId);
         break;
       case "archive":
-        await vscode.commands.executeCommand("chronicle.archiveItem", this.#itemId);
+        await vscode.commands.executeCommand("codicil.archiveItem", this.#itemId);
         break;
       case "restore":
-        await vscode.commands.executeCommand("chronicle.restoreItem", this.#itemId);
+        await vscode.commands.executeCommand("codicil.restoreItem", this.#itemId);
         break;
     }
   }
@@ -84,10 +84,10 @@ export class DetailPanel {
   #render(): void {
     const item = this.#itemId ? this.session.store?.get(this.#itemId) : undefined;
     if (!item) {
-      this.#panel.title = "Chronicle";
+      this.#panel.title = "Codicil";
       this.#panel.webview.html = pageHtml(
         this.#panel.webview,
-        "Chronicle",
+        "Codicil",
         blankSlate("That knowledge item is no longer here."),
       );
       return;

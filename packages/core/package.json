@@ -1,7 +1,8 @@
 {
-  "name": "@chronicle/core",
+  "name": "@codicil/core",
   "version": "0.1.0",
-  "description": "Schema, store, scope model, resolver, verifier and history for Chronicle",
+  "description": "Schema, store, scope model, resolver, verifier and history for Codicil",
+  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,9 +12,14 @@
       "import": "./dist/index.js"
     }
   },
+  "engines": {
+    "node": ">=18"
+  },
   "files": [
     "dist"
   ],
+  "author": "Pranit Deshmukh",
+  "license": "MIT",
   "scripts": {
     "build": "tsup && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit"

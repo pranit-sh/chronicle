@@ -18,7 +18,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 evidence:
   - expect: present
     lastCheckedAt: 2026-08-18T12:20:58.832Z
@@ -28,4 +28,4 @@ evidence:
     path: packages/core/src/schema.ts
 ---
 
-packages/core/src/schema.ts is the single source of truth for every Chronicle data shape. CLI input, MCP tool arguments, YAML frontmatter and the index cache all parse through it, so a malformed file fails loudly at the boundary instead of corrupting knowledge.
+packages/core/src/schema.ts is the single source of truth for every Codicil data shape. CLI input, MCP tool arguments, YAML frontmatter and the index cache all parse through it, so a malformed file fails loudly at the boundary instead of corrupting knowledge.

@@ -6,5 +6,5 @@ coverage/
 *.log
 *.vsix
 
-# Chronicle derives this from the committed Markdown in .chronicle/knowledge/
-.chronicle/.cache/
+# Codicil derives this from the committed Markdown in .codicil/knowledge/
+.codicil/.cache/

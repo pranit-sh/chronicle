@@ -1,8 +1,8 @@
-import type { KnowledgeItem, KnowledgeStatusName, KnowledgeTypeName } from "@chronicle/core";
+import type { KnowledgeItem, KnowledgeStatusName, KnowledgeTypeName } from "@codicil/core";
 import * as vscode from "vscode";
 
 import { itemIcon, itemTooltip, relativeTime, statusLabel, typeLabel } from "../present.js";
-import type { ChronicleSession } from "../session.js";
+import type { CodicilSession } from "../session.js";
 
 /**
  * The knowledge tree groups reviewed project knowledge by type, status or scope.
@@ -32,7 +32,7 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
   #search = "";
   readonly #emitter = new vscode.EventEmitter<void>();
 
-  constructor(private readonly session: ChronicleSession) {
+  constructor(private readonly session: CodicilSession) {
     this.onDidChangeTreeData = this.#emitter.event;
     session.onDidChange(() => this.#emitter.fire());
   }
@@ -84,7 +84,7 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
         return [
           {
             kind: "message",
-            label: "Chronicle could not read this knowledge layer",
+            label: "Codicil could not read this knowledge layer",
             detail: this.session.loadError,
             icon: "error",
           },
@@ -146,7 +146,7 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
   }
 
   #groups(items: readonly KnowledgeItem[]): Node[] {
-    const groupBy = vscode.workspace.getConfiguration("chronicle").get<string>("groupBy") ?? "type";
+    const groupBy = vscode.workspace.getConfiguration("codicil").get<string>("groupBy") ?? "type";
 
     if (groupBy === "status") {
       const statuses: KnowledgeStatusName[] = ["stale", "active", "confirmed", "proposed", "archived"];
@@ -196,7 +196,7 @@ export class KnowledgeTree implements vscode.TreeDataProvider<Node> {
     row.tooltip = itemTooltip(item);
     row.contextValue = item.status === "archived" ? "item.archived" : "item";
     row.command = {
-      command: "chronicle.showItem",
+      command: "codicil.showItem",
       title: "Show knowledge item",
       arguments: [item.id],
     };

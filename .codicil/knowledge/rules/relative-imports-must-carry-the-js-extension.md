@@ -17,7 +17,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 ---
 
 Every package is NodeNext ESM with verbatimModuleSyntax, so relative imports need an explicit .js extension and type-only imports need the import type form.

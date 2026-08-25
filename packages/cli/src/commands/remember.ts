@@ -5,7 +5,7 @@ import {
   classifyStatement,
   defaultExpiry,
   type KnowledgeDraft,
-} from "@chronicle/core";
+} from "@codicil/core";
 import type { Command } from "commander";
 
 import { collect, parseNumber } from "../options.js";
@@ -66,7 +66,7 @@ export function registerRemember(program: Command): void {
         source: "human",
         confidence: parseNumber(options.confidence, "confidence") ?? 0.9,
         scopes: options.scope?.length ? options.scope : classified.scopes,
-        provenance: { origin: "command", ref: "chronicle remember" },
+        provenance: { origin: "command", ref: "codicil remember" },
       };
       if (options.tag?.length) draft.tags = options.tag;
       if (options.path?.length) draft.paths = options.path;

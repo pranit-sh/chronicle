@@ -3,7 +3,7 @@ import { userInfo } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { type Actor, ChronicleStore } from "@chronicle/core";
+import { type Actor, CodicilStore } from "@codicil/core";
 
 const run = promisify(execFile);
 
@@ -17,8 +17,8 @@ export function resolveCwd(options: GlobalOptions): string {
   return options.cwd ? path.resolve(options.cwd) : process.cwd();
 }
 
-export async function openStore(options: GlobalOptions): Promise<ChronicleStore> {
-  return ChronicleStore.open(resolveCwd(options));
+export async function openStore(options: GlobalOptions): Promise<CodicilStore> {
+  return CodicilStore.open(resolveCwd(options));
 }
 
 export async function currentBranch(cwd: string): Promise<string | undefined> {
@@ -33,10 +33,10 @@ export async function currentBranch(cwd: string): Promise<string | undefined> {
 
 /**
  * Everything written through the CLI is attributed to a human, because agents
- * reach Chronicle through MCP and are only ever allowed to stage proposals.
+ * reach Codicil through MCP and are only ever allowed to stage proposals.
  */
 export async function resolveActor(options: GlobalOptions): Promise<Actor> {
-  const explicit = options.actor ?? process.env.CHRONICLE_ACTOR;
+  const explicit = options.actor ?? process.env.CODICIL_ACTOR;
   if (explicit) return { kind: "human", id: explicit };
 
   try {

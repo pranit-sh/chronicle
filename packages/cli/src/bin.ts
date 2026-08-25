@@ -1,4 +1,4 @@
-import { ChronicleError } from "@chronicle/core";
+import { CodicilError } from "@codicil/core";
 import { Command, CommanderError } from "commander";
 
 import { registerContext } from "./commands/context.js";
@@ -21,12 +21,12 @@ export function buildProgram(): Command {
   const program = new Command();
 
   program
-    .name("chronicle")
+    .name("codicil")
     .description(
       [
         "A developer-controlled, versioned knowledge layer for AI coding agents.",
         "",
-        "Knowledge lives as Markdown in .chronicle/ and is committed alongside your code,",
+        "Knowledge lives as Markdown in .codicil/ and is committed alongside your code,",
         "so it follows branches, reviews and merges exactly like the code does.",
       ].join("\n"),
     )
@@ -62,13 +62,13 @@ async function main(): Promise<void> {
       process.exitCode = error.exitCode;
       return;
     }
-    if (error instanceof ChronicleError) {
+    if (error instanceof CodicilError) {
       process.stderr.write(`${color.red("error")} ${error.message}\n`);
       process.exitCode = 1;
       return;
     }
     process.stderr.write(`${color.red("error")} ${(error as Error).message}\n`);
-    if (process.env.CHRONICLE_DEBUG) process.stderr.write(`${(error as Error).stack}\n`);
+    if (process.env.CODICIL_DEBUG) process.stderr.write(`${(error as Error).stack}\n`);
     process.exitCode = 1;
   }
 }

@@ -3,7 +3,7 @@ import {
   type VerificationOutcome,
   suggestedActions,
   verify,
-} from "@chronicle/core";
+} from "@codicil/core";
 import type { Command } from "commander";
 
 import { color, print, printJson, shortId, table } from "../ui.js";
@@ -111,7 +111,7 @@ export function registerVerify(program: Command): void {
 
       if (report.results.length === 0) {
         print(color.gray("Nothing to verify: no knowledge item has machine checkable evidence yet."));
-        print(color.gray("Attach some with chronicle evidence add <id> --grep <pattern> --in <glob>"));
+        print(color.gray("Attach some with codicil evidence add <id> --grep <pattern> --in <glob>"));
         return;
       }
 

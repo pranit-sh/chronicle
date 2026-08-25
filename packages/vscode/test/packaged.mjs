@@ -16,8 +16,8 @@ import { fileURLToPath } from "node:url";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const extensionRoot = path.resolve(here, "..");
 
-const workdir = await mkdtemp(path.join(tmpdir(), "chronicle-vsix-"));
-const vsix = path.join(workdir, "chronicle.vsix");
+const workdir = await mkdtemp(path.join(tmpdir(), "codicil-vsix-"));
+const vsix = path.join(workdir, "codicil.vsix");
 const unpacked = path.join(workdir, "unpacked");
 
 try {
@@ -61,7 +61,7 @@ try {
   execFileSync("node", [path.join(here, "smoke.mjs")], {
     cwd: extensionRoot,
     stdio: "inherit",
-    env: { ...process.env, CHRONICLE_EXTENSION_BUNDLE: entry },
+    env: { ...process.env, CODICIL_EXTENSION_BUNDLE: entry },
   });
 
   console.log("packaged vsix runs standalone");

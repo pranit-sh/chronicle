@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ChronicleConfigSchema,
+  CodicilConfigSchema,
   DEFAULT_CONFIG,
   EvidenceSchema,
   KnowledgeFrontmatterSchema,
@@ -17,9 +17,9 @@ const baseFrontmatter = {
   actor: { kind: "human", id: "vinay" },
 };
 
-describe("ChronicleConfigSchema", () => {
+describe("CodicilConfigSchema", () => {
   it("fills nested defaults when given an empty object", () => {
-    const config = ChronicleConfigSchema.parse({});
+    const config = CodicilConfigSchema.parse({});
     expect(config.budget.maxItems).toBe(25);
     expect(config.budget.maxChars).toBe(8000);
     expect(config.authority.autoLearn).toBe(true);
@@ -35,12 +35,12 @@ describe("ChronicleConfigSchema", () => {
   });
 
   it("rejects malformed scope ids", () => {
-    const result = ChronicleConfigSchema.safeParse({ scopes: { "Backend API": ["src/**"] } });
+    const result = CodicilConfigSchema.safeParse({ scopes: { "Backend API": ["src/**"] } });
     expect(result.success).toBe(false);
   });
 
   it("accepts dotted scope ids", () => {
-    const config = ChronicleConfigSchema.parse({ scopes: { "backend.api": ["src/api/**"] } });
+    const config = CodicilConfigSchema.parse({ scopes: { "backend.api": ["src/api/**"] } });
     expect(config.scopes["backend.api"]).toEqual(["src/api/**"]);
   });
 });

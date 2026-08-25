@@ -17,7 +17,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 ---
 
 ## Decision

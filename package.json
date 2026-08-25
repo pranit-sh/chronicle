@@ -1,5 +1,5 @@
 {
-  "name": "chronicle-monorepo",
+  "name": "codicil-monorepo",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "test": "vitest run && pnpm build && pnpm --filter chronicle-vscode test",
+    "test": "vitest run && pnpm build && pnpm --filter codicil-vscode test",
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "clean": "pnpm -r exec rm -rf dist"

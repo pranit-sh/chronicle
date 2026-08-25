@@ -15,19 +15,19 @@ import {
   rejectProposal,
   renderDiff,
 } from "../src/proposals.js";
-import { chroniclePaths } from "../src/paths.js";
+import { codicilPaths } from "../src/paths.js";
 import type { Actor } from "../src/schema.js";
-import { ChronicleStore } from "../src/store.js";
+import { CodicilStore } from "../src/store.js";
 
 const human: Actor = { kind: "human", id: "reviewer" };
 const agent: Actor = { kind: "agent", id: "cursor" };
 
 let root: string;
-let store: ChronicleStore;
+let store: CodicilStore;
 
 beforeEach(async () => {
-  root = await mkdtemp(path.join(tmpdir(), "chronicle-proposals-"));
-  store = await ChronicleStore.init(root, human);
+  root = await mkdtemp(path.join(tmpdir(), "codicil-proposals-"));
+  store = await CodicilStore.init(root, human);
 });
 
 afterEach(async () => {
@@ -35,8 +35,8 @@ afterEach(async () => {
 });
 
 async function setAuthority(patch: string): Promise<void> {
-  await writeFile(chroniclePaths(root).configFile, `version: 1\nauthority:\n${patch}\n`, "utf8");
-  store = await ChronicleStore.openAt(root);
+  await writeFile(codicilPaths(root).configFile, `version: 1\nauthority:\n${patch}\n`, "utf8");
+  store = await CodicilStore.openAt(root);
 }
 
 describe("proposeCreate", () => {
@@ -172,7 +172,7 @@ describe("acceptProposal", () => {
     expect(item?.scopes).toEqual(["backend"]);
     expect(await listProposals(store.paths)).toHaveLength(0);
 
-    const reopened = await ChronicleStore.openAt(root);
+    const reopened = await CodicilStore.openAt(root);
     expect(reopened.list()).toHaveLength(1);
   });
 
@@ -314,13 +314,13 @@ describe("proposal storage", () => {
       proposedBy: agent,
       reason: "Detected in conversation",
     });
-    const raw = await readFile(path.join(root, ".chronicle/proposals", `${proposal.id}.yaml`), "utf8");
+    const raw = await readFile(path.join(root, ".codicil/proposals", `${proposal.id}.yaml`), "utf8");
     expect(raw).toContain("op: create");
     expect(raw).toContain("reason: Detected in conversation");
   });
 
   it("reports a corrupt proposal instead of ignoring it", async () => {
-    await writeFile(path.join(root, ".chronicle/proposals/broken.yaml"), "op: nonsense\n", "utf8");
+    await writeFile(path.join(root, ".codicil/proposals/broken.yaml"), "op: nonsense\n", "utf8");
     await expect(listProposals(store.paths)).rejects.toThrow(/not a valid proposal/);
   });
 });

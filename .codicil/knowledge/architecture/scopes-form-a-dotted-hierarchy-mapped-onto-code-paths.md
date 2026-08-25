@@ -17,7 +17,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 evidence:
   - expect: present
     lastCheckedAt: 2026-08-18T12:20:58.832Z

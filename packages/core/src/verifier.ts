@@ -6,7 +6,7 @@ import {
   type KnowledgeItem,
   VERIFIABLE_EVIDENCE_KINDS,
 } from "./schema.js";
-import type { ChronicleStore } from "./store.js";
+import type { CodicilStore } from "./store.js";
 
 /**
  * Re-checks stored knowledge against the working tree.
@@ -116,7 +116,7 @@ function applyResults(checks: readonly EvidenceCheck[], checkedAt: string): Evid
 }
 
 export async function verify(
-  store: ChronicleStore,
+  store: CodicilStore,
   actor: Actor,
   options: VerifyOptions = {},
 ): Promise<VerifyReport> {

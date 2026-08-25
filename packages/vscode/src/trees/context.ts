@@ -3,16 +3,16 @@ import {
   type DroppedEntry,
   type ResolvedEntry,
   resolveContextForStore,
-} from "@chronicle/core";
+} from "@codicil/core";
 import * as vscode from "vscode";
 
 import { itemIcon } from "../present.js";
-import type { ChronicleSession } from "../session.js";
+import type { CodicilSession } from "../session.js";
 
 /**
  * What an agent would actually be told about the file in front of you.
  *
- * This is the transparency view: not everything Chronicle knows, but the exact
+ * This is the transparency view: not everything Codicil knows, but the exact
  * package the resolver would hand over right now, in the order it would appear,
  * including what got dropped for the budget.
  */
@@ -28,7 +28,7 @@ export class ContextTree implements vscode.TreeDataProvider<Node> {
   readonly #emitter = new vscode.EventEmitter<void>();
   #task = "";
 
-  constructor(private readonly session: ChronicleSession) {
+  constructor(private readonly session: CodicilSession) {
     this.onDidChangeTreeData = this.#emitter.event;
     session.onDidChange(() => this.#emitter.fire());
     vscode.window.onDidChangeActiveTextEditor(() => this.#emitter.fire());
@@ -71,7 +71,7 @@ export class ContextTree implements vscode.TreeDataProvider<Node> {
         row.iconPath = new vscode.ThemeIcon("eye");
         row.description = `${stats.itemCount} items · ${stats.totalChars} chars`;
         row.contextValue = "contextHeader";
-        row.command = { command: "chronicle.showContext", title: "Open the full package" };
+        row.command = { command: "codicil.showContext", title: "Open the full package" };
         const tooltip = new vscode.MarkdownString();
         tooltip.appendMarkdown(`Scopes: \`${trace.activeScopes.join(" > ")}\`\n\n`);
         if (trace.task) tooltip.appendMarkdown(`Task: ${trace.task}\n\n`);
@@ -87,7 +87,7 @@ export class ContextTree implements vscode.TreeDataProvider<Node> {
         row.iconPath = itemIcon(node.entry.item);
         row.description = `#${node.rank}`;
         row.command = {
-          command: "chronicle.showItem",
+          command: "codicil.showItem",
           title: "Show knowledge item",
           arguments: [node.entry.item.id],
         };
@@ -110,7 +110,7 @@ export class ContextTree implements vscode.TreeDataProvider<Node> {
         row.description = node.dropped.reason;
         row.tooltip = node.dropped.reason;
         row.command = {
-          command: "chronicle.showItem",
+          command: "codicil.showItem",
           title: "Show knowledge item",
           arguments: [node.dropped.id],
         };

@@ -17,7 +17,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 evidence:
   - expect: present
     minMatches: 1
@@ -28,4 +28,4 @@ evidence:
     glob: packages/*/test/**/*.test.ts
 ---
 
-The root vitest.config.ts aliases @chronicle/core to its source, so tests run against the current source without building first. Store and MCP tests work against a real temporary .chronicle directory rather than mocking the filesystem.
+The root vitest.config.ts aliases @codicil/core to its source, so tests run against the current source without building first. Store and MCP tests work against a real temporary .codicil directory rather than mocking the filesystem.

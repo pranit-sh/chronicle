@@ -1,5 +1,5 @@
 import {
-  ChronicleError,
+  CodicilError,
   type DiffLine,
   type Proposal,
   acceptProposal,
@@ -10,7 +10,7 @@ import {
   proposeCreate,
   rejectProposal,
   resolveProposal,
-} from "@chronicle/core";
+} from "@codicil/core";
 import type { Command } from "commander";
 
 import { collect } from "../options.js";
@@ -71,7 +71,7 @@ export function registerProposals(program: Command): void {
       print();
       print(
         color.gray(
-          `Review with chronicle diff <id>, then chronicle accept <id> or chronicle reject <id>.`,
+          `Review with codicil diff <id>, then codicil accept <id> or codicil reject <id>.`,
         ),
       );
     });
@@ -110,7 +110,7 @@ export function registerProposals(program: Command): void {
         print(colorizeDiff(diff));
       });
       print();
-      print(color.gray("chronicle accept <id> · chronicle accept <id> --title \"...\" --scope <scope> · chronicle reject <id>"));
+      print(color.gray("codicil accept <id> · codicil accept <id> --title \"...\" --scope <scope> · codicil reject <id>"));
     });
 
   program
@@ -225,7 +225,7 @@ export function registerProposals(program: Command): void {
         });
       } else {
         if (statement.length === 0) {
-          throw new ChronicleError("invalid_input", "Say what to propose, or pass --update / --archive.");
+          throw new CodicilError("invalid_input", "Say what to propose, or pass --update / --archive.");
         }
         const text = statement.join(" ");
         const classified = classifyStatement(text, Object.keys(store.config.scopes));
@@ -236,7 +236,7 @@ export function registerProposals(program: Command): void {
             body: classified.body,
             scopes: options.scope?.length ? options.scope : classified.scopes,
             ...(classified.enforcement ? { enforcement: classified.enforcement } : {}),
-            provenance: { origin: "command", ref: "chronicle propose" },
+            provenance: { origin: "command", ref: "codicil propose" },
           },
           proposedBy,
           reason,
@@ -252,6 +252,6 @@ export function registerProposals(program: Command): void {
       print();
       print(colorizeDiff(proposalDiff(proposal, proposal.targetId ? store.get(proposal.targetId) : undefined)));
       print();
-      print(color.gray(`Review it with chronicle diff ${shortId(proposal.id)}`));
+      print(color.gray(`Review it with codicil diff ${shortId(proposal.id)}`));
     });
 }

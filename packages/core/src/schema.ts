@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * The single source of truth for every Chronicle data shape. The CLI, the MCP
+ * The single source of truth for every Codicil data shape. The CLI, the MCP
  * server and the future VS Code extension all validate through these schemas,
  * and the MCP tool definitions reuse them directly as `inputSchema`.
  */
@@ -18,7 +18,7 @@ export const KNOWLEDGE_TYPES = [
 export type KnowledgeTypeName = (typeof KNOWLEDGE_TYPES)[number];
 export const KnowledgeTypeSchema = z.enum(KNOWLEDGE_TYPES);
 
-/** Directory under `.chronicle/knowledge/` that holds each type. */
+/** Directory under `.codicil/knowledge/` that holds each type. */
 export const TYPE_DIRECTORIES: Record<KnowledgeTypeName, string> = {
   rule: "rules",
   decision: "decisions",
@@ -437,7 +437,7 @@ export const DEFAULT_EXCLUDES = [
   "**/*.key",
 ];
 
-export const ChronicleConfigSchema = z.object({
+export const CodicilConfigSchema = z.object({
   version: z.literal(1).default(1),
   /** Maps a scope id to the code paths that activate it. */
   scopes: z.record(ScopeIdSchema, z.array(z.string().min(1))).default({}),
@@ -447,6 +447,6 @@ export const ChronicleConfigSchema = z.object({
   /** Paths the verifier never reads and the resolver never matches against. */
   exclude: z.array(z.string().min(1)).default(DEFAULT_EXCLUDES),
 });
-export type ChronicleConfig = z.infer<typeof ChronicleConfigSchema>;
+export type CodicilConfig = z.infer<typeof CodicilConfigSchema>;
 
-export const DEFAULT_CONFIG: ChronicleConfig = ChronicleConfigSchema.parse({});
+export const DEFAULT_CONFIG: CodicilConfig = CodicilConfigSchema.parse({});

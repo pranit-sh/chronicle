@@ -1,18 +1,18 @@
 import {
-  ChronicleStore,
+  CodicilStore,
   type Diagnosis,
   type DiagnosisLevel,
-  chronicleSizeBytes,
+  codicilSizeBytes,
   isHealthy,
   runDoctor,
-} from "@chronicle/core";
+} from "@codicil/core";
 import type { Command } from "commander";
 
 import { color, print, printJson, table } from "../ui.js";
 import { type GlobalOptions, resolveCwd } from "../workspace.js";
 
 const LEVEL_HEADING: Record<DiagnosisLevel, string> = {
-  error: "Problems that stop Chronicle working",
+  error: "Problems that stop Codicil working",
   warning: "Worth fixing",
   info: "Notes",
 };
@@ -49,7 +49,7 @@ export function registerDoctor(program: Command): void {
       const report = await runDoctor(cwd);
 
       if (options.json) {
-        printJson({ ...report, sizeBytes: report.initialized ? await chronicleSizeBytes(cwd) : 0 });
+        printJson({ ...report, sizeBytes: report.initialized ? await codicilSizeBytes(cwd) : 0 });
         process.exitCode = isHealthy(report) ? 0 : 1;
         return;
       }
@@ -73,7 +73,7 @@ export function registerDoctor(program: Command): void {
       let itemCount = 0;
       let openError = "";
       try {
-        const store = await ChronicleStore.openAt(report.root);
+        const store = await CodicilStore.openAt(report.root);
         itemCount = store.all().length;
       } catch (error) {
         storeOpens = false;
@@ -83,7 +83,7 @@ export function registerDoctor(program: Command): void {
       print();
       const facts: string[][] = [
         [color.gray("items"), `${report.itemsChecked} checked`],
-        [color.gray("size"), humanBytes(await chronicleSizeBytes(cwd))],
+        [color.gray("size"), humanBytes(await codicilSizeBytes(cwd))],
         [
           color.gray("store"),
           storeOpens

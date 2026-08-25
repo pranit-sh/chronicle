@@ -1,8 +1,8 @@
 import { newKnowledgeId } from "../src/ids.js";
 import { extractSections } from "../src/sections.js";
 import {
-  type ChronicleConfig,
-  ChronicleConfigSchema,
+  type CodicilConfig,
+  CodicilConfigSchema,
   KnowledgeFrontmatterSchema,
   type KnowledgeItem,
 } from "../src/schema.js";
@@ -25,12 +25,12 @@ export function makeItem(overrides: Record<string, unknown> = {}): KnowledgeItem
     ...frontmatter,
     body: text,
     sections: extractSections(text),
-    filePath: `/repo/.chronicle/knowledge/${frontmatter.type}/${frontmatter.id}.md`,
+    filePath: `/repo/.codicil/knowledge/${frontmatter.type}/${frontmatter.id}.md`,
   };
 }
 
-export function makeConfig(overrides: Record<string, unknown> = {}): ChronicleConfig {
-  return ChronicleConfigSchema.parse(overrides);
+export function makeConfig(overrides: Record<string, unknown> = {}): CodicilConfig {
+  return CodicilConfigSchema.parse(overrides);
 }
 
 export const LAYERED_SCOPES = {

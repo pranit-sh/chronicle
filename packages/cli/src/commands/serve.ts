@@ -1,4 +1,4 @@
-import { serveChronicleStdio } from "@chronicle/mcp";
+import { serveCodicilStdio } from "codicil-mcp";
 import type { Command } from "commander";
 
 import { type GlobalOptions, resolveCwd } from "../workspace.js";
@@ -12,7 +12,7 @@ export function registerServe(program: Command): void {
       const options = this.optsWithGlobals<GlobalOptions & { agent?: string }>();
       const cwd = resolveCwd(options);
       // stdout is the MCP transport from here on, so this notice goes to stderr.
-      process.stderr.write(`chronicle: serving knowledge from ${cwd} over stdio\n`);
-      serveChronicleStdio({ cwd, ...(options.agent ? { agentId: options.agent } : {}) });
+      process.stderr.write(`codicil: serving knowledge from ${cwd} over stdio\n`);
+      serveCodicilStdio({ cwd, ...(options.agent ? { agentId: options.agent } : {}) });
     });
 }

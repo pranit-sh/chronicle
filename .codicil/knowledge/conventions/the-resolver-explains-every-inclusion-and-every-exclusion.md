@@ -16,7 +16,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 ---
 
-Each resolved entry carries its component signal scores and human readable reasons, and every dropped candidate carries why it was dropped. This is what chronicle context --trace prints, and it is what makes scoring changes testable with fixtures instead of judged by feel.
+Each resolved entry carries its component signal scores and human readable reasons, and every dropped candidate carries why it was dropped. This is what codicil context --trace prints, and it is what makes scoring changes testable with fixtures instead of judged by feel.

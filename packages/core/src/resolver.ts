@@ -2,14 +2,14 @@ import { toRepoRelative } from "./paths.js";
 import { ROOT_SCOPE } from "./schema.js";
 import type {
   Budget,
-  ChronicleConfig,
+  CodicilConfig,
   KnowledgeItem,
   KnowledgeSourceName,
   KnowledgeTypeName,
 } from "./schema.js";
 import { ScopeResolver, coversScope, pathsMatch, scopeDepth } from "./scope.js";
 import { leadParagraph, truncate } from "./sections.js";
-import type { ChronicleStore } from "./store.js";
+import type { CodicilStore } from "./store.js";
 
 /**
  * The resolver answers one question: what is the smallest amount of correct,
@@ -117,7 +117,7 @@ export interface ContextPackage {
 
 export interface ResolutionInput {
   items: readonly KnowledgeItem[];
-  config: ChronicleConfig;
+  config: CodicilConfig;
   root: string;
 }
 
@@ -374,7 +374,7 @@ export function resolveContext(input: ResolutionInput, request: ResolutionReques
 }
 
 export function resolveContextForStore(
-  store: ChronicleStore,
+  store: CodicilStore,
   request: ResolutionRequest = {},
 ): ContextPackage {
   return resolveContext({ items: store.all(), config: store.config, root: store.root }, request);

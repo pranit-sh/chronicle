@@ -155,10 +155,10 @@ Module._load = function load(request, parent, isMain) {
 
 // --- fixture --------------------------------------------------------------
 
-workspaceRoot = await mkdtemp(path.join(tmpdir(), "chronicle-vscode-"));
+workspaceRoot = await mkdtemp(path.join(tmpdir(), "codicil-vscode-"));
 const core = require("../../core/dist/index.js");
 const actor = { kind: "human", id: "tester" };
-const store = await core.ChronicleStore.init(workspaceRoot, actor);
+const store = await core.CodicilStore.init(workspaceRoot, actor);
 
 await mkdir(path.join(workspaceRoot, "src/api"), { recursive: true });
 await writeFile(path.join(workspaceRoot, "src/api/users.ts"), "export const list = () => [];\n");
@@ -198,8 +198,8 @@ await core.proposeCreate(store, {
 
 // Defaults to the freshly built bundle. Point it at an extracted .vsix to
 // prove the shipped artifact runs without any node_modules beside it.
-const bundle = process.env.CHRONICLE_EXTENSION_BUNDLE
-  ? path.resolve(process.env.CHRONICLE_EXTENSION_BUNDLE)
+const bundle = process.env.CODICIL_EXTENSION_BUNDLE
+  ? path.resolve(process.env.CODICIL_EXTENSION_BUNDLE)
   : "../dist/extension.cjs";
 const extension = require(bundle);
 const subscriptions = [];
@@ -208,20 +208,20 @@ await extension.activate({ subscriptions });
 assert.ok(subscriptions.length > 0, "activate registered nothing");
 
 for (const name of [
-  "chronicle.init",
-  "chronicle.remember",
-  "chronicle.refresh",
-  "chronicle.showItem",
-  "chronicle.verifyAll",
-  "chronicle.acceptProposal",
-  "chronicle.rejectProposal",
-  "chronicle.showContext",
-  "chronicle.doctor",
+  "codicil.init",
+  "codicil.remember",
+  "codicil.refresh",
+  "codicil.showItem",
+  "codicil.verifyAll",
+  "codicil.acceptProposal",
+  "codicil.rejectProposal",
+  "codicil.showContext",
+  "codicil.doctor",
 ]) {
   assert.ok(registered.has(name), `command ${name} was not registered`);
 }
 
-const knowledge = events.get("chronicle.knowledge");
+const knowledge = events.get("codicil.knowledge");
 const groups = knowledge.getChildren();
 assert.ok(groups.length >= 2, "expected the knowledge to be grouped by type");
 assert.ok(
@@ -237,7 +237,7 @@ for (const group of groups) {
   for (const child of knowledge.getChildren(group)) {
     const childRow = knowledge.getTreeItem(child);
     assert.ok(childRow.label, "an item row needs a label");
-    assert.equal(childRow.command.command, "chronicle.showItem");
+    assert.equal(childRow.command.command, "codicil.showItem");
     itemRows.push(childRow);
   }
 }
@@ -247,19 +247,19 @@ const staleRow = itemRows.find((row) => row.label === "Postgres over MongoDB");
 assert.ok(staleRow, "the stale decision is missing from the tree");
 assert.match(staleRow.description, /stale/, "a stale item should say so on its row");
 
-const proposals = events.get("chronicle.proposals");
+const proposals = events.get("codicil.proposals");
 const pending = proposals.getChildren();
 assert.equal(pending.length, 1, "expected one pending proposal");
 const proposalRow = proposals.getTreeItem(pending[0]);
 assert.match(proposalRow.label, /New architecture/, `unexpected proposal row: ${proposalRow.label}`);
 
-const contextTree = events.get("chronicle.context");
+const contextTree = events.get("codicil.context");
 const contextRows = contextTree.getChildren();
 assert.equal(contextRows[0].kind, "header", "the context view should lead with the package header");
 for (const row of contextRows) contextTree.getTreeItem(row);
 
 // Accepting has to move the proposal into the knowledge base.
-await registered.get("chronicle.acceptProposal")(pending[0].id);
+await registered.get("codicil.acceptProposal")(pending[0].id);
 assert.equal(proposals.getChildren().length, 0, "the accepted proposal should be gone");
 assert.ok(
   knowledge
@@ -270,8 +270,8 @@ assert.ok(
 
 // The detail panel is structured HTML over the frontmatter, with the body
 // rendered as real Markdown.
-await registered.get("chronicle.showItem")(decision.id);
-const detail = panels.find((panel) => panel.viewType === "chronicle.detail");
+await registered.get("codicil.showItem")(decision.id);
+const detail = panels.find((panel) => panel.viewType === "codicil.detail");
 assert.ok(detail, "showItem did not open a detail panel");
 const html = detail.webview.html;
 
@@ -292,12 +292,12 @@ assert.doesNotMatch(html, /\*\*Postgres\*\*/, "raw Markdown leaked into the pane
 // Raw HTML in a body must never reach the panel: bodies arrive through merges
 // and accepted agent proposals.
 await store.update(decision.id, { body: 'Careful: <img src=x onerror="alert(1)">' }, actor);
-await registered.get("chronicle.refresh")();
-await registered.get("chronicle.showItem")(decision.id);
+await registered.get("codicil.refresh")();
+await registered.get("codicil.showItem")(decision.id);
 assert.doesNotMatch(detail.webview.html, /<img/, "raw HTML in a body was not escaped");
 
-await registered.get("chronicle.doctor")();
-await registered.get("chronicle.verifyAll")();
+await registered.get("codicil.doctor")();
+await registered.get("codicil.verifyAll")();
 
 await rm(workspaceRoot, { recursive: true, force: true });
 console.log("vscode smoke test passed");

@@ -1,7 +1,7 @@
 ---
 id: k_01M0A5D90ZB8MZ6KWC7H17GP1W
 type: architecture
-title: Chronicle is a pnpm monorepo of three packages
+title: Codicil is a pnpm monorepo of four packages
 status: active
 lifetime: permanent
 scopes:
@@ -17,7 +17,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 evidence:
   - expect: present
     minMatches: 3
@@ -28,4 +28,4 @@ evidence:
     glob: packages/*/package.json
 ---
 
-@chronicle/core holds the schema, store, scope model, resolver, verifier and history. @chronicle/mcp serves that core to coding agents over MCP. The chronicle CLI drives all of it from a terminal and can start the MCP server with chronicle serve. Core depends on nothing but zod, yaml, picomatch and ulid, so it can be embedded in a VS Code extension later without dragging in a server.
+@codicil/core holds the schema, store, scope model, resolver, verifier and history. codicil-mcp serves that core to coding agents over MCP. The codicil CLI drives all of it from a terminal and can start the MCP server with codicil serve. codicil-vscode wraps the same core in a VS Code extension. Core depends on nothing but zod, yaml, picomatch and ulid, so it can be embedded in a VS Code extension without dragging in a server.

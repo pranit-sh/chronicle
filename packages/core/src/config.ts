@@ -2,12 +2,12 @@ import { readFile } from "node:fs/promises";
 
 import { parse as parseYaml } from "yaml";
 
-import { ChronicleError, formatZodError } from "./errors.js";
+import { CodicilError, formatZodError } from "./errors.js";
 import { atomicWrite } from "./fs-utils.js";
-import type { ChroniclePaths } from "./paths.js";
-import { type ChronicleConfig, ChronicleConfigSchema, DEFAULT_CONFIG } from "./schema.js";
+import type { CodicilPaths } from "./paths.js";
+import { type CodicilConfig, CodicilConfigSchema, DEFAULT_CONFIG } from "./schema.js";
 
-export async function loadConfig(paths: ChroniclePaths): Promise<ChronicleConfig> {
+export async function loadConfig(paths: CodicilPaths): Promise<CodicilConfig> {
   let raw: string;
   try {
     raw = await readFile(paths.configFile, "utf8");
@@ -18,16 +18,16 @@ export async function loadConfig(paths: ChroniclePaths): Promise<ChronicleConfig
   try {
     parsed = raw.trim() ? parseYaml(raw) : {};
   } catch (error) {
-    throw new ChronicleError(
+    throw new CodicilError(
       "invalid_config",
       `${paths.configFile} is not valid YAML: ${(error as Error).message}`,
     );
   }
-  const result = ChronicleConfigSchema.safeParse(parsed ?? {});
+  const result = CodicilConfigSchema.safeParse(parsed ?? {});
   if (!result.success) {
-    throw new ChronicleError(
+    throw new CodicilError(
       "invalid_config",
-      formatZodError(result.error, `${paths.configFile} is not a valid Chronicle config:`),
+      formatZodError(result.error, `${paths.configFile} is not a valid Codicil config:`),
       result.error.issues,
     );
   }
@@ -39,7 +39,7 @@ export async function loadConfig(paths: ChroniclePaths): Promise<ChronicleConfig
  * dump, because the developer is meant to own and edit this file.
  */
 export function defaultConfigYaml(): string {
-  return `# Chronicle configuration. This file is committed, so knowledge settings
+  return `# Codicil configuration. This file is committed, so knowledge settings
 # travel with the branch just like the knowledge itself.
 version: 1
 
@@ -65,7 +65,7 @@ authority:
   autoLearn: true
   # Agents may propose changes to accepted rules and decisions.
   autoModifyRules: false
-  # \`chronicle verify\` may archive items whose evidence has vanished.
+  # \`codicil verify\` may archive items whose evidence has vanished.
   autoArchiveStale: false
   detectContradictions: true
 
@@ -88,6 +88,6 @@ exclude:
 `;
 }
 
-export async function writeDefaultConfig(paths: ChroniclePaths): Promise<void> {
+export async function writeDefaultConfig(paths: CodicilPaths): Promise<void> {
   await atomicWrite(paths.configFile, defaultConfigYaml());
 }

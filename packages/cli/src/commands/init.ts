@@ -1,4 +1,4 @@
-import { CHRONICLE_DIR, ChronicleStore } from "@chronicle/core";
+import { CODICIL_DIR, CodicilStore } from "@codicil/core";
 import type { Command } from "commander";
 
 import { color, print, printJson } from "../ui.js";
@@ -7,26 +7,26 @@ import { type GlobalOptions, resolveActor, resolveCwd } from "../workspace.js";
 export function registerInit(program: Command): void {
   program
     .command("init")
-    .description(`Create the ${CHRONICLE_DIR} knowledge layer in this project`)
+    .description(`Create the ${CODICIL_DIR} knowledge layer in this project`)
     .action(async function (this: Command) {
       const options = this.optsWithGlobals<GlobalOptions>();
       const root = resolveCwd(options);
       const actor = await resolveActor(options);
-      const store = await ChronicleStore.init(root, actor);
+      const store = await CodicilStore.init(root, actor);
 
       if (options.json) {
-        printJson({ root, chronicleDir: store.paths.chronicleDir });
+        printJson({ root, codicilDir: store.paths.codicilDir });
         return;
       }
 
       print(
-        `${color.green("Initialized")} the Chronicle knowledge layer in ${color.bold(`${CHRONICLE_DIR}/`)}`,
+        `${color.green("Initialized")} the Codicil knowledge layer in ${color.bold(`${CODICIL_DIR}/`)}`,
       );
       print();
       print("Next steps:");
-      print(`  1. Describe your scopes in ${color.bold(`${CHRONICLE_DIR}/config.yaml`)}`);
-      print(`  2. Capture durable human-authored knowledge: ${color.bold('chronicle remember "Never edit generated/**"')}`);
-      print(`  3. Connect your coding agent to MCP with: ${color.bold("chronicle serve")}`);
-      print(`  4. Preview resolved agent context with: ${color.bold("chronicle context --file src/index.ts")}`);
+      print(`  1. Describe your scopes in ${color.bold(`${CODICIL_DIR}/config.yaml`)}`);
+      print(`  2. Capture durable human-authored knowledge: ${color.bold('codicil remember "Never edit generated/**"')}`);
+      print(`  3. Connect your coding agent to MCP with: ${color.bold("codicil serve")}`);
+      print(`  4. Preview resolved agent context with: ${color.bold("codicil context --file src/index.ts")}`);
     });
 }

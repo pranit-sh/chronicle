@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-# Recreates Chronicle's own knowledge layer from scratch.
+# Recreates Codicil's own knowledge layer from scratch.
 #
-# Chronicle dogfoods itself: this repository's rules, decisions and conventions
-# live in .chronicle/ and are served to coding agents over MCP. Editing the
-# Markdown in .chronicle/knowledge by hand is expected and supported; this script
+# Codicil dogfoods itself: this repository's rules, decisions and conventions
+# live in .codicil/ and are served to coding agents over MCP. Editing the
+# Markdown in .codicil/knowledge by hand is expected and supported; this script
 # exists so the seed set can be rebuilt or reviewed as a whole.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 CLI="node packages/cli/dist/bin.js"
 
-if [ -d .chronicle ]; then
-  echo "refusing to overwrite the existing .chronicle; remove it first" >&2
+if [ -d .codicil ]; then
+  echo "refusing to overwrite the existing .codicil; remove it first" >&2
   exit 1
 fi
 
 $CLI init >/dev/null
 
-cat > .chronicle/config.yaml <<'YAML'
-# Chronicle configuration. This file is committed, so knowledge settings
+cat > .codicil/config.yaml <<'YAML'
+# Codicil configuration. This file is committed, so knowledge settings
 # travel with the branch just like the knowledge itself.
 version: 1
 
@@ -63,9 +63,9 @@ remember() { $CLI remember "$@" >/dev/null; }
 
 # --- Rules ----------------------------------------------------------------
 
-remember "The Markdown in .chronicle/knowledge is the only source of truth" \
+remember "The Markdown in .codicil/knowledge is the only source of truth" \
   --type rule --scope core.store --enforcement must --pin \
-  --body "The in-memory index and .chronicle/.cache/index.json are derived. Both can be deleted at any time and must be rebuilt from the Markdown, never the other way round. A developer editing a knowledge file by hand is a supported workflow, not an edge case."
+  --body "The in-memory index and .codicil/.cache/index.json are derived. Both can be deleted at any time and must be rebuilt from the Markdown, never the other way round. A developer editing a knowledge file by hand is a supported workflow, not an edge case."
 
 remember "Never write anything but protocol messages to stdout in the MCP server" \
   --type rule --scope mcp --enforcement never \
@@ -73,15 +73,15 @@ remember "Never write anything but protocol messages to stdout in the MCP server
 
 remember "Agents may only stage proposals, never accept them" \
   --type rule --scope mcp --enforcement never --pin \
-  --body "The MCP server deliberately exposes no accept, edit or delete tool. An agent can write to .chronicle/proposals and nowhere else, so a human always decides what the project believes. Adding a tool that mutates .chronicle/knowledge directly would break the core product promise."
+  --body "The MCP server deliberately exposes no accept, edit or delete tool. An agent can write to .codicil/proposals and nowhere else, so a human always decides what the project believes. Adding a tool that mutates .codicil/knowledge directly would break the core product promise."
 
-remember "All knowledge writes go through ChronicleStore" \
+remember "All knowledge writes go through CodicilStore" \
   --type rule --scope core --enforcement must \
-  --body "Never touch files under .chronicle/knowledge with fs directly. The store owns id generation, slug uniqueness, atomic writes, archive moves, the index and the history log; bypassing it desynchronises all five."
+  --body "Never touch files under .codicil/knowledge with fs directly. The store owns id generation, slug uniqueness, atomic writes, archive moves, the index and the history log; bypassing it desynchronises all five."
 
 remember "Validate every external shape with the Zod schemas before it reaches the store" \
   --type rule --enforcement must \
-  --body "packages/core/src/schema.ts is the single source of truth for every Chronicle data shape. CLI input, MCP tool arguments, YAML frontmatter and the index cache all parse through it, so a malformed file fails loudly at the boundary instead of corrupting knowledge."
+  --body "packages/core/src/schema.ts is the single source of truth for every Codicil data shape. CLI input, MCP tool arguments, YAML frontmatter and the index cache all parse through it, so a malformed file fails loudly at the boundary instead of corrupting knowledge."
 
 remember "Relative imports must carry the .js extension" \
   --type rule --enforcement must \
@@ -91,7 +91,7 @@ remember "Relative imports must carry the .js extension" \
 
 remember "Knowledge is Markdown with YAML frontmatter, not a database" \
   --type decision --scope core.store --body "## Decision
-One Markdown file per knowledge item under .chronicle/knowledge, with YAML frontmatter, committed to Git.
+One Markdown file per knowledge item under .codicil/knowledge, with YAML frontmatter, committed to Git.
 
 ## Rationale
 The product thesis is Knowledge Git: knowledge has to diff, branch, review and merge like code, and a developer has to be able to open it in an editor. A single binary database is opaque in Git and produces no meaningful conflicts.
@@ -100,9 +100,9 @@ The product thesis is Knowledge Git: knowledge has to diff, branch, review and m
 SQLite as the source of truth, rejected because it defeats the versioning thesis. One JSON file per item, rejected as unpleasant to hand edit. An append-only JSONL event log, deferred as heavier than the MVP needs.
 
 ## Consequences
-Queries need an index, so the store keeps an in-memory map rebuilt from disk and cached, keyed by mtime, in the gitignored .chronicle/.cache."
+Queries need an index, so the store keeps an in-memory map rebuilt from disk and cached, keyed by mtime, in the gitignored .codicil/.cache."
 
-remember "Agents reach Chronicle over MCP, not through generated instruction files" \
+remember "Agents reach Codicil over MCP, not through generated instruction files" \
   --type decision --scope mcp --body "## Decision
 The first delivery mechanism is an MCP stdio server exposing context_resolve, knowledge_search, knowledge_get and knowledge_propose.
 
@@ -131,9 +131,9 @@ tsup delegates declaration bundling to rollup-plugin-dts, which crashes on the T
 
 # --- Architecture ---------------------------------------------------------
 
-remember "Chronicle is a pnpm monorepo of three packages" \
+remember "Codicil is a pnpm monorepo of four packages" \
   --type architecture --scope project \
-  --body "@chronicle/core holds the schema, store, scope model, resolver, verifier and history. @chronicle/mcp serves that core to coding agents over MCP. The chronicle CLI drives all of it from a terminal and can start the MCP server with chronicle serve. Core depends on nothing but zod, yaml, picomatch and ulid, so it can be embedded in a VS Code extension later without dragging in a server."
+  --body "@codicil/core holds the schema, store, scope model, resolver, verifier and history. codicil-mcp serves that core to coding agents over MCP. The codicil CLI drives all of it from a terminal and can start the MCP server with codicil serve. codicil-vscode wraps the same core in a VS Code extension. Core depends on nothing but zod, yaml, picomatch and ulid, so it can be embedded in a VS Code extension without dragging in a server."
 
 remember "Scopes form a dotted hierarchy mapped onto code paths" \
   --type architecture --scope core.resolver \
@@ -149,11 +149,11 @@ remember "A knowledge id is immutable; the filename is only a derived slug" \
 
 remember "Tests live in packages/*/test and run with Vitest from the repo root" \
   --type convention --scope tests \
-  --body "The root vitest.config.ts aliases @chronicle/core to its source, so tests run against the current source without building first. Store and MCP tests work against a real temporary .chronicle directory rather than mocking the filesystem."
+  --body "The root vitest.config.ts aliases @codicil/core to its source, so tests run against the current source without building first. Store and MCP tests work against a real temporary .codicil directory rather than mocking the filesystem."
 
 remember "The resolver explains every inclusion and every exclusion" \
   --type convention --scope core.resolver \
-  --body "Each resolved entry carries its component signal scores and human readable reasons, and every dropped candidate carries why it was dropped. This is what chronicle context --trace prints, and it is what makes scoring changes testable with fixtures instead of judged by feel."
+  --body "Each resolved entry carries its component signal scores and human readable reasons, and every dropped candidate carries why it was dropped. This is what codicil context --trace prints, and it is what makes scoring changes testable with fixtures instead of judged by feel."
 
 # --- Known issues ---------------------------------------------------------
 

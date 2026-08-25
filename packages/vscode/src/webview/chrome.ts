@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 
-import type { KnowledgeTypeName } from "@chronicle/core";
+import type { KnowledgeTypeName } from "@codicil/core";
 import * as vscode from "vscode";
 
 import { escapeHtml } from "../present.js";
@@ -113,6 +113,18 @@ export function callout(tone: Exclude<Tone, "neutral">, label: string, text: str
   return `<aside class="callout callout--${tone}">
 <span class="callout-icon">${glyph(mark)}</span>
 <span class="callout-text"><strong class="callout-label">${escapeHtml(label)}</strong>${escapeHtml(text)}</span>
+</aside>`;
+}
+
+/**
+ * A callout whose body is already trusted HTML — for asides that need inline
+ * `<code>` or other markup. Callers are responsible for escaping the content.
+ */
+export function calloutHtml(tone: Exclude<Tone, "neutral">, label: string, html: string): string {
+  const mark = tone === "bad" || tone === "warn" ? "issue" : "info";
+  return `<aside class="callout callout--${tone}">
+<span class="callout-icon">${glyph(mark)}</span>
+<span class="callout-text"><strong class="callout-label">${escapeHtml(label)}</strong>${html}</span>
 </aside>`;
 }
 

@@ -14,7 +14,7 @@ export default defineConfig({
   noExternal: [/^(?!vscode$)/],
   external: ["vscode"],
   dts: false,
-  // Bundling all of @chronicle/core and its dependencies makes this large
+  // Bundling all of @codicil/core and its dependencies makes this large
   // enough that minifying is worth it; the source map keeps stacks readable.
   minify: true,
   sourcemap: true,

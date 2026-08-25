@@ -5,7 +5,7 @@ import {
   type KnowledgeSourceName,
   type KnowledgeStatusName,
   type KnowledgeTypeName,
-} from "@chronicle/core";
+} from "@codicil/core";
 import type { Command } from "commander";
 
 import { collect } from "../options.js";

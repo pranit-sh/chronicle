@@ -1,4 +1,4 @@
-# Chronicle
+# Codicil
 
 A developer-controlled, versioned knowledge layer for AI coding agents.
 
@@ -8,11 +8,16 @@ already tried. Not because it is bad at code, but because nobody ever wrote down
 what this project actually is — and the places where you did write it down
 (`CLAUDE.md`, a wiki, a Slack thread) go stale silently.
 
-Chronicle makes that knowledge a real artifact: structured, versioned, checkable
+Codicil makes that knowledge a real artifact: structured, versioned, checkable
 against the code, and yours to control.
 
+> [!TIP]
+> Prefer a UI? The **[Codicil VS Code extension](packages/vscode)** gives you
+> the knowledge tree, proposal review and a live view of exactly what an agent
+> is told for the file you're editing.
+
 ```
-.chronicle/
+.codicil/
   config.yaml                            scope map, budget, what agents may do
   knowledge/
     rules/no-direct-db-in-handlers.md
@@ -30,7 +35,7 @@ follows branches, shows up in review, and merges the way code does.
 
 **Knowledge is typed.** A rule ("never call the database from an API handler")
 is not the same thing as a decision ("Postgres over MongoDB, because…") or a
-piece of temporary context ("we are mid-migration to Better Auth"). Chronicle
+piece of temporary context ("we are mid-migration to Better Auth"). Codicil
 stores seven types and treats them differently when it decides what an agent
 should see.
 
@@ -40,15 +45,41 @@ file you are editing and packs it under a budget, so the agent gets 12 relevant
 items rather than 200 irrelevant ones — and can explain every inclusion.
 
 **Knowledge is checkable.** An item can carry evidence: a file that must exist,
-a pattern that must not appear, a glob that must match. `chronicle verify`
+a pattern that must not appear, a glob that must match. `codicil verify`
 re-runs those predicates against the working tree. Nothing is inferred by an
 LLM; a failing check marks the item stale and asks you what to do.
 
-**AI proposes, you dispose.** Agents reach Chronicle over MCP and can stage
+**AI proposes, you dispose.** Agents reach Codicil over MCP and can stage
 proposals, never write. There is deliberately no accept tool, so an agent cannot
 ratify its own beliefs.
 
+> [!IMPORTANT]
+> Tool use is ultimately controlled by the agent client and model. If an agent
+> skips Codicil, prompt it explicitly: *“Use Codicil context for this task”*
+> or *“Propose this to Codicil if it should persist.”*
+
 ## Getting started
+
+Add Codicil to your agent by pointing it at the published MCP server. For
+example, in `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "codicil": {
+      "command": "npx",
+      "args": ["-y", "codicil-mcp"],
+      "env": { "CODICIL_ROOT": "${workspaceFolder}" }
+    }
+  }
+}
+```
+
+> [!NOTE]
+> The VS Code extension writes this config for you — run **Codicil: Configure
+> MCP for Copilot / Cursor / Claude Code** from the Command Palette.
+
+To work with the knowledge layer directly from the command line:
 
 ```bash
 pnpm install && pnpm build
@@ -58,33 +89,19 @@ node packages/cli/dist/bin.js remember "Never call the database directly from an
 node packages/cli/dist/bin.js context --file src/api/users.ts
 ```
 
-Point an agent at it by adding the MCP server to your client, for example
-`.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "chronicle": {
-      "command": "node",
-      "args": ["packages/mcp/dist/bin.js"]
-    }
-  }
-}
-```
-
 ## Packages
 
 | Package | Name | What it is |
 | --- | --- | --- |
-| `packages/core` | `@chronicle/core` | Schema, store, scope model, resolver, verifier, proposals, history, doctor |
-| `packages/cli` | `chronicle` | The command line |
-| `packages/mcp` | `@chronicle/mcp` | Stdio MCP server: read tools, a resource, and `knowledge_propose` |
-| `packages/vscode` | Chronicle for VS Code | Knowledge tree, proposal review, active-context view |
+| `packages/cli` | [`codicil`](https://www.npmjs.com/package/codicil) | The command line |
+| `packages/mcp` | [`codicil-mcp`](https://www.npmjs.com/package/codicil-mcp) | Stdio MCP server: read tools, a resource, and `knowledge_propose` |
+| `packages/vscode` | Codicil for VS Code | Knowledge tree, proposal review, active-context view |
+| `packages/core` | `@codicil/core` (bundled) | Schema, store, scope model, resolver, verifier, proposals, history, doctor |
 
 ## The command line
 
 ```
-init                              create .chronicle/ in this project
+init                              create .codicil/ in this project
 remember "<text>"                 capture knowledge, classified automatically
 list / show <ref>                 browse what the project knows
 context --file <path> --task …    exactly what an agent would receive
@@ -109,9 +126,9 @@ gated by `authority.autoLearn` in `config.yaml`. Agents are instructed to call
 when they judge that conversation information is durable project knowledge;
 they do not need to wait for an explicit “remember this” request.
 Tool use is still ultimately controlled by the agent client and model. If an
-agent skips Chronicle, prompt it explicitly: “Use Chronicle context for this
-task” or “Propose this to Chronicle if it should persist.”
-Resource: `chronicle://knowledge/{id}`. Prompt: `remember`.
+agent skips Codicil, prompt it explicitly: “Use Codicil context for this
+task” or “Propose this to Codicil if it should persist.”
+Resource: `codicil://knowledge/{id}`. Prompt: `remember`.
 
 ## What an item looks like
 
@@ -149,15 +166,15 @@ To run the VS Code extension against a real editor, press <kbd>F5</kbd> for an
 Extension Development Host, or install a build into the editor you already use:
 
 ```bash
-pnpm --filter chronicle-vscode package
-code --install-extension packages/vscode/chronicle-vscode-*.vsix --force
+pnpm --filter codicil-vscode package
+code --install-extension packages/vscode/codicil-vscode-*.vsix --force
 ```
 
 `cursor` works in place of `code`, and `--force` is what lets a rebuild replace
 an installed copy carrying the same version number.
 
-Chronicle dogfoods itself: this repository has its own `.chronicle/`, and the
-rules in it are verified by `chronicle verify` against this codebase.
+Codicil dogfoods itself: this repository has its own `.codicil/`, and the
+rules in it are verified by `codicil verify` against this codebase.
 
 ## License
 

@@ -1,7 +1,7 @@
 ---
 id: k_01M0A5D81Q7AV98DQKRV9CTKHM
 type: rule
-title: All knowledge writes go through ChronicleStore
+title: All knowledge writes go through CodicilStore
 status: active
 enforcement: must
 lifetime: permanent
@@ -18,7 +18,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 evidence:
   - expect: present
     lastCheckedAt: 2026-08-18T12:20:58.832Z
@@ -28,4 +28,4 @@ evidence:
     path: packages/core/src/store.ts
 ---
 
-Never touch files under .chronicle/knowledge with fs directly. The store owns id generation, slug uniqueness, atomic writes, archive moves, the index and the history log; bypassing it desynchronises all five.
+Never touch files under .codicil/knowledge with fs directly. The store owns id generation, slug uniqueness, atomic writes, archive moves, the index and the history log; bypassing it desynchronises all five.

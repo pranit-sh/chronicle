@@ -1,21 +1,51 @@
 {
-  "name": "chronicle",
+  "name": "codicil",
   "version": "0.1.0",
-  "description": "Command line for Chronicle, a versioned knowledge layer for AI coding agents",
+  "description": "Command line for Codicil, a versioned knowledge layer for AI coding agents",
   "type": "module",
   "bin": {
-    "chronicle": "./dist/bin.js"
+    "codicil": "./dist/bin.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "keywords": [
+    "codicil",
+    "cli",
+    "knowledge",
+    "ai",
+    "agent",
+    "context",
+    "mcp"
+  ],
+  "author": "Pranit Deshmukh",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranit-sh/codicil.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/pranit-sh/codicil/issues"
+  },
+  "homepage": "https://github.com/pranit-sh/codicil#readme",
+  "funding": {
+    "type": "buymeacoffee",
+    "url": "https://www.buymeacoffee.com/pranit.sh"
+  },
   "scripts": {
     "build": "tsup",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@chronicle/core": "workspace:*",
-    "@chronicle/mcp": "workspace:*",
+    "@codicil/core": "workspace:*",
+    "codicil-mcp": "workspace:*",
     "commander": "^15.0.0"
   }
 }

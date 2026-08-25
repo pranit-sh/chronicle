@@ -1,7 +1,7 @@
 ---
 id: k_01M0A5D8KTNF57TCZW8FP8QVSZ
 type: decision
-title: Agents reach Chronicle over MCP, not through generated instruction files
+title: Agents reach Codicil over MCP, not through generated instruction files
 status: active
 decisionStatus: accepted
 lifetime: permanent
@@ -17,7 +17,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 ---
 
 ## Decision

@@ -4,7 +4,7 @@ import { ROOT_SCOPE, type KnowledgeTypeName } from "./schema.js";
  * Turns a free text statement into a structured draft.
  *
  * This is deliberately a small set of deterministic heuristics rather than a
- * model call: `chronicle remember` has to work offline, and the developer
+ * model call: `codicil remember` has to work offline, and the developer
  * reviews and can override every field before the item is written anyway.
  */
 

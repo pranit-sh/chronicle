@@ -1,18 +1,18 @@
 import { stat } from "node:fs/promises";
 import path from "node:path";
 
-export const CHRONICLE_DIR = ".chronicle";
+export const CODICIL_DIR = ".codicil";
 
 /**
  * What the directory was called before 0.1.0. Only used to recognise it and
  * tell the developer to rename it.
  */
-export const LEGACY_CHRONICLE_DIR = ".context";
+export const LEGACY_CODICIL_DIR = ".context";
 
-export interface ChroniclePaths {
-  /** Workspace root, i.e. the directory that contains `.chronicle/`. */
+export interface CodicilPaths {
+  /** Workspace root, i.e. the directory that contains `.codicil/`. */
   root: string;
-  chronicleDir: string;
+  codicilDir: string;
   knowledgeDir: string;
   archiveDir: string;
   proposalsDir: string;
@@ -22,18 +22,18 @@ export interface ChroniclePaths {
   indexCacheFile: string;
 }
 
-export function chroniclePaths(root: string): ChroniclePaths {
-  const chronicleDir = path.join(root, CHRONICLE_DIR);
-  const cacheDir = path.join(chronicleDir, ".cache");
+export function codicilPaths(root: string): CodicilPaths {
+  const codicilDir = path.join(root, CODICIL_DIR);
+  const cacheDir = path.join(codicilDir, ".cache");
   return {
     root,
-    chronicleDir,
-    knowledgeDir: path.join(chronicleDir, "knowledge"),
-    archiveDir: path.join(chronicleDir, "archive"),
-    proposalsDir: path.join(chronicleDir, "proposals"),
-    historyDir: path.join(chronicleDir, "history"),
+    codicilDir,
+    knowledgeDir: path.join(codicilDir, "knowledge"),
+    archiveDir: path.join(codicilDir, "archive"),
+    proposalsDir: path.join(codicilDir, "proposals"),
+    historyDir: path.join(codicilDir, "history"),
     cacheDir,
-    configFile: path.join(chronicleDir, "config.yaml"),
+    configFile: path.join(codicilDir, "config.yaml"),
     indexCacheFile: path.join(cacheDir, "index.json"),
   };
 }
@@ -47,13 +47,13 @@ async function isDirectory(target: string): Promise<boolean> {
 }
 
 /**
- * Walks up from `startDir` looking for a `.chronicle/` directory, the same way
+ * Walks up from `startDir` looking for a `.codicil/` directory, the same way
  * Git locates `.git/`.
  */
 export async function findWorkspaceRoot(startDir: string): Promise<string | undefined> {
   let current = path.resolve(startDir);
   for (;;) {
-    if (await isDirectory(path.join(current, CHRONICLE_DIR))) return current;
+    if (await isDirectory(path.join(current, CODICIL_DIR))) return current;
     const parent = path.dirname(current);
     if (parent === current) return undefined;
     current = parent;
@@ -67,7 +67,7 @@ export async function findWorkspaceRoot(startDir: string): Promise<string | unde
 export async function findLegacyRoot(startDir: string): Promise<string | undefined> {
   let current = path.resolve(startDir);
   for (;;) {
-    if (await isDirectory(path.join(current, LEGACY_CHRONICLE_DIR))) return current;
+    if (await isDirectory(path.join(current, LEGACY_CODICIL_DIR))) return current;
     const parent = path.dirname(current);
     if (parent === current) return undefined;
     current = parent;

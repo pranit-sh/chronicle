@@ -7,13 +7,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { checkEvidence, createEvidenceContext } from "../src/evidence.js";
 import { readHistory } from "../src/history.js";
 import { EvidenceSchema, type Actor, type Evidence } from "../src/schema.js";
-import { ChronicleStore } from "../src/store.js";
+import { CodicilStore } from "../src/store.js";
 import { verify } from "../src/verifier.js";
 
 const actor: Actor = { kind: "human", id: "tester" };
 
 let root: string;
-let store: ChronicleStore;
+let store: CodicilStore;
 
 async function write(relative: string, contents: string): Promise<void> {
   const full = path.join(root, relative);
@@ -24,8 +24,8 @@ async function write(relative: string, contents: string): Promise<void> {
 const evidence = (input: Record<string, unknown>): Evidence => EvidenceSchema.parse(input);
 
 beforeEach(async () => {
-  root = await mkdtemp(path.join(tmpdir(), "chronicle-verify-"));
-  store = await ChronicleStore.init(root, actor);
+  root = await mkdtemp(path.join(tmpdir(), "codicil-verify-"));
+  store = await CodicilStore.init(root, actor);
   await write("src/api/users.ts", "import { repo } from '../lib/repository';\nexport const list = () => repo.users();\n");
   await write("src/api/orders.ts", "import { repo } from '../lib/repository';\n");
   await write("src/lib/repository.ts", "export const repo = {};\n");
@@ -126,7 +126,7 @@ describe("verify", () => {
     const report = await verify(store, actor);
     expect(report.counts.verified).toBe(1);
 
-    const reopened = await ChronicleStore.openAt(root);
+    const reopened = await CodicilStore.openAt(root);
     const after = reopened.get(item.id);
     expect(after?.status).toBe("active");
     expect(after?.lastVerifiedAt).toBeTruthy();
@@ -147,7 +147,7 @@ describe("verify", () => {
     expect(report.counts.stale).toBe(1);
     expect(report.results[0]?.summary).toContain("The evidence behind this has gone");
 
-    const reopened = await ChronicleStore.openAt(root);
+    const reopened = await CodicilStore.openAt(root);
     expect(reopened.get(item.id)?.status).toBe("stale");
     expect(reopened.get(item.id)?.evidence[0]?.lastResult).toBe("fail");
   });
@@ -168,7 +168,7 @@ describe("verify", () => {
     expect(report.results[0]?.summary).toContain("The repository disagrees");
 
     // A fact the repository disagrees with is stale knowledge.
-    expect((await ChronicleStore.openAt(root)).get(item.id)?.status).toBe("stale");
+    expect((await CodicilStore.openAt(root)).get(item.id)?.status).toBe("stale");
   });
 
   it("treats the same signal on a rule as the code breaking the rule, not stale knowledge", async () => {
@@ -190,7 +190,7 @@ describe("verify", () => {
     expect(report.results[0]?.summary).toContain("The code breaks this rule");
 
     // The rule still stands; it is the code that is wrong.
-    const reopened = await ChronicleStore.openAt(root);
+    const reopened = await CodicilStore.openAt(root);
     expect(reopened.get(rule.id)?.status).toBe("active");
   });
 
@@ -208,7 +208,7 @@ describe("verify", () => {
     await write("src/auth/jwt.ts", "export const sign = () => {}\n");
     const report = await verify(store, actor);
     expect(report.counts.verified).toBe(1);
-    expect((await ChronicleStore.openAt(root)).get(item.id)?.status).toBe("active");
+    expect((await CodicilStore.openAt(root)).get(item.id)?.status).toBe("active");
   });
 
   it("marks expired temporary knowledge without needing any evidence", async () => {
@@ -224,7 +224,7 @@ describe("verify", () => {
 
     const report = await verify(store, actor);
     expect(report.counts.expired).toBe(1);
-    expect((await ChronicleStore.openAt(root)).get(item.id)?.status).toBe("stale");
+    expect((await CodicilStore.openAt(root)).get(item.id)?.status).toBe("stale");
   });
 
   it("leaves items alone in a dry run", async () => {
@@ -240,7 +240,7 @@ describe("verify", () => {
     const report = await verify(store, actor, { dryRun: true });
     expect(report.counts.stale).toBe(1);
     expect(report.results[0]?.statusChanged).toBe(false);
-    expect((await ChronicleStore.openAt(root)).get(item.id)?.status).toBe("active");
+    expect((await CodicilStore.openAt(root)).get(item.id)?.status).toBe("active");
   });
 
   it("ignores items with no machine checkable evidence unless asked", async () => {
@@ -300,7 +300,7 @@ describe("verify", () => {
     );
 
     await verify(store, actor);
-    const after = (await ChronicleStore.openAt(root)).get(item.id);
+    const after = (await CodicilStore.openAt(root)).get(item.id);
     expect(after?.title).toBe("Auth lives in src/auth/jwt.ts");
     expect(after?.body).toBe("The signing key comes from the environment.");
   });

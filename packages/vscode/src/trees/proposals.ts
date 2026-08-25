@@ -1,8 +1,8 @@
-import type { Proposal } from "@chronicle/core";
+import type { Proposal } from "@codicil/core";
 import * as vscode from "vscode";
 
 import { proposalTitle, relativeTime } from "../present.js";
-import type { ChronicleSession } from "../session.js";
+import type { CodicilSession } from "../session.js";
 
 /**
  * Pending agent proposals.
@@ -14,7 +14,7 @@ export class ProposalTree implements vscode.TreeDataProvider<Proposal> {
   readonly onDidChangeTreeData: vscode.Event<void>;
   readonly #emitter = new vscode.EventEmitter<void>();
 
-  constructor(private readonly session: ChronicleSession) {
+  constructor(private readonly session: CodicilSession) {
     this.onDidChangeTreeData = this.#emitter.event;
     session.onDidChange(() => this.#emitter.fire());
   }
@@ -33,7 +33,7 @@ export class ProposalTree implements vscode.TreeDataProvider<Proposal> {
     );
     row.description = `${proposal.proposedBy.id} · ${relativeTime(proposal.createdAt)}`;
     row.command = {
-      command: "chronicle.reviewProposal",
+      command: "codicil.reviewProposal",
       title: "Review proposal",
       arguments: [proposal.id],
     };

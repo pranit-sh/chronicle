@@ -1,7 +1,7 @@
 {
-  "name": "@chronicle/mcp",
+  "name": "codicil-mcp",
   "version": "0.1.0",
-  "description": "Model Context Protocol server exposing a Chronicle knowledge layer to AI coding agents",
+  "description": "Model Context Protocol server exposing a Codicil knowledge layer to AI coding agents",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,17 +12,55 @@
     }
   },
   "bin": {
-    "chronicle-mcp": "./dist/bin.js"
+    "codicil-mcp": "./dist/bin.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "keywords": [
+    "codicil",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "agent",
+    "llm",
+    "copilot",
+    "cursor",
+    "claude",
+    "knowledge",
+    "context",
+    "memory"
+  ],
+  "author": "Pranit Deshmukh",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranit-sh/codicil.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/pranit-sh/codicil/issues"
+  },
+  "homepage": "https://github.com/pranit-sh/codicil#readme",
+  "funding": {
+    "type": "buymeacoffee",
+    "url": "https://www.buymeacoffee.com/pranit.sh"
+  },
   "scripts": {
     "build": "tsup && tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
-    "@chronicle/core": "workspace:*",
+    "@codicil/core": "workspace:*",
     "@modelcontextprotocol/server": "^2.0.0",
     "zod": "^4.4.3"
   },

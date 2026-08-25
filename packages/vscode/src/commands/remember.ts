@@ -2,16 +2,16 @@ import {
   type KnowledgeDraft,
   type KnowledgeTypeName,
   classifyStatement,
-} from "@chronicle/core";
+} from "@codicil/core";
 import * as vscode from "vscode";
 
 import { typeLabel } from "../present.js";
-import type { ChronicleSession } from "../session.js";
+import type { CodicilSession } from "../session.js";
 
 /**
  * Capture, from wherever the developer happens to be.
  *
- * Chronicle guesses the type and scope from the sentence and shows its guess
+ * Codicil guesses the type and scope from the sentence and shows its guess
  * for confirmation rather than making the developer fill in a form. Correcting
  * one dropdown is cheaper than answering six questions, and being able to
  * correct it is what keeps the developer in control.
@@ -37,7 +37,7 @@ const TYPE_HINT: Record<KnowledgeTypeName, string> = {
   issue: "Something known to be broken",
 };
 
-export async function remember(session: ChronicleSession, seed?: string): Promise<void> {
+export async function remember(session: CodicilSession, seed?: string): Promise<void> {
   const store = session.requireStore();
 
   const statement =
@@ -80,7 +80,7 @@ export async function remember(session: ChronicleSession, seed?: string): Promis
     `Remembered as a ${item.type}: ${item.title}`,
     open,
   );
-  if (choice === open) await vscode.commands.executeCommand("chronicle.showItem", item.id);
+  if (choice === open) await vscode.commands.executeCommand("codicil.showItem", item.id);
 }
 
 async function confirmType(

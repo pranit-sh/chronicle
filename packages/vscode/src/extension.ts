@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
 
 import { registerCommands } from "./commands/index.js";
-import { ChronicleSession } from "./session.js";
+import { CodicilSession } from "./session.js";
 import { ContextTree } from "./trees/context.js";
 import { KnowledgeTree } from "./trees/knowledge.js";
 import { ProposalTree } from "./trees/proposals.js";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-  const session = new ChronicleSession();
+  const session = new CodicilSession();
   const knowledgeTree = new KnowledgeTree(session);
   const proposalTree = new ProposalTree(session);
   const contextTree = new ContextTree(session);
@@ -18,18 +18,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   context.subscriptions.push(
     session,
-    vscode.window.createTreeView("chronicle.gettingStarted", {
+    vscode.window.createTreeView("codicil.gettingStarted", {
       treeDataProvider: emptyTree,
     }),
-    vscode.window.createTreeView("chronicle.agentSetup", {
+    vscode.window.createTreeView("codicil.agentSetup", {
       treeDataProvider: emptyTree,
     }),
-    vscode.window.createTreeView("chronicle.knowledge", {
+    vscode.window.createTreeView("codicil.knowledge", {
       treeDataProvider: knowledgeTree,
       showCollapseAll: true,
     }),
-    vscode.window.createTreeView("chronicle.proposals", { treeDataProvider: proposalTree }),
-    vscode.window.createTreeView("chronicle.context", { treeDataProvider: contextTree }),
+    vscode.window.createTreeView("codicil.proposals", { treeDataProvider: proposalTree }),
+    vscode.window.createTreeView("codicil.context", { treeDataProvider: contextTree }),
     ...registerCommands({ session, knowledgeTree, contextTree, extensionUri: context.extensionUri }),
     createStatusBar(session, contextTree),
   );
@@ -45,12 +45,12 @@ export function deactivate(): void {
  * A quiet count of how much the agent is being told about the file in front of
  * you, so the context layer is visible without asking for it.
  */
-function createStatusBar(session: ChronicleSession, contextTree: ContextTree): vscode.Disposable {
+function createStatusBar(session: CodicilSession, contextTree: ContextTree): vscode.Disposable {
   const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 90);
-  item.command = "chronicle.showContext";
+  item.command = "codicil.showContext";
 
   const update = () => {
-    const enabled = vscode.workspace.getConfiguration("chronicle").get<boolean>("statusBar.enabled", true);
+    const enabled = vscode.workspace.getConfiguration("codicil").get<boolean>("statusBar.enabled", true);
     if (!enabled || !session.initialized) {
       item.hide();
       return;
@@ -90,7 +90,7 @@ function createStatusBar(session: ChronicleSession, contextTree: ContextTree): v
     session.onDidChange(update),
     vscode.window.onDidChangeActiveTextEditor(update),
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration("chronicle")) update();
+      if (event.affectsConfiguration("codicil")) update();
     }),
   ];
   update();

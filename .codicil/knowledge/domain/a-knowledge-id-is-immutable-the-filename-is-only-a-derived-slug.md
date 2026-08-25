@@ -16,7 +16,7 @@ actor:
   id: Pranit Deshmukh
 provenance:
   origin: command
-  ref: chronicle remember
+  ref: codicil remember
 ---
 
 Each item carries a ULID based id in its frontmatter that never changes. The filename is a slug of the title, kept readable for Git diffs, and the store renames it when the title changes. Never key anything off the filename.

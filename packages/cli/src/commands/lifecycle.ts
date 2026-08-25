@@ -1,4 +1,4 @@
-import { ChronicleError } from "@chronicle/core";
+import { CodicilError } from "@codicil/core";
 import type { Command } from "commander";
 
 import { color, print, printJson, shortId } from "../ui.js";
@@ -44,9 +44,9 @@ export function registerLifecycle(program: Command): void {
       const store = await openStore(options);
       const item = store.resolveRef(reference);
       if (!options.yes) {
-        throw new ChronicleError(
+        throw new CodicilError(
           "invalid_input",
-          `Refusing to delete "${item.title}" without --yes. Consider \`chronicle archive ${shortId(item.id)}\` instead, which keeps the history.`,
+          `Refusing to delete "${item.title}" without --yes. Consider \`codicil archive ${shortId(item.id)}\` instead, which keeps the history.`,
         );
       }
       const actor = await resolveActor(options);

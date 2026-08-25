@@ -1,6 +1,6 @@
 import {
-  CHRONICLE_DIR,
-  ChronicleStore,
+  CODICIL_DIR,
+  CodicilStore,
   acceptProposal,
   isHealthy,
   rejectProposal,
@@ -8,12 +8,12 @@ import {
   runDoctor,
   suggestedActions,
   verify,
-} from "@chronicle/core";
+} from "@codicil/core";
 import * as path from "node:path";
 import * as vscode from "vscode";
 
 import { statusLabel } from "../present.js";
-import type { ChronicleSession } from "../session.js";
+import type { CodicilSession } from "../session.js";
 import type { ContextTree } from "../trees/context.js";
 import type { KnowledgeFilter, KnowledgeTree } from "../trees/knowledge.js";
 import { DetailPanel } from "../webview/detail.js";
@@ -22,7 +22,7 @@ import { AgentSetupPanel } from "../webview/setup.js";
 import { remember } from "./remember.js";
 
 export interface CommandContext {
-  session: ChronicleSession;
+  session: CodicilSession;
   knowledgeTree: KnowledgeTree;
   contextTree: ContextTree;
   extensionUri?: vscode.Uri;
@@ -46,34 +46,34 @@ export function registerCommands({
   extensionUri,
 }: CommandContext): vscode.Disposable[] {
   return [
-    guard("chronicle.init", () => init(session, extensionUri)),
-    guard("chronicle.configureMcp", () => configureVsCodeMcp(session)),
-    guard("chronicle.configureCursorMcp", () => configureCursorMcp(session)),
-    guard("chronicle.configureClaudeCodeMcp", () => configureClaudeCodeMcp(session)),
-    guard("chronicle.addAgentInstructions", () => addAgentInstructions(session)),
-    guard("chronicle.openMcpSetupGuide", () => openMcpSetupGuide(session, extensionUri)),
-    guard("chronicle.remember", () => remember(session)),
-    guard("chronicle.rememberSelection", () => rememberSelection(session)),
-    guard("chronicle.refresh", () => session.reload()),
+    guard("codicil.init", () => init(session, extensionUri)),
+    guard("codicil.configureMcp", () => configureVsCodeMcp(session)),
+    guard("codicil.configureCursorMcp", () => configureCursorMcp(session)),
+    guard("codicil.configureClaudeCodeMcp", () => configureClaudeCodeMcp(session)),
+    guard("codicil.addAgentInstructions", () => addAgentInstructions(session)),
+    guard("codicil.openMcpSetupGuide", () => openMcpSetupGuide(session, extensionUri)),
+    guard("codicil.remember", () => remember(session)),
+    guard("codicil.rememberSelection", () => rememberSelection(session)),
+    guard("codicil.refresh", () => session.reload()),
 
-    guard("chronicle.showItem", async (id: string) => {
+    guard("codicil.showItem", async (id: string) => {
       DetailPanel.show(session, id, extensionUri);
     }),
-    guard("chronicle.openFile", (arg: unknown) => openFile(session, refOf(arg))),
-    guard("chronicle.archiveItem", (arg: unknown) => archive(session, refOf(arg))),
-    guard("chronicle.restoreItem", (arg: unknown) => restore(session, refOf(arg))),
-    guard("chronicle.verifyItem", (arg: unknown) => verifyItems(session, refOf(arg))),
-    guard("chronicle.verifyAll", () => verifyItems(session)),
+    guard("codicil.openFile", (arg: unknown) => openFile(session, refOf(arg))),
+    guard("codicil.archiveItem", (arg: unknown) => archive(session, refOf(arg))),
+    guard("codicil.restoreItem", (arg: unknown) => restore(session, refOf(arg))),
+    guard("codicil.verifyItem", (arg: unknown) => verifyItems(session, refOf(arg))),
+    guard("codicil.verifyAll", () => verifyItems(session)),
 
-    guard("chronicle.reviewProposal", async (arg: unknown) => {
+    guard("codicil.reviewProposal", async (arg: unknown) => {
       ReviewPanel.show(session, refOf(arg), extensionUri);
     }),
-    guard("chronicle.acceptProposal", (arg: unknown) => accept(session, refOf(arg))),
-    guard("chronicle.rejectProposal", (arg: unknown) => reject(session, refOf(arg))),
+    guard("codicil.acceptProposal", (arg: unknown) => accept(session, refOf(arg))),
+    guard("codicil.rejectProposal", (arg: unknown) => reject(session, refOf(arg))),
 
-    guard("chronicle.showContext", () => showContext(contextTree)),
-    guard("chronicle.doctor", () => doctor(session)),
-    guard("chronicle.filterByStatus", () => filter(knowledgeTree)),
+    guard("codicil.showContext", () => showContext(contextTree)),
+    guard("codicil.doctor", () => doctor(session)),
+    guard("codicil.filterByStatus", () => filter(knowledgeTree)),
   ];
 }
 
@@ -82,28 +82,28 @@ function refOf(arg: unknown): string {
   if (typeof arg === "string") return arg;
   const candidate = arg as { id?: string; item?: { id?: string } } | undefined;
   const id = candidate?.item?.id ?? candidate?.id;
-  if (!id) throw new Error("Pick an item from the Chronicle view first.");
+  if (!id) throw new Error("Pick an item from the Codicil view first.");
   return id;
 }
 
-async function init(session: ChronicleSession, extensionUri?: vscode.Uri): Promise<void> {
+async function init(session: CodicilSession, extensionUri?: vscode.Uri): Promise<void> {
   const folder = vscode.workspace.workspaceFolders?.[0];
   if (!folder) {
-    throw new Error(`Open a folder first, so Chronicle knows where to put ${CHRONICLE_DIR}/.`);
+    throw new Error(`Open a folder first, so Codicil knows where to put ${CODICIL_DIR}/.`);
   }
 
-  await ChronicleStore.init(folder.uri.fsPath, await session.actor());
+  await CodicilStore.init(folder.uri.fsPath, await session.actor());
   await session.reload();
 
   const guide = "Open guide";
   const choice = await vscode.window.showInformationMessage(
-    `Chronicle is set up. Knowledge lives in ${CHRONICLE_DIR}/ and is meant to be committed.`,
+    `Codicil is set up. Knowledge lives in ${CODICIL_DIR}/ and is meant to be committed.`,
     guide,
   );
   if (choice === guide) await openMcpSetupGuide(session, extensionUri);
 }
 
-async function configureVsCodeMcp(session: ChronicleSession): Promise<void> {
+async function configureVsCodeMcp(session: CodicilSession): Promise<void> {
   const folder = await initializedFolder(session);
   const vscodeDir = vscode.Uri.joinPath(folder.uri, ".vscode");
   const mcpUri = vscode.Uri.joinPath(vscodeDir, "mcp.json");
@@ -112,11 +112,11 @@ async function configureVsCodeMcp(session: ChronicleSession): Promise<void> {
 
   const config = await readJsonObject(mcpUri, ".vscode/mcp.json");
   const servers = objectValue(config.servers);
-  const existing = servers.chronicle;
+  const existing = servers.codicil;
 
   if (existing !== undefined) {
     const replace = await vscode.window.showWarningMessage(
-      "This workspace already has a Chronicle MCP server in .vscode/mcp.json.",
+      "This workspace already has a Codicil MCP server in .vscode/mcp.json.",
       "Replace it",
       "Open file",
       "Cancel",
@@ -130,12 +130,12 @@ async function configureVsCodeMcp(session: ChronicleSession): Promise<void> {
 
   config.servers = {
     ...servers,
-    chronicle: {
+    codicil: {
       type: "stdio",
       command: "npx",
-      args: ["-y", "@chronicle/mcp"],
+      args: ["-y", "@codicil/mcp"],
       env: {
-        CHRONICLE_ROOT: "${workspaceFolder}",
+        CODICIL_ROOT: "${workspaceFolder}",
       },
     },
   };
@@ -144,11 +144,11 @@ async function configureVsCodeMcp(session: ChronicleSession): Promise<void> {
   await openDocument(mcpUri);
 
   void vscode.window.showInformationMessage(
-    "Chronicle MCP is configured for Copilot in this workspace. Reload MCP servers if Copilot does not pick it up immediately.",
+    "Codicil MCP is configured for Copilot in this workspace. Reload MCP servers if Copilot does not pick it up immediately.",
   );
 }
 
-async function configureCursorMcp(session: ChronicleSession): Promise<void> {
+async function configureCursorMcp(session: CodicilSession): Promise<void> {
   const folder = await initializedFolder(session);
   const cursorDir = vscode.Uri.joinPath(folder.uri, ".cursor");
   const mcpUri = vscode.Uri.joinPath(cursorDir, "mcp.json");
@@ -157,11 +157,11 @@ async function configureCursorMcp(session: ChronicleSession): Promise<void> {
 
   const config = await readJsonObject(mcpUri, ".cursor/mcp.json");
   const mcpServers = objectValue(config.mcpServers);
-  const existing = mcpServers.chronicle;
+  const existing = mcpServers.codicil;
 
   if (existing !== undefined) {
     const replace = await vscode.window.showWarningMessage(
-      "This workspace already has a Chronicle MCP server in .cursor/mcp.json.",
+      "This workspace already has a Codicil MCP server in .cursor/mcp.json.",
       "Replace it",
       "Open file",
       "Cancel",
@@ -175,27 +175,27 @@ async function configureCursorMcp(session: ChronicleSession): Promise<void> {
 
   config.mcpServers = {
     ...mcpServers,
-    chronicle: chronicleMcpServer(folder.uri.fsPath),
+    codicil: codicilMcpServer(folder.uri.fsPath),
   };
 
   await vscode.workspace.fs.writeFile(mcpUri, Buffer.from(`${JSON.stringify(config, null, 2)}\n`, "utf8"));
   await openDocument(mcpUri);
   void vscode.window.showInformationMessage(
-    "Chronicle MCP is configured for Cursor in this workspace. Restart Cursor or refresh MCP servers if it does not appear immediately.",
+    "Codicil MCP is configured for Cursor in this workspace. Restart Cursor or refresh MCP servers if it does not appear immediately.",
   );
 }
 
-async function configureClaudeCodeMcp(session: ChronicleSession): Promise<void> {
+async function configureClaudeCodeMcp(session: CodicilSession): Promise<void> {
   const folder = await initializedFolder(session);
   const configUri = vscode.Uri.joinPath(folder.uri, ".mcp.json");
 
   const config = await readJsonObject(configUri, ".mcp.json");
   const mcpServers = objectValue(config.mcpServers);
-  const existing = mcpServers.chronicle;
+  const existing = mcpServers.codicil;
 
   if (existing !== undefined) {
     const replace = await vscode.window.showWarningMessage(
-      "This workspace already has a Chronicle MCP server in .mcp.json.",
+      "This workspace already has a Codicil MCP server in .mcp.json.",
       "Replace it",
       "Open file",
       "Cancel",
@@ -209,34 +209,34 @@ async function configureClaudeCodeMcp(session: ChronicleSession): Promise<void> 
 
   config.mcpServers = {
     ...mcpServers,
-    chronicle: chronicleMcpServer(folder.uri.fsPath),
+    codicil: codicilMcpServer(folder.uri.fsPath),
   };
 
   await vscode.workspace.fs.writeFile(configUri, Buffer.from(`${JSON.stringify(config, null, 2)}\n`, "utf8"));
   await openDocument(configUri);
   void vscode.window.showInformationMessage(
-    "Chronicle MCP is configured for Claude Code in this workspace. Start Claude Code here and approve the project MCP server when prompted.",
+    "Codicil MCP is configured for Claude Code in this workspace. Start Claude Code here and approve the project MCP server when prompted.",
   );
 }
 
-async function openMcpSetupGuide(session: ChronicleSession, extensionUri?: vscode.Uri): Promise<void> {
+async function openMcpSetupGuide(session: CodicilSession, extensionUri?: vscode.Uri): Promise<void> {
   AgentSetupPanel.show(session, extensionUri);
 }
 
-const instructionBlock = `<!-- chronicle-agent-instructions:start -->
-## Chronicle project knowledge
+const instructionBlock = `<!-- codicil-agent-instructions:start -->
+## Codicil project knowledge
 
-This repository uses Chronicle for reviewed project knowledge. Before making code changes, use the Chronicle MCP tools to resolve the relevant context for the files or task you are working on. Prefer Chronicle knowledge over stale notes, old chat history or guesses.
+This repository uses Codicil for reviewed project knowledge. Before making code changes, use the Codicil MCP tools to resolve the relevant context for the files or task you are working on. Prefer Codicil knowledge over stale notes, old chat history or guesses.
 
-Resolve context proactively before planning or editing; do not wait for the developer to ask you to pull context from Chronicle.
+Resolve context proactively before planning or editing; do not wait for the developer to ask you to pull context from Codicil.
 
-As the conversation unfolds, decide whether information from the developer is durable project knowledge: a rule, decision, convention, architectural fact, domain concept, current context note or known issue that would help future agents. When it is worth keeping, propose it back to Chronicle yourself instead of leaving it only in chat. Do not wait for the developer to say "remember", "record" or "add it". Proposals are staged for human review and are not accepted knowledge until the developer approves them.
+As the conversation unfolds, decide whether information from the developer is durable project knowledge: a rule, decision, convention, architectural fact, domain concept, current context note or known issue that would help future agents. When it is worth keeping, propose it back to Codicil yourself instead of leaving it only in chat. Do not wait for the developer to say "remember", "record" or "add it". Proposals are staged for human review and are not accepted knowledge until the developer approves them.
 
-Use Chronicle MCP tools as follows:
+Use Codicil MCP tools as follows:
 - \`context_resolve\` to get the applicable rules, decisions, conventions and known issues for the current task or file before planning or editing.
 - \`knowledge_search\` and \`knowledge_get\` to check existing project knowledge before assuming something is undecided.
 - \`knowledge_propose\` to stage durable new or updated knowledge when you judge it worth adding. Proposed knowledge must still be reviewed by a human.
-<!-- chronicle-agent-instructions:end -->
+<!-- codicil-agent-instructions:end -->
 `;
 
 interface InstructionTarget {
@@ -265,21 +265,21 @@ const instructionTargets: InstructionTarget[] = [
   },
   {
     label: "Cursor",
-    detail: ".cursor/rules/chronicle.mdc",
-    uri: (folder) => vscode.Uri.joinPath(folder.uri, ".cursor", "rules", "chronicle.mdc"),
+    detail: ".cursor/rules/codicil.mdc",
+    uri: (folder) => vscode.Uri.joinPath(folder.uri, ".cursor", "rules", "codicil.mdc"),
     prefix: "---\nalwaysApply: true\n---\n\n",
   },
 ];
 
-async function addAgentInstructions(session: ChronicleSession): Promise<void> {
+async function addAgentInstructions(session: CodicilSession): Promise<void> {
   const folder = await initializedFolder(session);
   const picks: InstructionPick[] = [
     { label: "All supported agents", detail: "CLAUDE.md, copilot-instructions.md and Cursor project rule", targets: instructionTargets },
     ...instructionTargets.map((target) => ({ label: target.label, detail: target.detail, targets: [target] })),
   ];
   const picked = await vscode.window.showQuickPick(picks, {
-    title: "Add Chronicle instructions for which agent?",
-    placeHolder: "Choose where Chronicle should add agent guidance",
+    title: "Add Codicil instructions for which agent?",
+    placeHolder: "Choose where Codicil should add agent guidance",
     matchOnDetail: true,
   });
   if (!picked) return;
@@ -293,8 +293,8 @@ async function addAgentInstructions(session: ChronicleSession): Promise<void> {
   }
 
   const message = updated.length
-    ? `Added Chronicle agent instructions to ${updated.join(", ")}.`
-    : "Those agent instructions already include Chronicle guidance.";
+    ? `Added Codicil agent instructions to ${updated.join(", ")}.`
+    : "Those agent instructions already include Codicil guidance.";
   const open = updated.length === 1 ? "Open file" : undefined;
   const choice = await vscode.window.showInformationMessage(
     skipped.length ? `${message} Already present in ${skipped.join(", ")}.` : message,
@@ -312,7 +312,7 @@ async function writeInstructionTarget(
 ): Promise<"updated" | "skipped"> {
   const uri = target.uri(folder);
   const existing = await readTextFile(uri);
-  if (existing.includes("chronicle-agent-instructions:start")) return "skipped";
+  if (existing.includes("codicil-agent-instructions:start")) return "skipped";
 
   const prefix = existing.length === 0 ? target.prefix ?? "" : "";
   const spacer = existing.length > 0 && !existing.endsWith("\n") ? "\n\n" : existing.length > 0 ? "\n" : "";
@@ -334,29 +334,29 @@ async function createParentDirectory(uri: vscode.Uri): Promise<void> {
   await vscode.workspace.fs.createDirectory(vscode.Uri.file(path.dirname(uri.fsPath)));
 }
 
-async function initializedFolder(session: ChronicleSession): Promise<vscode.WorkspaceFolder> {
+async function initializedFolder(session: CodicilSession): Promise<vscode.WorkspaceFolder> {
   const folder = vscode.workspace.workspaceFolders?.[0];
   if (!folder) throw new Error("Open a folder first.");
 
   if (!session.initialized) {
     const initialize = await vscode.window.showInformationMessage(
-      "Set up Chronicle in this workspace before connecting agents to it.",
-      "Initialize Chronicle",
+      "Set up Codicil in this workspace before connecting agents to it.",
+      "Initialize Codicil",
       "Cancel",
     );
-    if (initialize !== "Initialize Chronicle") throw new Error("Chronicle setup cancelled.");
-    await ChronicleStore.init(folder.uri.fsPath, await session.actor());
+    if (initialize !== "Initialize Codicil") throw new Error("Codicil setup cancelled.");
+    await CodicilStore.init(folder.uri.fsPath, await session.actor());
     await session.reload();
   }
 
   return folder;
 }
 
-function chronicleMcpServer(root: string): Record<string, unknown> {
+function codicilMcpServer(root: string): Record<string, unknown> {
   return {
     command: "npx",
-    args: ["-y", "@chronicle/mcp"],
-    env: { CHRONICLE_ROOT: root },
+    args: ["-y", "@codicil/mcp"],
+    env: { CODICIL_ROOT: root },
   };
 }
 
@@ -389,20 +389,20 @@ async function openDocument(uri: vscode.Uri): Promise<void> {
   await vscode.window.showTextDocument(document, { preview: false });
 }
 
-async function rememberSelection(session: ChronicleSession): Promise<void> {
+async function rememberSelection(session: CodicilSession): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   const selected = editor?.document.getText(editor.selection).trim();
   if (!selected) throw new Error("Select the text you want to remember first.");
   await remember(session, selected);
 }
 
-async function openFile(session: ChronicleSession, reference: string): Promise<void> {
+async function openFile(session: CodicilSession, reference: string): Promise<void> {
   const item = session.requireStore().resolveRef(reference);
   const document = await vscode.workspace.openTextDocument(vscode.Uri.file(item.filePath));
   await vscode.window.showTextDocument(document);
 }
 
-async function archive(session: ChronicleSession, reference: string): Promise<void> {
+async function archive(session: CodicilSession, reference: string): Promise<void> {
   const store = session.requireStore();
   const item = store.resolveRef(reference);
 
@@ -410,7 +410,7 @@ async function archive(session: ChronicleSession, reference: string): Promise<vo
     `Archive "${item.title}"?`,
     {
       modal: true,
-      detail: `Agents stop being told this. The file moves to ${CHRONICLE_DIR}/archive/ and stays in Git.`,
+      detail: `Agents stop being told this. The file moves to ${CODICIL_DIR}/archive/ and stays in Git.`,
     },
     "Archive",
   );
@@ -420,13 +420,13 @@ async function archive(session: ChronicleSession, reference: string): Promise<vo
   await session.reload();
 }
 
-async function restore(session: ChronicleSession, reference: string): Promise<void> {
+async function restore(session: CodicilSession, reference: string): Promise<void> {
   const store = session.requireStore();
   await store.restore(reference, await session.actor());
   await session.reload();
 }
 
-async function verifyItems(session: ChronicleSession, reference?: string): Promise<void> {
+async function verifyItems(session: CodicilSession, reference?: string): Promise<void> {
   const store = session.requireStore();
   const actor = await session.actor();
 
@@ -438,7 +438,7 @@ async function verifyItems(session: ChronicleSession, reference?: string): Promi
 
   if (report.results.length === 0) {
     void vscode.window.showInformationMessage(
-      "Nothing to check yet. Add verification checks to an item so Chronicle can tell when it goes out of date.",
+      "Nothing to check yet. Add verification checks to an item so Codicil can tell when it goes out of date.",
     );
     return;
   }
@@ -465,19 +465,19 @@ async function verifyItems(session: ChronicleSession, reference?: string): Promi
     review,
   );
   if (choice === review) {
-    if (problems.length === 1) await vscode.commands.executeCommand("chronicle.showItem", first.item.id);
-    else await vscode.commands.executeCommand("chronicle.filterByStatus");
+    if (problems.length === 1) await vscode.commands.executeCommand("codicil.showItem", first.item.id);
+    else await vscode.commands.executeCommand("codicil.filterByStatus");
   }
 }
 
-async function accept(session: ChronicleSession, reference: string): Promise<void> {
+async function accept(session: CodicilSession, reference: string): Promise<void> {
   const store = session.requireStore();
   const result = await acceptProposal(store, reference, await session.actor());
   ReviewPanel.dismiss(result.proposal.id);
   await session.reload();
 }
 
-async function reject(session: ChronicleSession, reference: string): Promise<void> {
+async function reject(session: CodicilSession, reference: string): Promise<void> {
   const store = session.requireStore();
   const reason = await vscode.window.showInputBox({
     title: "Reject proposal",
@@ -495,7 +495,7 @@ async function reject(session: ChronicleSession, reference: string): Promise<voi
 /** Opens the exact Markdown an agent would receive for the current file. */
 async function showContext(contextTree: ContextTree): Promise<void> {
   const pkg = contextTree.resolve();
-  if (!pkg) throw new Error("This workspace has no Chronicle knowledge layer yet.");
+  if (!pkg) throw new Error("This workspace has no Codicil knowledge layer yet.");
 
   const document = await vscode.workspace.openTextDocument({
     language: "markdown",
@@ -504,7 +504,7 @@ async function showContext(contextTree: ContextTree): Promise<void> {
   await vscode.window.showTextDocument(document, { preview: true });
 }
 
-async function doctor(session: ChronicleSession): Promise<void> {
+async function doctor(session: CodicilSession): Promise<void> {
   const folder = session.folder ?? vscode.workspace.workspaceFolders?.[0];
   if (!folder) throw new Error("Open a folder first.");
 
@@ -531,11 +531,11 @@ async function doctor(session: ChronicleSession): Promise<void> {
   const document = await vscode.workspace.openTextDocument({
     language: "markdown",
     content: [
-      "# Chronicle health check",
+      "# Codicil health check",
       "",
       isHealthy(report)
         ? "Nothing is broken, but some things are worth tidying."
-        : "Some problems stop Chronicle working.",
+        : "Some problems stop Codicil working.",
       "",
       "```",
       ...lines,
