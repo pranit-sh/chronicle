@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "See, review and control the knowledge your AI coding agents work from",
+  "description": "Project knowledge and context management for AI coding agents in Visual Studio Code",
   "publisher": "pranit-sh",
   "license": "MIT",
   "author": "pranit-sh",

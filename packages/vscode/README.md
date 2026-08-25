@@ -1,46 +1,103 @@
 # Chronicle for VS Code
 
-See, review and control what your AI coding agents are told about your project.
+**See, review and control what your AI coding agents know about your project.**
 
-Chronicle keeps project knowledge — rules, decisions, architecture, conventions
-— as Markdown in `.chronicle/`, committed alongside your code. This extension is
-the window onto it.
+Your agent forgets the decision you explained yesterday, suggests the library
+you deliberately removed, and rebuilds the thing you already tried. Chronicle
+fixes that by keeping project knowledge — rules, decisions, architecture,
+conventions — as Markdown in `.chronicle/`, committed alongside your code.
 
-## What it gives you
+This extension is your window onto it: read it, review what agents suggest, and
+see exactly what an agent is told for the file you're editing.
 
-**Knowledge** — everything the project knows, grouped by type, status or scope.
-Open an item to read the full Markdown record, edit it, verify it or archive it.
+![Chronicle sidebar in VS Code](https://raw.githubusercontent.com/pranit-sh/chronicle/main/packages/vscode/media/screenshot.png)
 
-**Proposals** — agents stage what they judge worth remembering, without waiting
-for an explicit “remember this”. Nothing reaches the knowledge base until you
-accept it, and every proposal opens as a diff showing exactly what would land.
+## Why Chronicle
 
-**Active context** — the exact package an agent would receive for the file you
-are editing, in the order it would see it, including what was left out for the
-budget and why. This is the transparency view: no hidden prompt.
+- **Knowledge that lives with your code.** Markdown with YAML frontmatter,
+  versioned in Git. It follows branches, shows up in review, and merges like
+  code — never goes stale in a wiki or a Slack thread.
+- **You stay in control.** Agents can *propose* knowledge, never write it.
+  Nothing enters the knowledge base until you accept it.
+- **The right context, automatically.** Chronicle serves each agent only the
+  knowledge that applies to the file at hand — and can explain every inclusion.
 
-**Guide** — one-click MCP setup for Copilot, Cursor and Claude Code, plus the
-workflow, the available actions and the verification check syntax.
+## Features
+
+### 📚 Knowledge
+
+Everything the project knows, grouped by type, status or scope. Open an item to
+read the full Markdown record — then edit, verify or archive it. A live summary
+shows how much is in play, stale, or waiting on you.
+
+### ✅ Proposals
+
+Agents stage what they judge worth remembering. Review each proposal as a diff
+and accept or reject it. Nothing reaches the knowledge base without your say-so.
+
+### 🎯 Context
+
+The exact package an agent would receive for the file you're editing — in the
+order it would see it, including what was dropped for the budget and why.
+
+### 🩺 Verify & Doctor
+
+Knowledge items can carry checks (a file that must exist, a pattern that must
+not appear). Re-run them against your code per item or all at once. **Doctor**
+scans for merge conflicts, broken files and dangling references.
 
 ## Getting started
 
-1. Run **Chronicle: Set up the knowledge layer** from the command palette.
-2. Open **Chronicle: Open Guide** and use the setup buttons to connect an agent.
-3. Commit `.chronicle/`. Knowledge now follows branches, reviews and merges the
-   same way your code does.
+1. **Install** the extension and open a project.
+2. Open the **Chronicle** view in the Activity Bar and click **Initialize
+   Chronicle**. This creates the `.chronicle/` folder.
+3. Capture your first note: select code or text, right-click, and choose
+   **Chronicle: Remember the selected text** — or run **Chronicle: Remember
+   this** from the Command Palette.
+4. **Connect your agent** so it can read and propose knowledge over MCP. Use the
+   built-in setup commands for your client:
+   - `Chronicle: Configure MCP for Copilot`
+   - `Chronicle: Configure MCP for Cursor`
+   - `Chronicle: Configure MCP for Claude Code`
 
-Connected agents resolve context and stage proposals on their own. **Chronicle:
-Remember this** captures something manually.
+The **Guide** view walks through the full workflow, available actions and check
+syntax at any time.
 
-## Development
+## Commands
 
-```bash
-pnpm install
-pnpm build
-pnpm --filter chronicle-vscode test
-```
+| Command | What it does |
+| --- | --- |
+| `Chronicle: Set up the knowledge layer` | Create `.chronicle/` in this project |
+| `Chronicle: Remember this` | Capture knowledge; type and scope inferred for you |
+| `Chronicle: Remember the selected text` | Capture the current editor selection |
+| `Chronicle: What does the agent know here?` | Show context for the open file |
+| `Chronicle: Verify against the code` | Re-check a single item |
+| `Chronicle: Verify everything` | Re-check the whole knowledge layer |
+| `Chronicle: Check the knowledge layer for problems` | Run Doctor |
+| `Chronicle: Configure MCP for Copilot / Cursor / Claude Code` | Wire up your agent |
+| `Chronicle: Add agent instructions` | Add Chronicle guidance to your agent files |
+| `Chronicle: Open Guide` | Open the in-editor guide |
 
-Press <kbd>F5</kbd> for an Extension Development Host, then open a folder
-containing `.chronicle/config.yaml` — the debug window starts empty and the
-extension activates on that file. To install a build into your own editor
-instead, `pnpm --filter chronicle-vscode package` writes an installable `.vsix`.
+## Settings
+
+| Setting | Description |
+| --- | --- |
+| `chronicle.groupBy` | Group the Knowledge tree by `type`, `status` or `scope` |
+| `chronicle.statusBar.enabled` | Toggle the status bar item showing how many items apply to the current file |
+
+## Requirements
+
+- VS Code `1.95.0` or later.
+- A trusted, non-virtual workspace — Chronicle reads and writes `.chronicle/`
+  and runs verification checks directly against your files.
+
+## Learn more
+
+Chronicle is an open, developer-controlled knowledge layer that also ships a CLI
+and a standalone MCP server. See the
+[project README](https://github.com/pranit-sh/chronicle#readme) for the full
+story, and the [Changelog](CHANGELOG.md) for what's new.
+
+## License
+
+[MIT](LICENSE)
