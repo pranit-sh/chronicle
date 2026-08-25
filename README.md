@@ -93,7 +93,7 @@ node packages/cli/dist/bin.js context --file src/api/users.ts
 
 | Package | Name | What it is |
 | --- | --- | --- |
-| `packages/cli` | [`codicil`](https://www.npmjs.com/package/codicil) | The command line |
+| `packages/cli` | [`codicil-cli`](https://www.npmjs.com/package/codicil-cli) | The command line, installed as `codicil` |
 | `packages/mcp` | [`codicil-mcp`](https://www.npmjs.com/package/codicil-mcp) | Stdio MCP server: read tools, a resource, and `knowledge_propose` |
 | `packages/vscode` | Codicil for VS Code | Knowledge tree, proposal review, active-context view |
 | `packages/core` | `@codicil/core` (bundled) | Schema, store, scope model, resolver, verifier, proposals, history, doctor |

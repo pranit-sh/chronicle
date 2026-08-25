@@ -1,11 +1,11 @@
-# codicil
+# codicil-cli
 
 > The command line for Codicil — a developer-controlled, versioned knowledge layer for your AI coding agents.
 
-[![npm version](https://img.shields.io/npm/v/codicil.svg)](https://www.npmjs.com/package/codicil)
-[![license](https://img.shields.io/npm/l/codicil.svg)](https://github.com/pranit-sh.codicil/blob/main/LICENSE)
-[![Downloads](https://img.shields.io/npm/dm/codicil)](https://www.npmjs.com/package/codicil)
-[![Issues](https://img.shields.io/github/issues/pranit-sh.codicil.svg)](https://github.com/pranit-sh.codicil/issues)
+[![npm version](https://img.shields.io/npm/v/codicil-cli.svg)](https://www.npmjs.com/package/codicil-cli)
+[![license](https://img.shields.io/npm/l/codicil.svg)](https://github.com/pranit-sh/codicil/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/npm/dm/codicil-cli)](https://www.npmjs.com/package/codicil-cli)
+[![Issues](https://img.shields.io/github/issues/pranit-sh/codicil.svg)](https://github.com/pranit-sh/codicil/issues)
 
 Codicil keeps a project's knowledge — rules, decisions, architecture,
 conventions, domain concepts, current context and known issues — as Markdown in
@@ -17,13 +17,13 @@ reviews what agents propose, and inspects what's known.
 ## Install
 
 ```bash
-npm install -g codicil
+npm install -g codicil-cli
 ```
 
 Or run without installing:
 
 ```bash
-npx codicil --help
+npx codicil-cli --help
 ```
 
 Node.js ≥ 18.
@@ -63,11 +63,11 @@ Codicil also ships:
 - **[codicil-mcp](https://www.npmjs.com/package/codicil-mcp)** — an MCP server so agents read this knowledge directly.
 - **[Codicil for VS Code](https://marketplace.visualstudio.com/items?itemName=pranit-sh.codicil)** — a UI to review proposals and browse context.
 
-See the **[project README](https://github.com/pranit-sh.codicil#readme)** for the full picture.
+See the **[project README](https://github.com/pranit-sh/codicil#readme)** for the full picture.
 
 ## Issues & feature requests
 
-Found a bug or want a new feature? **[Open an issue on GitHub](https://github.com/pranit-sh.codicil/issues/new/choose)**.
+Found a bug or want a new feature? **[Open an issue on GitHub](https://github.com/pranit-sh/codicil/issues/new/choose)**.
 
 ## Support
 
@@ -75,4 +75,4 @@ If Codicil saved you a headache, you can [![Buy Me a Coffee](https://img.shields
 
 ## License
 
-[MIT](https://github.com/pranit-sh.codicil/blob/main/LICENSE)
+[MIT](https://github.com/pranit-sh/codicil/blob/main/LICENSE)

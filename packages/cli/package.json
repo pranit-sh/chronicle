@@ -1,5 +1,5 @@
 {
-  "name": "codicil",
+  "name": "codicil-cli",
   "version": "0.1.0",
   "description": "Command line for Codicil, a versioned knowledge layer for AI coding agents",
   "type": "module",
@@ -44,8 +44,10 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@codicil/core": "workspace:*",
     "codicil-mcp": "workspace:*",
     "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@codicil/core": "workspace:*"
   }
 }

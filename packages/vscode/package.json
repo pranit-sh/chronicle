@@ -2,7 +2,6 @@
   "name": "codicil-vscode",
   "displayName": "Codicil",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Project knowledge and context management for AI coding agents in Visual Studio Code",
   "publisher": "pranit-sh",
@@ -65,11 +64,9 @@
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies"
   },
-  "dependencies": {
-    "@codicil/core": "workspace:*",
-    "markdown-it": "^15.0.0"
-  },
   "devDependencies": {
+    "@codicil/core": "workspace:*",
+    "markdown-it": "^15.0.0",
     "@types/markdown-it": "^14.1.2",
     "@types/vscode": "~1.95.0",
     "@vscode/vsce": "^3.9.2"

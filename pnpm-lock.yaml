@@ -23,15 +23,16 @@ importers:
 
   packages/cli:
     dependencies:
-      '@codicil/core':
-        specifier: workspace:*
-        version: link:../core
       codicil-mcp:
         specifier: workspace:*
         version: link:../mcp
       commander:
         specifier: ^15.0.0
         version: 15.0.0
+    devDependencies:
+      '@codicil/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/core:
     dependencies:
@@ -54,9 +55,6 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@codicil/core':
-        specifier: workspace:*
-        version: link:../core
       '@modelcontextprotocol/server':
         specifier: ^2.0.0
         version: 2.0.0
@@ -64,19 +62,18 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@codicil/core':
+        specifier: workspace:*
+        version: link:../core
       '@modelcontextprotocol/client':
         specifier: ^2.0.0
         version: 2.0.0
 
   packages/vscode:
-    dependencies:
+    devDependencies:
       '@codicil/core':
         specifier: workspace:*
         version: link:../core
-      markdown-it:
-        specifier: ^15.0.0
-        version: 15.0.0
-    devDependencies:
       '@types/markdown-it':
         specifier: ^14.1.2
         version: 14.1.2
@@ -86,6 +83,9 @@ importers:
       '@vscode/vsce':
         specifier: ^3.9.2
         version: 3.9.2
+      markdown-it:
+        specifier: ^15.0.0
+        version: 15.0.0
 
 packages:
 
