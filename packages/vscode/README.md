@@ -1,6 +1,6 @@
 # Chronicle for VS Code
 
-**See, review and control what your AI coding agents know about your project.**
+> **See, review and control what your AI coding agents know about your project.**
 
 Your agent forgets the decision you explained yesterday, suggests the library
 you deliberately removed, and rebuilds the thing you already tried. Chronicle
@@ -10,37 +10,30 @@ conventions — as Markdown in `.chronicle/`, committed alongside your code.
 This extension is your window onto it: read it, review what agents suggest, and
 see exactly what an agent is told for the file you're editing.
 
-![Chronicle sidebar in VS Code](https://raw.githubusercontent.com/pranit-sh/chronicle/main/packages/vscode/media/screenshot.png)
-
-## Why Chronicle
-
-- **Knowledge that lives with your code.** Markdown with YAML frontmatter,
-  versioned in Git. It follows branches, shows up in review, and merges like
-  code — never goes stale in a wiki or a Slack thread.
-- **You stay in control.** Agents can *propose* knowledge, never write it.
-  Nothing enters the knowledge base until you accept it.
-- **The right context, automatically.** Chronicle serves each agent only the
-  knowledge that applies to the file at hand — and can explain every inclusion.
+![Chronicle sidebar in VS Code](https://raw.githubusercontent.com/pranit-sh/chronicle/main/packages/vscode/media/sidebar-overview.png)
 
 ## Features
 
-### 📚 Knowledge
+### Knowledge
 
 Everything the project knows, grouped by type, status or scope. Open an item to
 read the full Markdown record — then edit, verify or archive it. A live summary
 shows how much is in play, stale, or waiting on you.
 
-### ✅ Proposals
+### Proposals
 
 Agents stage what they judge worth remembering. Review each proposal as a diff
 and accept or reject it. Nothing reaches the knowledge base without your say-so.
 
-### 🎯 Context
+> **You propose, they suggest — you decide.** There is deliberately no way for an
+> agent to accept its own proposals.
+
+### Context
 
 The exact package an agent would receive for the file you're editing — in the
 order it would see it, including what was dropped for the budget and why.
 
-### 🩺 Verify & Doctor
+### Verify & Doctor
 
 Knowledge items can carry checks (a file that must exist, a pattern that must
 not appear). Re-run them against your code per item or all at once. **Doctor**
@@ -62,6 +55,10 @@ scans for merge conflicts, broken files and dangling references.
 
 The **Guide** view walks through the full workflow, available actions and check
 syntax at any time.
+
+> **Tip:** When you capture a note, Chronicle infers its type and scope from the
+> sentence and shows you the guess before saving — so you can correct it in one
+> click.
 
 ## Commands
 
