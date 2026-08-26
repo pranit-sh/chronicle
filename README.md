@@ -182,6 +182,10 @@ an installed copy carrying the same version number.
 Codicil dogfoods itself: this repository has its own `.codicil/`, and the
 rules in it are verified by `codicil verify` against this codebase.
 
+## Support
+
+If Codicil saved you a headache, you can [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-BD5FFF?style=flat&logo=buy-me-a-coffee&logoColor=ffffff&labelColor=BD5FFF)](https://buymeacoffee.com/pranit.sh) — it keeps the knowledge flowing.
+
 ## License
 
 MIT
