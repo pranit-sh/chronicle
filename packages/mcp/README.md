@@ -60,7 +60,7 @@ nothing to install globally.
 }
 ```
 
-> **Tip:** The [Codicil VS Code extension](https://marketplace.visualstudio.com/items?itemName=pranit-sh.codicil)
+> **Tip:** The [Codicil VS Code extension](https://marketplace.visualstudio.com/items?itemName=pranit-sh.codicil-vscode)
 > writes these config files for you and adds a UI to review what agents propose.
 
 ---

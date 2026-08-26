@@ -18,6 +18,10 @@
   "bugs": {
     "url": "https://github.com/pranit-sh/codicil/issues"
   },
+  "qna": "https://github.com/pranit-sh/codicil/issues",
+  "sponsor": {
+    "url": "https://www.buymeacoffee.com/pranit.sh"
+  },
   "engines": {
     "vscode": "^1.95.0"
   },

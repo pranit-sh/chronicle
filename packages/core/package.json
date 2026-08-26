@@ -18,8 +18,30 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "codicil",
+    "knowledge",
+    "ai",
+    "agent",
+    "context",
+    "schema",
+    "store"
+  ],
   "author": "Pranit Deshmukh",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranit-sh/codicil.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/pranit-sh/codicil/issues"
+  },
+  "homepage": "https://github.com/pranit-sh/codicil#readme",
+  "funding": {
+    "type": "buymeacoffee",
+    "url": "https://www.buymeacoffee.com/pranit.sh"
+  },
   "scripts": {
     "build": "tsup && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit"

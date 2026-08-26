@@ -1,5 +1,11 @@
 # Codicil
 
+[![CLI on npm](https://img.shields.io/npm/v/codicil-cli?label=codicil-cli&logo=npm)](https://www.npmjs.com/package/codicil-cli)
+[![MCP on npm](https://img.shields.io/npm/v/codicil-mcp?label=codicil-mcp&logo=npm)](https://www.npmjs.com/package/codicil-mcp)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/pranit-sh.codicil-vscode?label=VS%20Code&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=pranit-sh.codicil-vscode)
+[![license](https://img.shields.io/github/license/pranit-sh/codicil.svg)](LICENSE)
+[![Issues](https://img.shields.io/github/issues/pranit-sh/codicil.svg)](https://github.com/pranit-sh/codicil/issues)
+
 A developer-controlled, versioned knowledge layer for AI coding agents.
 
 Your agent forgets the architecture decision you explained yesterday, suggests

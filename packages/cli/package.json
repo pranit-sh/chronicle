@@ -38,6 +38,9 @@
     "type": "buymeacoffee",
     "url": "https://www.buymeacoffee.com/pranit.sh"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",

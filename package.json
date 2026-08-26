@@ -5,6 +5,30 @@
   "type": "module",
   "description": "A developer-controlled, versioned knowledge layer for AI coding agents",
   "packageManager": "pnpm@11.0.9",
+  "author": "Pranit Deshmukh",
+  "license": "MIT",
+  "homepage": "https://github.com/pranit-sh/codicil#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranit-sh/codicil.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pranit-sh/codicil/issues"
+  },
+  "funding": {
+    "type": "buymeacoffee",
+    "url": "https://www.buymeacoffee.com/pranit.sh"
+  },
+  "keywords": [
+    "codicil",
+    "knowledge",
+    "ai",
+    "agent",
+    "context",
+    "mcp",
+    "cli",
+    "vscode"
+  ],
   "engines": {
     "node": ">=20"
   },

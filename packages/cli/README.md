@@ -65,7 +65,7 @@ commands and flags.
 Codicil also ships:
 
 - **[codicil-mcp](https://www.npmjs.com/package/codicil-mcp)** — an MCP server so agents read this knowledge directly.
-- **[Codicil for VS Code](https://marketplace.visualstudio.com/items?itemName=pranit-sh.codicil)** — a UI to review proposals and browse context.
+- **[Codicil for VS Code](https://marketplace.visualstudio.com/items?itemName=pranit-sh.codicil-vscode)** — a UI to review proposals and browse context.
 
 See the **[project README](https://github.com/pranit-sh/codicil#readme)** for the full picture.
 
