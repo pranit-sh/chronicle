@@ -72,7 +72,7 @@ function setupBody(): string {
         codicil: {
           type: "stdio",
           command: "npx",
-          args: ["-y", "@codicil/mcp"],
+          args: ["-y", "codicil-mcp"],
           env: { CODICIL_ROOT: "${workspaceFolder}" },
         },
       },

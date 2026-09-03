@@ -133,7 +133,7 @@ async function configureVsCodeMcp(session: CodicilSession): Promise<void> {
     codicil: {
       type: "stdio",
       command: "npx",
-      args: ["-y", "@codicil/mcp"],
+      args: ["-y", "codicil-mcp"],
       env: {
         CODICIL_ROOT: "${workspaceFolder}",
       },
@@ -355,7 +355,7 @@ async function initializedFolder(session: CodicilSession): Promise<vscode.Worksp
 function codicilMcpServer(root: string): Record<string, unknown> {
   return {
     command: "npx",
-    args: ["-y", "@codicil/mcp"],
+    args: ["-y", "codicil-mcp"],
     env: { CODICIL_ROOT: root },
   };
 }
