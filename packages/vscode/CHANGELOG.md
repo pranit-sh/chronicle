@@ -5,6 +5,12 @@ All notable changes to the Codicil extension are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-09-03
+
+### Fixed
+
+- Use the published `codicil-mcp` package when generating MCP server configuration.
+
 ## [0.1.0] - 2026-08-23
 
 First public release.
@@ -32,4 +38,5 @@ First public release.
 - `codicil.groupBy` setting to group the knowledge tree by type, status or
   scope.
 
+[0.1.1]: https://github.com/pranit-sh/codicil/releases/tag/v0.1.1
 [0.1.0]: https://github.com/pranit-sh/codicil/releases/tag/v0.1.0

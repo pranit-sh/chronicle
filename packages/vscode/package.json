@@ -1,7 +1,7 @@
 {
   "name": "codicil-vscode",
   "displayName": "Codicil",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Project knowledge and context management for AI coding agents in Visual Studio Code",
   "publisher": "pranit-sh",
